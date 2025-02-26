@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visualize - Data Science Platform</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand" href="/">Data Science Platform</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/upload">Upload Data</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/eda">EDA</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/visualize">Visualize</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/churn_prediction">Churn Prediction</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/sales_forecast">Sales Forecast</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container-fluid mt-4">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h3 class="card-title mb-0">Data Visualization</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-3">
+                                <div class="card bg-light">
+                                    <div class="card-body">
+                                        <h5 class="card-title">Visualization Controls</h5>
+                                        <form id="visualizationForm">
+                                            <div class="mb-3">
+                                                <label for="chartType" class="form-label">Chart Type</label>
+                                                <select class="form-select" id="chartType" required>
+                                                    <option value="" selected disabled>Select chart type</option>
+                                                    <option value="bar">Bar Chart</option>
+                                                    <option value="line">Line Chart</option>
+                                                    <option value="scatter">Scatter Plot</option>
+                                                    <option value="histogram">Histogram</option>
+                                                    <option value="box">Box Plot</option>
+                                                    <option value="pie">Pie Chart</option>
+                                                    <option value="heatmap">Heatmap</option>
+                                                    <option value="correlation">Correlation Matrix</option>
+                                                </select>
+                                            </div>
+                                            
+                                            <div class="mb-3" id="xColumnContainer">
+                                                <label for="xColumn" class="form-label">X Axis</label>
+                                                <select class="form-select" id="xColumn">
+                                                    <option value="" selected disabled>Select column</option>
+                                                    {% for column in columns %}
+                                                    <option value="{{ column }}">{{ column }}</option>
+                                                    {% endfor %}
+                                                </select>
+                                            </div>
+                                            
+                                            <div class="mb-3" id="yColumnContainer">
+                                                <label for="yColumn" class="form-label">Y Axis</label>
+                                                <select class="form-select" id="yColumn">
+                                                    <option value="" selected disabled>Select column</option>
+                                                    {% for column in columns %}
+                                                    <option value="{{ column }}">{{ column }}</option>
+                                                    {% endfor %}
+                                                </select>
+                                            </div>
+                                            
+                                            <div class="mb-3" id="colorByContainer" style="display: none;">
+                                                <label for="colorBy" class="form-label">Color By</label>
+                                                <select class="form-select" id="colorBy">
+                                                    <option value="" selected>None</option>
+                                                    {% for column in columns %}
+                                                    <option value="{{ column }}">{{ column }}</option>
+                                                    {% endfor %}
+                                                </select>
+                                            </div>
+                                            
+                                            <div class="d-grid gap-2">
+                                                <button type="submit" class="btn btn-primary">Generate Visualization</button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                                
+                                <div class="card bg-light mt-3">
+                                    <div class="card-body">
+                                        <h5 class="card-title">Quick Actions</h5>
+                                        <div class="d-grid gap-2">
+                                            <button id="saveChart" class="btn btn-success btn-sm">
+                                                <i class="bi bi-download"></i> Save Chart
+                                            </button>
+                                            <button id="shareChart" class="btn btn-info btn-sm">
+                                                <i class="bi bi-share"></i> Share Chart
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-9">
+                                <div class="card shadow-sm" style="min-height: 600px;">
+                                    <div class="card-body">
+                                        <h5 class="card-title" id="chartTitle">Your Visualization</h5>
+                                        <div id="chartContainer" style="height: 550px;">
+                                            <div class="text-center" style="padding-top: 200px;">
+                                                <p class="text-muted">Select chart type and columns to generate visualization</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="mt-5 py-3 bg-light">
+        <div class="container text-center">
+            <p>Data Science Platform MVP &copy; 2023</p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const chartTypeSelect = document.getElementById('chartType');
+            const xColumnContainer = document.getElementById('xColumnContainer');
+            const yColumnContainer = document.getElementById('yColumnContainer');
+            const colorByContainer = document.getElementById('colorByContainer');
+            const visualizationForm = document.getElementById('visualizationForm');
+            const chartContainer = document.getElementById('chartContainer');
+            const chartTitle = document.getElementById('chartTitle');
+            
+            // Show/hide controls based on chart type
+            chartTypeSelect.addEventListener('change', function() {
+                const chartType = this.value;
+                
+                // Reset form
+                xColumnContainer.style.display = 'block';
+                yColumnContainer.style.display = 'block';
+                colorByContainer.style.display = 'none';
+                
+                // Adjust controls based on chart type
+                if (chartType === 'correlation') {
+                    xColumnContainer.style.display = 'none';
+                    yColumnContainer.style.display = 'none';
+                } else if (chartType === 'histogram' || chartType === 'box' || chartType === 'pie') {
+                    yColumnContainer.style.display = 'none';
+                } else if (chartType === 'scatter') {
+                    colorByContainer.style.display = 'block';
+                }
+            });
+            
+            // Handle form submission
+            visualizationForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const chartType = chartTypeSelect.value;
+                const xColumn = document.getElementById('xColumn').value;
+                const yColumn = document.getElementById('yColumn').value;
+                const colorBy = document.getElementById('colorBy').value;
+                
+                // Validate form
+                if (chartType === '') {
+                    alert('Please select a chart type');
+                    return;
+                }
+                
+                if (chartType !== 'correlation' && xColumn === '') {
+                    alert('Please select X column');
+                    return;
+                }
+                
+                if (['scatter', 'line', 'bar'].includes(chartType) && yColumn === '') {
+                    alert('Please select Y column');
+                    return;
+                }
+                
+                // Display loading message
+                chartContainer.innerHTML = '<div class="text-center" style="padding-top: 200px;"><div class="spinner-border text-primary" role="status"></div><p class="mt-2">Generating visualization...</p></div>';
+                
+                // Set chart title
+                if (chartType === 'correlation') {
+                    chartTitle.innerText = 'Correlation Matrix';
+                } else if (yColumn) {
+                    chartTitle.innerText = `${chartType.charAt(0).toUpperCase() + chartType.slice(1)} Chart: ${yColumn} by ${xColumn}`;
+                } else {
+                    chartTitle.innerText = `${chartType.charAt(0).toUpperCase() + chartType.slice(1)} Chart: ${xColumn}`;
+                }
+                
+                // Send request to API
+                fetch('/api/visualize', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        chart_type: chartType,
+                        x_column: xColumn,
+                        y_column: yColumn,
+                        color_by: colorBy
+                    }),
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error) {
+                        chartContainer.innerHTML = `<div class="alert alert-danger">${data.error}</div>`;
+                    } else {
+                        // Parse the chart JSON and render
+                        const chartData = JSON.parse(data.chart);
+                        Plotly.newPlot('chartContainer', chartData.data, chartData.layout);
+                    }
+                })
+                .catch(error => {
+                    chartContainer.innerHTML = `<div class="alert alert-danger">Error generating visualization: ${error.message}</div>`;
+                });
+            });
+            
+            // Handle save chart button
+            document.getElementById('saveChart').addEventListener('click', function() {
+                if (chartContainer.data) {
+                    Plotly.downloadImage('chartContainer', {
+                        format: 'png',
+                        filename: 'visualization',
+                        height: 800,
+                        width: 1200
+                    });
+                } else {
+                    alert('Please generate a chart first');
+                }
+            });
+            
+            // Handle share chart button
+            document.getElementById('shareChart').addEventListener('click', function() {
+                alert('Sharing functionality will be added in a future update');
+            });
+        });
+    </script>
+</body>
+</html>

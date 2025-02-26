@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Churn Prediction - Data Science Platform</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand" href="/">Data Science Platform</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/upload">Upload Data</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/eda">EDA</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/visualize">Visualize</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/churn_prediction">Churn Prediction</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/sales_forecast">Sales Forecast</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container-fluid mt-4">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h3 class="card-title mb-0">Customer Churn Prediction</h3>
+                    </div>
+                    <div class="card-body">
+                        <ul class="nav nav-tabs" id="churnTabs" role="tablist">
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link active" id="train-tab" data-bs-toggle="tab" data-bs-target="#train" type="button" role="tab">Train Model</button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="predict-tab" data-bs-toggle="tab" data-bs-target="#predict" type="button" role="tab">Make Predictions</button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="evaluation-tab" data-bs-toggle="tab" data-bs-target="#evaluation" type="button" role="tab">Model Evaluation</button>
+                            </li>
+                        </ul>
+                        
+                        <div class="tab-content mt-3" id="churnTabContent">
+                            <!-- Train Model Tab -->
+                            <div class="tab-pane fade show active" id="train" role="tabpanel">
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <div class="card bg-light">
+                                            <div class="card-body">
+                                                <h5 class="card-title">Model Configuration</h5>
+                                                <form id="trainModelForm">
+                                                    <div class="mb-3">
+                                                        <label for="targetColumn" class="form-label">Target Column (Churn)</label>
+                                                        <select class="form-select" id="targetColumn" required>
+                                                            <option value="" selected disabled>Select target column</option>
+                                                            {% for column in columns %}
+                                                            <option value="{{ column }}">{{ column }}</option>
+                                                            {% endfor %}
+                                                        </select>
+                                                        <div class="form-text">Select the column indicating whether a customer churned</div>
+                                                    </div>
+                                                    
+                                                    <div class="mb-3">
+                                                        <label class="form-label">Feature Columns</label>
+                                                        <div style="max-height: 200px; overflow-y: auto; border: 1px solid #dee2e6; border-radius: 0.25rem; padding: 0.5rem;">
+                                                            {% for column in columns %}
+                                                            <div class="form-check">
+                                                                <input class="form-check-input feature-column" type="checkbox" value="{{ column }}" id="feature-{{ column }}">
+                                                                <label class="form-check-label" for="feature-{{ column }}">
+                                                                    {{ column }}
+                                                                </label>
+                                                            </div>
+                                                            {% endfor %}
+                                                        </div>
+                                                        <div class="form-text">Select columns to use as features for prediction</div>
+                                                    </div>
+                                                    
+                                                    <div class="mb-3">
+                                                        <label for="modelType" class="form-label">Model Type</label>
+                                                        <select class="form-select" id="modelType">
+                                                            <option value="random_forest" selected>Random Forest</option>
+                                                            <option value="xgboost">XGBoost</option>
+                                                        </select>
+                                                    </div>
+                                                    
+                                                    <div class="d-grid gap-2">
+                                                        <button type="submit" class="btn btn-primary">Train Model</button>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="col-md-8">
+                                        <div class="card shadow-sm" id="trainingResultCard" style="display: none;">
+                                            <div class="card-body">
+                                                <h5 class="card-title">Training Results</h5>
+                                                <div id="trainingResult">
+                                                    <!-- Training results will be displayed here -->
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="card shadow-sm" id="featureImportanceCard" style="display: none; margin-top: 1rem;">
+                                            <div class="card-body">
+                                                <h5 class="card-title">Feature Importance</h5>
+                                                <div id="featureImportanceChart" style="height: 400px;">
+                                                    <!-- Feature importance chart will be displayed here -->
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Make Predictions Tab -->
+                            <div class="tab-pane fade" id="predict" role="tabpanel">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="card bg-light">
+                                            <div class="card-body">
+                                                <h5 class="card-title">Prediction Input</h5>
+                                                <div id="predictionInputForm">
+                                                    <div class="alert alert-info">
+                                                        Please train a model first on the Train Model tab.
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="col-md-6">
+                                        <div class="card shadow-sm">
+                                            <div class="card-body">
+                                                <h5 class="card-title">Prediction Results</h5>
+                                                <div id="predictionResult">
+                                                    <div class="text-center py-5">
+                                                        <p class="text-muted">Train a model and submit prediction inputs to see results</p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Model Evaluation Tab -->
+                            <div class="tab-pane fade" id="evaluation" role="tabpanel">
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <div class="card shadow-sm">
+                                            <div class="card-body">
+                                                <h5 class="card-title">Model Performance Metrics</h5>
+                                                <div id="modelEvaluation">
+                                                    <div class="alert alert-info">
+                                                        Please train a model first on the Train Model tab.
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="mt-5 py-3 bg-light">
+        <div class="container text-center">
+            <p>Data Science Platform MVP &copy; 2023</p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Store model information
+            let trainedModel = {
+                trained: false,
+                features: [],
+                metrics: null
+            };
+            
+            // Handle target column selection to disable it in features
+            const targetColumnSelect = document.getElementById('targetColumn');
+            targetColumnSelect.addEventListener('change', function() {
+                const selectedTarget = this.value;
+                document.querySelectorAll('.feature-column').forEach(checkbox => {
+                    if (checkbox.value === selectedTarget) {
+                        checkbox.checked = false;
+                        checkbox.disabled = true;
+                    } else {
+                        checkbox.disabled = false;
+                    }
+                });
+            });
+            
+            // Handle form submission for training
+            const trainModelForm = document.getElementById('trainModelForm');
+            trainModelForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                // Get target column
+                const targetColumn = document.getElementById('targetColumn').value;
+                if (!targetColumn) {
+                    alert('Please select a target column');
+                    return;
+                }
+                
+                // Get selected features
+                const featureColumns = [];
+                document.querySelectorAll('.feature-column:checked').forEach(checkbox => {
+                    featureColumns.push(checkbox.value);
+                });
+                
+                if (featureColumns.length === 0) {
+                    alert('Please select at least one feature column');
+                    return;
+                }
+                
+                // Get model type
+                const modelType = document.getElementById('modelType').value;
+                
+                // Display loading message
+                document.getElementById('trainingResultCard').style.display = 'block';
+                document.getElementById('trainingResult').innerHTML = `
+                    <div class="text-center py-4">
+                        <div class="spinner-border text-primary" role="status"></div>
+                        <p class="mt-2">Training model, please wait...</p>
+                    </div>
+                `;
+                
+                // Send request to API
+                fetch('/api/train_churn_model', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        target_column: targetColumn,
+                        feature_columns: featureColumns,
+                        model_type: modelType
+                    }),
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error) {
+                        document.getElementById('trainingResult').innerHTML = `
+                            <div class="alert alert-danger">${data.error}</div>
+                        `;
+                    } else {
+                        // Store model information
+                        trainedModel.trained = true;
+                        trainedModel.features = featureColumns;
+                        trainedModel.metrics = data.metrics;
+                        
+                        // Display metrics
+                        let metricsHTML = `
+                            <div class="alert alert-success">
+                                <i class="bi bi-check-circle-fill"></i> Model trained successfully!
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <table class="table table-bordered">
+                                        <thead class="table-primary">
+                                            <tr>
+                                                <th>Metric</th>
+                                                <th>Value</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td>Accuracy</td>
+                                                <td>${(data.metrics.accuracy * 100).toFixed(2)}%</td>
+                                            </tr>
+                                            <tr>
+                                                <td>Precision</td>
+                                                <td>${(data.metrics.precision * 100).toFixed(2)}%</td>
+                                            </tr>
+                                            <tr>
+                                                <td>Recall</td>
+                                                <td>${(data.metrics.recall * 100).toFixed(2)}%</td>
+                                            </tr>
+                                            <tr>
+                                                <td>F1 Score</td>
+                                                <td>${(data.metrics.f1 * 100).toFixed(2)}%</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <div class="col-md-6">
+                                    <p><strong>Model Type:</strong> ${modelType === 'random_forest' ? 'Random Forest' : 'XGBoost'}</p>
+                                    <p><strong>Target Column:</strong> ${targetColumn}</p>
+                                    <p><strong>Features Used:</strong> ${featureColumns.length}</p>
+                                </div>
+                            </div>
+                        `;
+                        
+                        document.getElementById('trainingResult').innerHTML = metricsHTML;
+                        
+                        // Show feature importance chart
+                        if (data.metrics.feature_importances && data.metrics.feature_importances.length > 0) {
+                            document.getElementById('featureImportanceCard').style.display = 'block';
+                            
+                            // Prepare data for the chart
+                            const features = data.metrics.feature_importances.map(item => item.feature);
+                            const importances = data.metrics.feature_importances.map(item => item.importance);
+                            
+                            // Create the chart
+                            const chartData = [{
+                                type: 'bar',
+                                x: importances,
+                                y: features,
+                                orientation: 'h',
+                                marker: {
+                                    color: 'rgba(55, 128, 191, 0.7)',
+                                    line: {
+                                        color: 'rgba(55, 128, 191, 1.0)',
+                                        width: 1
+                                    }
+                                }
+                            }];
+                            
+                            const layout = {
+                                title: 'Feature Importance',
+                                yaxis: {
+                                    title: 'Features',
+                                    automargin: true
+                                },
+                                xaxis: {
+                                    title: 'Importance',
+                                    automargin: true
+                                },
+                                margin: {
+                                    l: 150
+                                }
+                            };
+                            
+                            Plotly.newPlot('featureImportanceChart', chartData, layout);
+                        }
+                        
+                        // Update prediction form
+                        createPredictionForm(featureColumns);
+                        
+                        // Update model evaluation tab
+                        updateModelEvaluation(data.metrics);
+                    }
+                })
+                .catch(error => {
+                    document.getElementById('trainingResult').innerHTML = `
+                        <div class="alert alert-danger">Error training model: ${error.message}</div>
+                    `;
+                });
+            });
+            
+            // Function to create prediction form based on trained model features
+            function createPredictionForm(features) {
+                if (!features || features.length === 0) return;
+                
+                let formHTML = `
+                    <form id="makePredictionForm">
+                        <div class="mb-3">
+                            <p class="text-success"><i class="bi bi-check-circle-fill"></i> Model is trained and ready for predictions</p>
+                        </div>
+                `;
+                
+                // Create input fields for each feature
+                features.forEach(feature => {
+                    formHTML += `
+                        <div class="mb-3">
+                            <label for="pred-${feature}" class="form-label">${feature}</label>
+                            <input type="text" class="form-control" id="pred-${feature}" name="${feature}" required>
+                        </div>
+                    `;
+                });
+                
+                formHTML += `
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary">Make Prediction</button>
+                        </div>
+                    </form>
+                `;
+                
+                document.getElementById('predictionInputForm').innerHTML = formHTML;
+                
+                // Add event listener to the new form
+                document.getElementById('makePredictionForm').addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    
+                    // Collect input values
+                    const inputData = {};
+                    features.forEach(feature => {
+                        const input = document.getElementById(`pred-${feature}`);
+                        // Try to convert to number if possible
+                        const value = isNaN(input.value) ? input.value : Number(input.value);
+                        inputData[feature] = value;
+                    });
+                    
+                    // Display loading
+                    document.getElementById('predictionResult').innerHTML = `
+                        <div class="text-center py-4">
+                            <div class="spinner-border text-primary" role="status"></div>
+                            <p class="mt-2">Making prediction, please wait...</p>
+                        </div>
+                    `;
+                    
+                    // Send request to API
+                    fetch('/api/predict_churn', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            data: inputData
+                        }),
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.error) {
+                            document.getElementById('predictionResult').innerHTML = `
+                                <div class="alert alert-danger">${data.error}</div>
+                            `;
+                        } else {
+                            // Display prediction
+                            const prediction = data.prediction.predictions[0];
+                            let resultHTML = `
+                                <div class="text-center">
+                                    <div class="display-6 mb-3">${prediction === 1 ? 'Customer will churn' : 'Customer will not churn'}</div>
+                            `;
+                            
+                            // Display probability if available
+                            if (data.prediction.probabilities) {
+                                const churnProb = data.prediction.probabilities[0][1] * 100;
+                                resultHTML += `
+                                    <div class="h4 text-${churnProb > 50 ? 'danger' : 'success'}">
+                                        Churn Probability: ${churnProb.toFixed(2)}%
+                                    </div>
+                                `;
+                                
+                                // Create a gauge chart for probability
+                                resultHTML += `<div id="probabilityGauge" style="height: 300px;"></div>`;
+                            }
+                            
+                            resultHTML += `</div>`;
+                            
+                            document.getElementById('predictionResult').innerHTML = resultHTML;
+                            
+                            // Create gauge chart if probabilities available
+                            if (data.prediction.probabilities) {
+                                const churnProb = data.prediction.probabilities[0][1] * 100;
+                                
+                                const gaugeData = [
+                                    {
+                                        type: "indicator",
+                                        mode: "gauge+number",
+                                        value: churnProb,
+                                        title: { text: "Churn Probability", font: { size: 16 } },
+                                        gauge: {
+                                            axis: { range: [null, 100] },
+                                            bar: { color: "darkblue" },
+                                            bgcolor: "white",
+                                            borderwidth: 2,
+                                            bordercolor: "gray",
+                                            steps: [
+                                                { range: [0, 25], color: "green" },
+                                                { range: [25, 50], color: "yellow" },
+                                                { range: [50, 75], color: "orange" },
+                                                { range: [75, 100], color: "red" }
+                                            ],
+                                            threshold: {
+                                                line: { color: "red", width: 4 },
+                                                thickness: 0.75,
+                                                value: 50
+                                            }
+                                        }
+                                    }
+                                ];
+                                
+                                const layout = { margin: { t: 25, b: 25, l: 25, r: 25 } };
+                                
+                                Plotly.newPlot('probabilityGauge', gaugeData, layout);
+                            }
+                        }
+                    })
+                    .catch(error => {
+                        document.getElementById('predictionResult').innerHTML = `
+                            <div class="alert alert-danger">Error making prediction: ${error.message}</div>
+                        `;
+                    });
+                });
+            }
+            
+            // Function to update model evaluation tab
+            function updateModelEvaluation(metrics) {
+                if (!metrics) return;
+                
+                let evaluationHTML = `
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h5>Performance Metrics</h5>
+                            <table class="table table-bordered">
+                                <thead class="table-primary">
+                                    <tr>
+                                        <th>Metric</th>
+                                        <th>Value</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>Accuracy</td>
+                                        <td>${(metrics.accuracy * 100).toFixed(2)}%</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Precision</td>
+                                        <td>${(metrics.precision * 100).toFixed(2)}%</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Recall</td>
+                                        <td>${(metrics.recall * 100).toFixed(2)}%</td>
+                                    </tr>
+                                    <tr>
+                                        <td>F1 Score</td>
+                                        <td>${(metrics.f1 * 100).toFixed(2)}%</td>
+                                    </tr>
+                                    ${metrics.roc_auc ? `
+                                    <tr>
+                                        <td>ROC AUC</td>
+                                        <td>${(metrics.roc_auc * 100).toFixed(2)}%</td>
+                                    </tr>
+                                    ` : ''}
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="col-md-6">
+                            <h5>What These Metrics Mean</h5>
+                            <ul class="list-group">
+                                <li class="list-group-item">
+                                    <strong>Accuracy:</strong> Overall correctness of predictions
+                                </li>
+                                <li class="list-group-item">
+                                    <strong>Precision:</strong> Accuracy of positive predictions (low false positives)
+                                </li>
+                                <li class="list-group-item">
+                                    <strong>Recall:</strong> Ability to find all positive samples (low false negatives)
+                                </li>
+                                <li class="list-group-item">
+                                    <strong>F1 Score:</strong> Balance between precision and recall
+                                </li>
+                                ${metrics.roc_auc ? `
+                                <li class="list-group-item">
+                                    <strong>ROC AUC:</strong> Ability to distinguish between classes
+                                </li>
+                                ` : ''}
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-4">
+                        <h5>Model Interpretation</h5>
+                        <div class="card">
+                            <div class="card-body">
+                                <p>Based on the metrics above, this model ${metrics.accuracy > 0.8 ? 'performs well' : 'may need improvement'} for churn prediction.</p>
+                                <p>Businesses should focus on the following when using this model:</p>
+                                <ul>
+                                    <li>High precision means fewer false alarms when identifying potential churners</li>
+                                    <li>High recall means the model can catch most customers who are likely to churn</li>
+                                    <li>The most important features for prediction are shown in the Feature Importance chart on the Train Model tab</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                document.getElementById('modelEvaluation').innerHTML = evaluationHTML;
+            }
+        });
+    </script>
+</body>
+</html>
