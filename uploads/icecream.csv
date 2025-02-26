@@ -1,0 +1,141 @@
+﻿Date,Flavor,Scoops,Cones,Cups,Price,Temperature,Weekday,Holiday,Promotional_Offer
+2024-07-01,Vanilla,2,50,50,3.00,82,Monday,False,None
+2024-07-01,Chocolate,1,60,40,2.50,82,Monday,False,None
+2024-07-01,Strawberry,3,40,60,4.50,82,Monday,False,None
+2024-07-01,Mint Chip,2,55,45,3.00,82,Monday,False,None
+2024-07-01,Cookies,1,70,30,2.50,82,Monday,False,None
+2024-07-02,Vanilla,1,55,55,2.50,85,Tuesday,False,None
+2024-07-02,Chocolate,3,45,55,4.50,85,Tuesday,False,None
+2024-07-02,Strawberry,2,60,40,3.00,85,Tuesday,False,10% Off
+2024-07-02,Mint Chip,1,75,25,2.50,85,Tuesday,False,None
+2024-07-02,Cookies,2,50,50,3.00,85,Tuesday,False,None
+2024-07-03,Vanilla,2,60,40,3.00,88,Wednesday,False,None
+2024-07-03,Chocolate,1,50,60,2.50,88,Wednesday,False,None
+2024-07-03,Strawberry,3,45,55,4.50,88,Wednesday,False,None
+2024-07-03,Mint Chip,2,65,35,3.00,88,Wednesday,False,Buy 1 Get 1
+2024-07-03,Cookies,1,70,30,2.50,88,Wednesday,False,None
+2024-07-04,Vanilla,1,58,42,2.50,90,Thursday,False,None
+2024-07-04,Chocolate,2,48,52,3.00,90,Thursday,False,None
+2024-07-04,Strawberry,3,52,48,4.50,90,Thursday,False,None
+2024-07-04,Mint Chip,1,62,38,2.50,90,Thursday,False,None
+2024-07-04,Cookies,2,55,45,3.00,90,Thursday,False,None
+2024-07-05,Vanilla,2,65,35,3.00,87,Friday,False,None
+2024-07-05,Chocolate,1,55,45,2.50,87,Friday,False,None
+2024-07-05,Strawberry,3,45,55,4.50,87,Friday,False,None
+2024-07-05,Mint Chip,2,60,40,3.00,87,Friday,False,None
+2024-07-05,Cookies,1,75,25,2.50,87,Friday,False,None
+2024-07-06,Vanilla,1,62,38,2.50,80,Saturday,False,None
+2024-07-06,Chocolate,3,50,50,4.50,80,Saturday,False,None
+2024-07-06,Strawberry,2,68,32,3.00,80,Saturday,False,10% Off
+2024-07-06,Mint Chip,1,72,28,2.50,80,Saturday,False,None
+2024-07-06,Cookies,2,58,42,3.00,80,Saturday,False,None
+2024-07-07,Vanilla,2,70,30,3.00,78,Sunday,False,None
+2024-07-07,Chocolate,1,60,40,2.50,78,Sunday,False,None
+2024-07-07,Strawberry,3,50,50,4.50,78,Sunday,False,None
+2024-07-07,Mint Chip,2,65,35,3.00,78,Sunday,False,None
+2024-07-07,Cookies,1,75,25,2.50,78,Sunday,False,None
+2024-07-08,Vanilla,1,60,40,2.50,83,Monday,False,None
+2024-07-08,Chocolate,2,50,50,3.00,83,Monday,False,None
+2024-07-08,Strawberry,3,40,60,4.50,83,Monday,False,None
+2024-07-08,Mint Chip,1,70,30,2.50,83,Monday,False,None
+2024-07-08,Cookies,2,60,40,3.00,83,Monday,False,None
+2024-07-09,Vanilla,2,55,45,3.00,86,Tuesday,False,None
+2024-07-09,Chocolate,1,65,35,2.50,86,Tuesday,False,None
+2024-07-09,Strawberry,3,45,55,4.50,86,Tuesday,False,None
+2024-07-09,Mint Chip,2,50,50,3.00,86,Tuesday,False,None
+2024-07-09,Cookies,1,75,25,2.50,86,Tuesday,False,None
+2024-07-10,Vanilla,1,62,38,2.50,89,Wednesday,False,None
+2024-07-10,Chocolate,2,58,42,3.00,89,Wednesday,False,None
+2024-07-10,Strawberry,3,48,52,4.50,89,Wednesday,False,None
+2024-07-10,Mint Chip,1,68,32,2.50,89,Wednesday,False,None
+2024-07-10,Cookies,2,65,35,3.00,89,Wednesday,False,None
+2024-07-11,Vanilla,2,70,30,3.00,92,Thursday,False,None
+2024-07-11,Chocolate,1,60,40,2.50,92,Thursday,False,None
+2024-07-11,Strawberry,3,50,50,4.50,92,Thursday,False,None
+2024-07-11,Mint Chip,2,65,35,3.00,92,Thursday,False,None
+2024-07-11,Cookies,1,70,30,2.50,92,Thursday,False,None
+2024-07-12,Vanilla,1,65,35,2.50,88,Friday,False,None
+2024-07-12,Chocolate,2,55,45,3.00,88,Friday,False,None
+2024-07-12,Strawberry,3,45,55,4.50,88,Friday,False,None
+2024-07-12,Mint Chip,1,75,25,2.50,88,Friday,False,None
+2024-07-12,Cookies,2,60,40,3.00,88,Friday,False,None
+2024-07-13,Vanilla,2,70,30,3.00,85,Saturday,False,None
+2024-07-13,Chocolate,1,60,40,2.50,85,Saturday,False,None
+2024-07-13,Strawberry,3,50,50,4.50,85,Saturday,False,None
+2024-07-13,Mint Chip,2,65,35,3.00,85,Saturday,False,None
+2024-07-13,Cookies,1,75,25,2.50,85,Saturday,False,None
+2024-07-14,Vanilla,1,62,38,2.50,82,Sunday,False,None
+2024-07-14,Chocolate,2,58,42,3.00,82,Sunday,False,None
+2024-07-14,Strawberry,3,48,52,4.50,82,Sunday,False,None
+2024-07-14,Mint Chip,1,68,32,2.50,82,Sunday,False,None
+2024-07-14,Cookies,2,65,35,3.00,82,Sunday,False,None
+2024-07-15,Vanilla,2,70,30,3.00,88,Monday,False,None
+2024-07-15,Chocolate,1,60,40,2.50,88,Monday,False,None
+2024-07-15,Strawberry,3,50,50,4.50,88,Monday,False,None
+2024-07-15,Mint Chip,2,65,35,3.00,88,Monday,False,None
+2024-07-15,Cookies,1,75,25,2.50,88,Monday,False,None
+2024-07-16,Vanilla,1,65,35,2.50,91,Tuesday,False,None
+2024-07-16,Chocolate,2,55,45,3.00,91,Tuesday,False,None
+2024-07-16,Strawberry,3,45,55,4.50,91,Tuesday,False,None
+2024-07-16,Mint Chip,1,75,25,2.50,91,Tuesday,False,None
+2024-07-16,Cookies,2,60,40,3.00,91,Tuesday,False,None
+2024-07-17,Vanilla,2,70,30,3.00,89,Wednesday,False,None
+2024-07-17,Chocolate,1,60,40,2.50,89,Wednesday,False,None
+2024-07-17,Strawberry,3,50,50,4.50,89,Wednesday,False,None
+2024-07-17,Mint Chip,2,65,35,3.00,89,Wednesday,False,None
+2024-07-17,Cookies,1,75,25,2.50,89,Wednesday,False,None
+2024-07-18,Vanilla,1,65,35,2.50,86,Thursday,False,None
+2024-07-18,Chocolate,2,55,45,3.00,86,Thursday,False,None
+2024-07-18,Strawberry,3,45,55,4.50,86,Thursday,False,None
+2024-07-18,Mint Chip,1,75,25,2.50,86,Thursday,False,None
+2024-07-18,Cookies,2,60,40,3.00,86,Thursday,False,None
+2024-07-19,Vanilla,2,70,30,3.00,83,Friday,False,None
+2024-07-19,Chocolate,1,60,40,2.50,83,Friday,False,None
+2024-07-19,Strawberry,3,50,50,4.50,83,Friday,False,None
+2024-07-19,Mint Chip,2,65,35,3.00,83,Friday,False,None
+2024-07-19,Cookies,1,75,25,2.50,83,Friday,False,None
+2024-07-20,Vanilla,1,62,38,2.50,80,Saturday,False,None
+2024-07-20,Chocolate,2,58,42,3.00,80,Saturday,False,None
+2024-07-20,Strawberry,3,48,52,4.50,80,Saturday,False,None
+2024-07-20,Mint Chip,1,68,32,2.50,80,Saturday,False,None
+2024-07-20,Cookies,2,65,35,3.00,80,Saturday,False,None
+2024-07-21,Vanilla,2,70,30,3.00,77,Sunday,False,None
+2024-07-21,Chocolate,1,60,40,2.50,77,Sunday,False,None
+2024-07-21,Strawberry,3,50,50,4.50,77,Sunday,False,None
+2024-07-21,Mint Chip,2,65,35,3.00,77,Sunday,False,None
+2024-07-21,Cookies,1,75,25,2.50,77,Sunday,False,None
+2024-07-22,Vanilla,1,60,40,2.50,82,Monday,False,None
+2024-07-22,Chocolate,2,50,50,3.00,82,Monday,False,None
+2024-07-22,Strawberry,3,40,60,4.50,82,Monday,False,None
+2024-07-22,Mint Chip,1,70,30,2.50,82,Monday,False,None
+2024-07-22,Cookies,2,60,40,3.00,82,Monday,False,None
+2024-07-23,Vanilla,2,55,45,3.00,85,Tuesday,False,None
+2024-07-23,Chocolate,1,65,35,2.50,85,Tuesday,False,None
+2024-07-23,Strawberry,3,45,55,4.50,85,Tuesday,False,None
+2024-07-23,Mint Chip,2,50,50,3.00,85,Tuesday,False,None
+2024-07-23,Cookies,1,75,25,2.50,85,Tuesday,False,None
+2024-07-24,Vanilla,1,62,38,2.50,88,Wednesday,False,None
+2024-07-24,Chocolate,2,58,42,3.00,88,Wednesday,False,None
+2024-07-24,Strawberry,3,48,52,4.50,88,Wednesday,False,None
+2024-07-24,Mint Chip,1,68,32,2.50,88,Wednesday,False,None
+2024-07-24,Cookies,2,65,35,3.00,88,Wednesday,False,None
+2024-07-25,Vanilla,2,70,30,3.00,91,Thursday,False,None
+2024-07-25,Chocolate,1,60,40,2.50,91,Thursday,False,None
+2024-07-25,Strawberry,3,50,50,4.50,91,Thursday,False,None
+2024-07-25,Mint Chip,2,65,35,3.00,91,Thursday,False,None
+2024-07-25,Cookies,1,70,30,2.50,91,Thursday,False,None
+2024-07-26,Vanilla,1,65,35,2.50,87,Friday,False,None
+2024-07-26,Chocolate,2,55,45,3.00,87,Friday,False,None
+2024-07-26,Strawberry,3,45,55,4.50,87,Friday,False,None
+2024-07-26,Mint Chip,1,75,25,2.50,87,Friday,False,None
+2024-07-26,Cookies,2,60,40,3.00,87,Friday,False,None
+2024-07-27,Vanilla,2,70,30,3.00,84,Saturday,False,None
+2024-07-27,Chocolate,1,60,40,2.50,84,Saturday,False,None
+2024-07-27,Strawberry,3,50,50,4.50,84,Saturday,False,None
+2024-07-27,Mint Chip,2,65,35,3.00,84,Saturday,False,None
+2024-07-27,Cookies,1,75,25,2.50,84,Saturday,False,None
+2024-07-28,Vanilla,1,62,38,2.50,81,Sunday,False,None
+2024-07-28,Chocolate,2,58,42,3.00,81,Sunday,False,None
+2024-07-28,Strawberry,3,48,52,4.50,81,Sunday,False,None
+2024-07-28,Mint Chip,1,68,32,2.50,81,Sunday,False,None
+2024-07-28,Cookies,2,65,35,3.00,81,Sunday,False,None
