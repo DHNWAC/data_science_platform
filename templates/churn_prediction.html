@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Classification Models - Data Science Platform</title>
+    <title>Churn Prediction - Data Science Platform</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
@@ -28,22 +28,13 @@
                         <a class="nav-link" href="/eda">EDA</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="/auto_visualize">Auto Visualize</a>
-                    </li>
-                    <li class="nav-item">
                         <a class="nav-link" href="/visualize">Visualize</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link active" href="/classification">Classification</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/glm">GLM Analysis</a>
+                        <a class="nav-link active" href="/churn_prediction">Churn Prediction</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="/sales_forecast">Sales Forecast</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/pricing">Pricing</a>
                     </li>
                 </ul>
             </div>
@@ -55,10 +46,10 @@
             <div class="col-md-12">
                 <div class="card shadow-sm mb-4">
                     <div class="card-header bg-primary text-white">
-                        <h3 class="card-title mb-0">Classification Models</h3>
+                        <h3 class="card-title mb-0">Customer Churn Prediction</h3>
                     </div>
                     <div class="card-body">
-                        <ul class="nav nav-tabs" id="classificationTabs" role="tablist">
+                        <ul class="nav nav-tabs" id="churnTabs" role="tablist">
                             <li class="nav-item" role="presentation">
                                 <button class="nav-link active" id="train-tab" data-bs-toggle="tab" data-bs-target="#train" type="button" role="tab">Train Model</button>
                             </li>
@@ -70,7 +61,7 @@
                             </li>
                         </ul>
                         
-                        <div class="tab-content mt-3" id="classificationTabContent">
+                        <div class="tab-content mt-3" id="churnTabContent">
                             <!-- Train Model Tab -->
                             <div class="tab-pane fade show active" id="train" role="tabpanel">
                                 <div class="row">
@@ -80,25 +71,16 @@
                                                 <h5 class="card-title">Model Configuration</h5>
                                                 <form id="trainModelForm">
                                                     <div class="mb-3">
-                                                        <label for="targetColumn" class="form-label">Target Column</label>
+                                                        <label for="targetColumn" class="form-label">Target Column (Churn)</label>
                                                         <select class="form-select" id="targetColumn" required>
                                                             <option value="" selected disabled>Select target column</option>
                                                             {% for column in columns %}
                                                             <option value="{{ column }}">{{ column }}</option>
                                                             {% endfor %}
                                                         </select>
-                                                        <div class="form-text">Select the column to predict</div>
+                                                        <div class="form-text">Select the column indicating whether a customer churned</div>
                                                     </div>
                                                     
-                                                    <div class="mb-3">
-                                                        <label for="problemType" class="form-label">Problem Type</label>
-                                                        <select class="form-select" id="problemType" required>
-                                                            <option value="binary" selected>Binary Classification</option>
-                                                            <option value="multiclass">Multi-class Classification</option>
-                                                        </select>
-                                                        <div class="form-text">Choose the type of classification problem</div>
-                                                    </div>
-
                                                     <div class="mb-3">
                                                         <label class="form-label">Feature Columns</label>
                                                         <div style="max-height: 200px; overflow-y: auto; border: 1px solid #dee2e6; border-radius: 0.25rem; padding: 0.5rem;">
@@ -119,20 +101,7 @@
                                                         <select class="form-select" id="modelType">
                                                             <option value="random_forest" selected>Random Forest</option>
                                                             <option value="xgboost">XGBoost</option>
-                                                            <option value="logistic">Logistic Regression</option>
                                                         </select>
-                                                    </div>
-
-                                                    <div class="mb-3" id="hyperparamsSection">
-                                                        <label class="form-label">Hyperparameters</label>
-                                                        <div class="mb-2">
-                                                            <label for="n_estimators" class="form-label">Number of Estimators</label>
-                                                            <input type="number" class="form-control" id="n_estimators" value="100" min="10" max="1000">
-                                                        </div>
-                                                        <div class="mb-2">
-                                                            <label for="max_depth" class="form-label">Max Depth</label>
-                                                            <input type="number" class="form-control" id="max_depth" value="10" min="1" max="100">
-                                                        </div>
                                                     </div>
                                                     
                                                     <div class="d-grid gap-2">
@@ -158,15 +127,6 @@
                                                 <h5 class="card-title">Feature Importance</h5>
                                                 <div id="featureImportanceChart" style="height: 400px;">
                                                     <!-- Feature importance chart will be displayed here -->
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        <div class="card shadow-sm" id="confusionMatrixCard" style="display: none; margin-top: 1rem;">
-                                            <div class="card-body">
-                                                <h5 class="card-title">Confusion Matrix</h5>
-                                                <div id="confusionMatrixChart" style="height: 400px;">
-                                                    <!-- Confusion matrix will be displayed here -->
                                                 </div>
                                             </div>
                                         </div>
@@ -242,8 +202,7 @@
             let trainedModel = {
                 trained: false,
                 features: [],
-                metrics: null,
-                problemType: 'binary'
+                metrics: null
             };
             
             // Handle target column selection to disable it in features
@@ -260,73 +219,13 @@
                 });
             });
             
-            // Handle model type changes to show appropriate hyperparameters
-            const modelTypeSelect = document.getElementById('modelType');
-            modelTypeSelect.addEventListener('change', function() {
-                updateHyperparameters(this.value);
-            });
-
-            function updateHyperparameters(modelType) {
-                const hyperparamsSection = document.getElementById('hyperparamsSection');
-                
-                let html = '<label class="form-label">Hyperparameters</label>';
-                
-                if (modelType === 'random_forest') {
-                    html += `
-                        <div class="mb-2">
-                            <label for="n_estimators" class="form-label">Number of Estimators</label>
-                            <input type="number" class="form-control" id="n_estimators" value="100" min="10" max="1000">
-                        </div>
-                        <div class="mb-2">
-                            <label for="max_depth" class="form-label">Max Depth</label>
-                            <input type="number" class="form-control" id="max_depth" value="10" min="1" max="100">
-                        </div>
-                    `;
-                } else if (modelType === 'xgboost') {
-                    html += `
-                        <div class="mb-2">
-                            <label for="n_estimators" class="form-label">Number of Estimators</label>
-                            <input type="number" class="form-control" id="n_estimators" value="100" min="10" max="1000">
-                        </div>
-                        <div class="mb-2">
-                            <label for="learning_rate" class="form-label">Learning Rate</label>
-                            <input type="number" class="form-control" id="learning_rate" value="0.1" min="0.001" max="1" step="0.001">
-                        </div>
-                        <div class="mb-2">
-                            <label for="max_depth" class="form-label">Max Depth</label>
-                            <input type="number" class="form-control" id="max_depth" value="6" min="1" max="20">
-                        </div>
-                    `;
-                } else if (modelType === 'logistic') {
-                    html += `
-                        <div class="mb-2">
-                            <label for="C" class="form-label">Regularization Strength (C)</label>
-                            <input type="number" class="form-control" id="C" value="1.0" min="0.001" max="100" step="0.001">
-                        </div>
-                        <div class="mb-2">
-                            <label for="penalty" class="form-label">Penalty</label>
-                            <select class="form-select" id="penalty">
-                                <option value="l2" selected>L2</option>
-                                <option value="l1">L1</option>
-                                <option value="elasticnet">Elastic Net</option>
-                                <option value="none">None</option>
-                            </select>
-                        </div>
-                    `;
-                }
-                
-                hyperparamsSection.innerHTML = html;
-            }
-            
             // Handle form submission for training
             const trainModelForm = document.getElementById('trainModelForm');
             trainModelForm.addEventListener('submit', function(e) {
                 e.preventDefault();
                 
-                // Get target column and problem type
+                // Get target column
                 const targetColumn = document.getElementById('targetColumn').value;
-                const problemType = document.getElementById('problemType').value;
-                
                 if (!targetColumn) {
                     alert('Please select a target column');
                     return;
@@ -343,21 +242,8 @@
                     return;
                 }
                 
-                // Get model type and hyperparameters
+                // Get model type
                 const modelType = document.getElementById('modelType').value;
-                const hyperparameters = {};
-                
-                if (modelType === 'random_forest') {
-                    hyperparameters.n_estimators = parseInt(document.getElementById('n_estimators').value);
-                    hyperparameters.max_depth = parseInt(document.getElementById('max_depth').value);
-                } else if (modelType === 'xgboost') {
-                    hyperparameters.n_estimators = parseInt(document.getElementById('n_estimators').value);
-                    hyperparameters.learning_rate = parseFloat(document.getElementById('learning_rate').value);
-                    hyperparameters.max_depth = parseInt(document.getElementById('max_depth').value);
-                } else if (modelType === 'logistic') {
-                    hyperparameters.C = parseFloat(document.getElementById('C').value);
-                    hyperparameters.penalty = document.getElementById('penalty').value;
-                }
                 
                 // Display loading message
                 document.getElementById('trainingResultCard').style.display = 'block';
@@ -368,21 +254,16 @@
                     </div>
                 `;
                 
-                // Store problem type
-                trainedModel.problemType = problemType;
-                
                 // Send request to API
-                fetch('/api/train_classification_model', {
+                fetch('/api/train_churn_model', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                     },
                     body: JSON.stringify({
                         target_column: targetColumn,
-                        problem_type: problemType,
                         feature_columns: featureColumns,
-                        model_type: modelType,
-                        hyperparameters: hyperparameters
+                        model_type: modelType
                     }),
                 })
                 .then(response => response.json())
@@ -416,11 +297,6 @@
                                                 <td>Accuracy</td>
                                                 <td>${(data.metrics.accuracy * 100).toFixed(2)}%</td>
                                             </tr>
-                        `;
-
-                        // Add specific metrics based on problem type
-                        if (problemType === 'binary') {
-                            metricsHTML += `
                                             <tr>
                                                 <td>Precision</td>
                                                 <td>${(data.metrics.precision * 100).toFixed(2)}%</td>
@@ -433,44 +309,11 @@
                                                 <td>F1 Score</td>
                                                 <td>${(data.metrics.f1 * 100).toFixed(2)}%</td>
                                             </tr>
-                            `;
-                            
-                            // Add ROC AUC if available
-                            if (data.metrics.roc_auc) {
-                                metricsHTML += `
-                                            <tr>
-                                                <td>ROC AUC</td>
-                                                <td>${(data.metrics.roc_auc * 100).toFixed(2)}%</td>
-                                            </tr>
-                                `;
-                            }
-                        } else {
-                            // For multiclass, show weighted metrics
-                            metricsHTML += `
-                                            <tr>
-                                                <td>Weighted Precision</td>
-                                                <td>${(data.metrics.precision * 100).toFixed(2)}%</td>
-                                            </tr>
-                                            <tr>
-                                                <td>Weighted Recall</td>
-                                                <td>${(data.metrics.recall * 100).toFixed(2)}%</td>
-                                            </tr>
-                                            <tr>
-                                                <td>Weighted F1 Score</td>
-                                                <td>${(data.metrics.f1 * 100).toFixed(2)}%</td>
-                                            </tr>
-                            `;
-                        }
-
-                        metricsHTML += `
                                         </tbody>
                                     </table>
                                 </div>
                                 <div class="col-md-6">
-                                    <p><strong>Model Type:</strong> ${modelType === 'random_forest' ? 'Random Forest' : 
-                                                                   modelType === 'xgboost' ? 'XGBoost' : 
-                                                                   'Logistic Regression'}</p>
-                                    <p><strong>Problem Type:</strong> ${problemType === 'binary' ? 'Binary Classification' : 'Multi-class Classification'}</p>
+                                    <p><strong>Model Type:</strong> ${modelType === 'random_forest' ? 'Random Forest' : 'XGBoost'}</p>
                                     <p><strong>Target Column:</strong> ${targetColumn}</p>
                                     <p><strong>Features Used:</strong> ${featureColumns.length}</p>
                                 </div>
@@ -519,46 +362,12 @@
                             
                             Plotly.newPlot('featureImportanceChart', chartData, layout);
                         }
-
-                        // Show confusion matrix if available
-                        if (data.metrics.confusion_matrix) {
-                            document.getElementById('confusionMatrixCard').style.display = 'block';
-                            
-                            const cm = data.metrics.confusion_matrix;
-                            const labels = data.metrics.class_labels || ['Class 0', 'Class 1'];
-                            
-                            const heatmapData = [{
-                                z: cm,
-                                x: labels,
-                                y: labels,
-                                type: 'heatmap',
-                                colorscale: 'Blues',
-                                showscale: true,
-                                text: cm.map(row => row.map(String)),
-                                texttemplate: '%{text}',
-                                textfont: {color: 'white'}
-                            }];
-                            
-                            const layout = {
-                                title: 'Confusion Matrix',
-                                xaxis: {
-                                    title: 'Predicted Label',
-                                    automargin: true
-                                },
-                                yaxis: {
-                                    title: 'True Label',
-                                    automargin: true
-                                }
-                            };
-                            
-                            Plotly.newPlot('confusionMatrixChart', heatmapData, layout);
-                        }
                         
                         // Update prediction form
-                        createPredictionForm(featureColumns, data.metrics.class_labels);
+                        createPredictionForm(featureColumns);
                         
                         // Update model evaluation tab
-                        updateModelEvaluation(data.metrics, problemType);
+                        updateModelEvaluation(data.metrics);
                     }
                 })
                 .catch(error => {
@@ -569,7 +378,7 @@
             });
             
             // Function to create prediction form based on trained model features
-            function createPredictionForm(features, classLabels) {
+            function createPredictionForm(features) {
                 if (!features || features.length === 0) return;
                 
                 let formHTML = `
@@ -620,14 +429,13 @@
                     `;
                     
                     // Send request to API
-                    fetch('/api/predict_classification', {
+                    fetch('/api/predict_churn', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
                         },
                         body: JSON.stringify({
-                            data: inputData,
-                            problem_type: trainedModel.problemType
+                            data: inputData
                         }),
                     })
                     .then(response => response.json())
@@ -639,117 +447,62 @@
                         } else {
                             // Display prediction
                             const prediction = data.prediction.predictions[0];
-                            let resultHTML = '';
-
-                            if (trainedModel.problemType === 'binary') {
-                                // For binary classification
-                                resultHTML = `
-                                    <div class="text-center">
-                                        <div class="display-6 mb-3">Predicted Class: ${prediction === 1 ? 'Positive' : 'Negative'}</div>
+                            let resultHTML = `
+                                <div class="text-center">
+                                    <div class="display-6 mb-3">${prediction === 1 ? 'Customer will churn' : 'Customer will not churn'}</div>
+                            `;
+                            
+                            // Display probability if available
+                            if (data.prediction.probabilities) {
+                                const churnProb = data.prediction.probabilities[0][1] * 100;
+                                resultHTML += `
+                                    <div class="h4 text-${churnProb > 50 ? 'danger' : 'success'}">
+                                        Churn Probability: ${churnProb.toFixed(2)}%
+                                    </div>
                                 `;
                                 
-                                // Display probability if available
-                                if (data.prediction.probabilities) {
-                                    const probPos = data.prediction.probabilities[0][1] * 100;
-                                    resultHTML += `
-                                        <div class="h4 text-${probPos > 50 ? 'danger' : 'success'}">
-                                            Probability: ${probPos.toFixed(2)}%
-                                        </div>
-                                    `;
-                                    
-                                    // Create a gauge chart for probability
-                                    resultHTML += `<div id="probabilityGauge" style="height: 300px;"></div>`;
-                                }
-                            } else {
-                                // For multi-class classification
-                                const predictedClass = prediction;
-                                let className = predictedClass;
-                                
-                                // Use class labels if available
-                                if (classLabels && classLabels.length > predictedClass) {
-                                    className = classLabels[predictedClass];
-                                }
-                                
-                                resultHTML = `
-                                    <div class="text-center">
-                                        <div class="display-6 mb-3">Predicted Class: ${className}</div>
-                                `;
-                                
-                                // Display probabilities if available
-                                if (data.prediction.probabilities) {
-                                    resultHTML += `<div id="probabilityChart" style="height: 300px;"></div>`;
-                                }
+                                // Create a gauge chart for probability
+                                resultHTML += `<div id="probabilityGauge" style="height: 300px;"></div>`;
                             }
                             
                             resultHTML += `</div>`;
                             
                             document.getElementById('predictionResult').innerHTML = resultHTML;
                             
-                            // Create visualization based on problem type
+                            // Create gauge chart if probabilities available
                             if (data.prediction.probabilities) {
-                                if (trainedModel.problemType === 'binary') {
-                                    // Create gauge chart for binary classification
-                                    const probPos = data.prediction.probabilities[0][1] * 100;
-                                    
-                                    const gaugeData = [
-                                        {
-                                            type: "indicator",
-                                            mode: "gauge+number",
-                                            value: probPos,
-                                            title: { text: "Probability", font: { size: 16 } },
-                                            gauge: {
-                                                axis: { range: [null, 100] },
-                                                bar: { color: "darkblue" },
-                                                bgcolor: "white",
-                                                borderwidth: 2,
-                                                bordercolor: "gray",
-                                                steps: [
-                                                    { range: [0, 25], color: "green" },
-                                                    { range: [25, 50], color: "yellow" },
-                                                    { range: [50, 75], color: "orange" },
-                                                    { range: [75, 100], color: "red" }
-                                                ],
-                                                threshold: {
-                                                    line: { color: "red", width: 4 },
-                                                    thickness: 0.75,
-                                                    value: 50
-                                                }
+                                const churnProb = data.prediction.probabilities[0][1] * 100;
+                                
+                                const gaugeData = [
+                                    {
+                                        type: "indicator",
+                                        mode: "gauge+number",
+                                        value: churnProb,
+                                        title: { text: "Churn Probability", font: { size: 16 } },
+                                        gauge: {
+                                            axis: { range: [null, 100] },
+                                            bar: { color: "darkblue" },
+                                            bgcolor: "white",
+                                            borderwidth: 2,
+                                            bordercolor: "gray",
+                                            steps: [
+                                                { range: [0, 25], color: "green" },
+                                                { range: [25, 50], color: "yellow" },
+                                                { range: [50, 75], color: "orange" },
+                                                { range: [75, 100], color: "red" }
+                                            ],
+                                            threshold: {
+                                                line: { color: "red", width: 4 },
+                                                thickness: 0.75,
+                                                value: 50
                                             }
                                         }
-                                    ];
-                                    
-                                    const layout = { margin: { t: 25, b: 25, l: 25, r: 25 } };
-                                    
-                                    Plotly.newPlot('probabilityGauge', gaugeData, layout);
-                                } else {
-                                    // Create bar chart for multi-class probabilities
-                                    const probs = data.prediction.probabilities[0];
-                                    let labels = Array.from({length: probs.length}, (_, i) => `Class ${i}`);
-                                    
-                                    // Use class labels if available
-                                    if (classLabels && classLabels.length === probs.length) {
-                                        labels = classLabels;
                                     }
-                                    
-                                    const chartData = [{
-                                        x: labels,
-                                        y: probs.map(p => p * 100),
-                                        type: 'bar',
-                                        marker: {
-                                            color: probs.map((p, i) => i === prediction ? 'rgba(55, 128, 191, 0.9)' : 'rgba(55, 128, 191, 0.5)')
-                                        }
-                                    }];
-                                    
-                                    const layout = {
-                                        title: 'Class Probabilities',
-                                        yaxis: {
-                                            title: 'Probability (%)',
-                                            range: [0, 100]
-                                        }
-                                    };
-                                    
-                                    Plotly.newPlot('probabilityChart', chartData, layout);
-                                }
+                                ];
+                                
+                                const layout = { margin: { t: 25, b: 25, l: 25, r: 25 } };
+                                
+                                Plotly.newPlot('probabilityGauge', gaugeData, layout);
                             }
                         }
                     })
@@ -762,7 +515,7 @@
             }
             
             // Function to update model evaluation tab
-            function updateModelEvaluation(metrics, problemType) {
+            function updateModelEvaluation(metrics) {
                 if (!metrics) return;
                 
                 let evaluationHTML = `
@@ -781,11 +534,6 @@
                                         <td>Accuracy</td>
                                         <td>${(metrics.accuracy * 100).toFixed(2)}%</td>
                                     </tr>
-                `;
-                
-                // Add specific metrics based on problem type
-                if (problemType === 'binary') {
-                    evaluationHTML += `
                                     <tr>
                                         <td>Precision</td>
                                         <td>${(metrics.precision * 100).toFixed(2)}%</td>
@@ -798,36 +546,12 @@
                                         <td>F1 Score</td>
                                         <td>${(metrics.f1 * 100).toFixed(2)}%</td>
                                     </tr>
-                    `;
-                    
-                    // Add ROC AUC if available
-                    if (metrics.roc_auc) {
-                        evaluationHTML += `
+                                    ${metrics.roc_auc ? `
                                     <tr>
                                         <td>ROC AUC</td>
                                         <td>${(metrics.roc_auc * 100).toFixed(2)}%</td>
                                     </tr>
-                        `;
-                    }
-                } else {
-                    // For multiclass, show weighted metrics
-                    evaluationHTML += `
-                                    <tr>
-                                        <td>Weighted Precision</td>
-                                        <td>${(metrics.precision * 100).toFixed(2)}%</td>
-                                    </tr>
-                                    <tr>
-                                        <td>Weighted Recall</td>
-                                        <td>${(metrics.recall * 100).toFixed(2)}%</td>
-                                    </tr>
-                                    <tr>
-                                        <td>Weighted F1 Score</td>
-                                        <td>${(metrics.f1 * 100).toFixed(2)}%</td>
-                                    </tr>
-                    `;
-                }
-                
-                evaluationHTML += `
+                                    ` : ''}
                                 </tbody>
                             </table>
                         </div>
@@ -846,18 +570,11 @@
                                 <li class="list-group-item">
                                     <strong>F1 Score:</strong> Balance between precision and recall
                                 </li>
-                `;
-                
-                // Add ROC AUC explanation for binary classification
-                if (problemType === 'binary' && metrics.roc_auc) {
-                    evaluationHTML += `
+                                ${metrics.roc_auc ? `
                                 <li class="list-group-item">
                                     <strong>ROC AUC:</strong> Ability to distinguish between classes
                                 </li>
-                    `;
-                }
-                
-                evaluationHTML += `
+                                ` : ''}
                             </ul>
                         </div>
                     </div>
@@ -866,33 +583,13 @@
                         <h5>Model Interpretation</h5>
                         <div class="card">
                             <div class="card-body">
-                                <p>Based on the metrics above, this model ${metrics.accuracy > 0.8 ? 'performs well' : 'may need improvement'} for classification.</p>
+                                <p>Based on the metrics above, this model ${metrics.accuracy > 0.8 ? 'performs well' : 'may need improvement'} for churn prediction.</p>
                                 <p>Businesses should focus on the following when using this model:</p>
                                 <ul>
-                                    <li>High precision means fewer false alarms when identifying positive cases</li>
-                                    <li>High recall means the model can catch most positive cases</li>
+                                    <li>High precision means fewer false alarms when identifying potential churners</li>
+                                    <li>High recall means the model can catch most customers who are likely to churn</li>
                                     <li>The most important features for prediction are shown in the Feature Importance chart on the Train Model tab</li>
                                 </ul>
-                `;
-                
-                // Add class balance information for multi-class
-                if (problemType === 'multiclass' && metrics.class_distribution) {
-                    evaluationHTML += `
-                                <p>Class Distribution:</p>
-                                <ul>
-                    `;
-                    
-                    // Add each class distribution
-                    for (const [className, count] of Object.entries(metrics.class_distribution)) {
-                        evaluationHTML += `<li>${className}: ${count} samples</li>`;
-                    }
-                    
-                    evaluationHTML += `
-                                </ul>
-                    `;
-                }
-                
-                evaluationHTML += `
                             </div>
                         </div>
                     </div>
@@ -900,9 +597,6 @@
                 
                 document.getElementById('modelEvaluation').innerHTML = evaluationHTML;
             }
-
-            // Initialize hyperparameters section with default values for Random Forest
-            updateHyperparameters('random_forest');
         });
     </script>
 </body>
