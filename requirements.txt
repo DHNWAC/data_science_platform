@@ -44,3 +44,10 @@ torch
 TensorFlow
 Flax
 
+statsmodels>=0.13.0
+transformers>=4.21.0
+torch>=1.12.0
+
+
+
+

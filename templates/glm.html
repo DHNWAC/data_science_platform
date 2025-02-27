@@ -1,0 +1,1044 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GLM Analysis - Data Science Platform</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mathjs@11.8.0/lib/browser/math.min.js"></script>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand" href="/">Data Science Platform</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/upload">Upload Data</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/eda">EDA</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/auto_visualize">Auto Visualize</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/visualize">Visualize</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/classification">Classification</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/glm">GLM Analysis</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/sales_forecast">Sales Forecast</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/pricing">Pricing</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container-fluid mt-4">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h3 class="card-title mb-0">Generalized Linear Models (GLM) Analysis</h3>
+                    </div>
+                    <div class="card-body">
+                        <ul class="nav nav-tabs" id="glmTabs" role="tablist">
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link active" id="model-tab" data-bs-toggle="tab" data-bs-target="#model" type="button" role="tab">Build Model</button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="predict-tab" data-bs-toggle="tab" data-bs-target="#predict" type="button" role="tab">Make Predictions</button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="diagnostics-tab" data-bs-toggle="tab" data-bs-target="#diagnostics" type="button" role="tab">Model Diagnostics</button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="interpretation-tab" data-bs-toggle="tab" data-bs-target="#interpretation" type="button" role="tab">Interpretation</button>
+                            </li>
+                        </ul>
+                        
+                        <div class="tab-content mt-3" id="glmTabContent">
+                            <!-- Build Model Tab -->
+                            <div class="tab-pane fade show active" id="model" role="tabpanel">
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <div class="card bg-light">
+                                            <div class="card-body">
+                                                <h5 class="card-title">Model Configuration</h5>
+                                                <form id="buildGLMForm">
+                                                    <div class="mb-3">
+                                                        <label for="targetColumn" class="form-label">Target Column</label>
+                                                        <select class="form-select" id="targetColumn" required>
+                                                            <option value="" selected disabled>Select target column</option>
+                                                            {% for column in columns %}
+                                                            <option value="{{ column }}">{{ column }}</option>
+                                                            {% endfor %}
+                                                        </select>
+                                                        <div class="form-text">Select the column to predict</div>
+                                                    </div>
+                                                    
+                                                    <div class="mb-3">
+                                                        <label class="form-label">Feature Columns</label>
+                                                        <div style="max-height: 200px; overflow-y: auto; border: 1px solid #dee2e6; border-radius: 0.25rem; padding: 0.5rem;">
+                                                            {% for column in columns %}
+                                                            <div class="form-check">
+                                                                <input class="form-check-input feature-column" type="checkbox" value="{{ column }}" id="feature-{{ column }}">
+                                                                <label class="form-check-label" for="feature-{{ column }}">
+                                                                    {{ column }}
+                                                                </label>
+                                                            </div>
+                                                            {% endfor %}
+                                                        </div>
+                                                        <div class="form-text">Select columns to use as predictors</div>
+                                                    </div>
+                                                    
+                                                    <div class="mb-3">
+                                                        <label for="distribution" class="form-label">Distribution Family</label>
+                                                        <select class="form-select" id="distribution">
+                                                            <option value="gaussian" selected>Gaussian (Normal)</option>
+                                                            <option value="poisson">Poisson</option>
+                                                            <option value="gamma">Gamma</option>
+                                                            <option value="binomial">Binomial</option>
+                                                        </select>
+                                                        <div class="form-text">Select the distribution that best matches your target variable</div>
+                                                    </div>
+                                                    
+                                                    <div class="mb-3">
+                                                        <label for="linkFunction" class="form-label">Link Function</label>
+                                                        <select class="form-select" id="linkFunction">
+                                                            <option value="identity" selected>Identity</option>
+                                                            <option value="log">Log</option>
+                                                            <option value="logit">Logit</option>
+                                                            <option value="inverse">Inverse</option>
+                                                        </select>
+                                                        <div class="form-text">Select the link function to use</div>
+                                                    </div>
+
+                                                    <div class="mb-3">
+                                                        <label for="alpha" class="form-label">Regularization Strength (Alpha)</label>
+                                                        <input type="number" class="form-control" id="alpha" value="0.001" min="0" max="1" step="0.001">
+                                                        <div class="form-text">Higher values increase regularization (0 = no regularization)</div>
+                                                    </div>
+                                                    
+                                                    <div class="mb-3">
+                                                        <label for="penalty" class="form-label">Regularization Type</label>
+                                                        <select class="form-select" id="penalty">
+                                                            <option value="none">None</option>
+                                                            <option value="l1">L1 (Lasso)</option>
+                                                            <option value="l2" selected>L2 (Ridge)</option>
+                                                            <option value="elasticnet">ElasticNet</option>
+                                                        </select>
+                                                    </div>
+                                                    
+                                                    <div class="mb-3" id="l1RatioContainer" style="display: none;">
+                                                        <label for="l1Ratio" class="form-label">L1 Ratio (ElasticNet)</label>
+                                                        <input type="number" class="form-control" id="l1Ratio" value="0.5" min="0" max="1" step="0.01">
+                                                        <div class="form-text">Ratio of L1 to L2 penalty (0 = Ridge, 1 = Lasso)</div>
+                                                    </div>
+
+                                                    <div class="form-check mb-3">
+                                                        <input class="form-check-input" type="checkbox" id="includeInteraction">
+                                                        <label class="form-check-label" for="includeInteraction">
+                                                            Include Interaction Terms
+                                                        </label>
+                                                        <div class="form-text">Include pairwise interactions between features</div>
+                                                    </div>
+                                                    
+                                                    <div class="d-grid gap-2">
+                                                        <button type="submit" class="btn btn-primary">Build GLM Model</button>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="col-md-8">
+                                        <div class="card shadow-sm" id="modelResultCard" style="display: none;">
+                                            <div class="card-body">
+                                                <h5 class="card-title">Model Results</h5>
+                                                <div id="modelResult">
+                                                    <!-- Model results will be displayed here -->
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="card shadow-sm" id="coefficientCard" style="display: none; margin-top: 1rem;">
+                                            <div class="card-body">
+                                                <h5 class="card-title">Model Coefficients</h5>
+                                                <div id="coefficientChart" style="height: 400px;">
+                                                    <!-- Coefficient chart will be displayed here -->
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Make Predictions Tab -->
+                            <div class="tab-pane fade" id="predict" role="tabpanel">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="card bg-light">
+                                            <div class="card-body">
+                                                <h5 class="card-title">Prediction Input</h5>
+                                                <div id="predictionInputForm">
+                                                    <div class="alert alert-info">
+                                                        Please build a model first on the Model tab.
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="col-md-6">
+                                        <div class="card shadow-sm">
+                                            <div class="card-body">
+                                                <h5 class="card-title">Prediction Results</h5>
+                                                <div id="predictionResult">
+                                                    <div class="text-center py-5">
+                                                        <p class="text-muted">Build a model and submit prediction inputs to see results</p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Model Diagnostics Tab -->
+                            <div class="tab-pane fade" id="diagnostics" role="tabpanel">
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <div class="card shadow-sm">
+                                            <div class="card-body">
+                                                <h5 class="card-title">GLM Diagnostics</h5>
+                                                <div id="diagnosticsContent">
+                                                    <div class="alert alert-info">
+                                                        Please build a model first on the Model tab.
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="row mt-4">
+                                    <div class="col-md-6">
+                                        <div class="card shadow-sm" id="residualPlotCard" style="display: none;">
+                                            <div class="card-body">
+                                                <h5 class="card-title">Residual Plot</h5>
+                                                <div id="residualPlot" style="height: 400px;"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="col-md-6">
+                                        <div class="card shadow-sm" id="qqPlotCard" style="display: none;">
+                                            <div class="card-body">
+                                                <h5 class="card-title">Q-Q Plot</h5>
+                                                <div id="qqPlot" style="height: 400px;"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Interpretation Tab -->
+                            <div class="tab-pane fade" id="interpretation" role="tabpanel">
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <div class="card shadow-sm">
+                                            <div class="card-body">
+                                                <h5 class="card-title">Model Interpretation</h5>
+                                                <div id="interpretationContent">
+                                                    <div class="alert alert-info">
+                                                        Please build a model first on the Model tab.
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="row mt-4">
+                                    <div class="col-md-6">
+                                        <div class="card shadow-sm" id="effectsPlotCard" style="display: none;">
+                                            <div class="card-body">
+                                                <h5 class="card-title">Marginal Effects</h5>
+                                                <div id="effectsPlot" style="height: 400px;"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="col-md-6">
+                                        <div class="card shadow-sm" id="interactionPlotCard" style="display: none;">
+                                            <div class="card-body">
+                                                <h5 class="card-title">Interaction Effects</h5>
+                                                <div id="interactionPlot" style="height: 400px;"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="mt-5 py-3 bg-light">
+        <div class="container text-center">
+            <p>Data Science Platform MVP &copy; 2023</p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Store model information
+            let glmModel = {
+                trained: false,
+                features: [],
+                target: '',
+                distribution: '',
+                link: '',
+                formula: '',
+                coefficients: {}
+            };
+            
+            // Handle target column selection to disable it in features
+            const targetColumnSelect = document.getElementById('targetColumn');
+            targetColumnSelect.addEventListener('change', function() {
+                const selectedTarget = this.value;
+                document.querySelectorAll('.feature-column').forEach(checkbox => {
+                    if (checkbox.value === selectedTarget) {
+                        checkbox.checked = false;
+                        checkbox.disabled = true;
+                    } else {
+                        checkbox.disabled = false;
+                    }
+                });
+            });
+            
+            // Show/hide L1 ratio based on penalty selection
+            const penaltySelect = document.getElementById('penalty');
+            const l1RatioContainer = document.getElementById('l1RatioContainer');
+            
+            penaltySelect.addEventListener('change', function() {
+                if (this.value === 'elasticnet') {
+                    l1RatioContainer.style.display = 'block';
+                } else {
+                    l1RatioContainer.style.display = 'none';
+                }
+            });
+            
+            // Handle distribution family and update appropriate link functions
+            const distributionSelect = document.getElementById('distribution');
+            const linkFunctionSelect = document.getElementById('linkFunction');
+            
+            distributionSelect.addEventListener('change', function() {
+                // Clear current options
+                linkFunctionSelect.innerHTML = '';
+                
+                // Add appropriate link functions based on distribution
+                if (this.value === 'gaussian') {
+                    addLinkOption('identity', 'Identity', true);
+                    addLinkOption('log', 'Log');
+                    addLinkOption('inverse', 'Inverse');
+                } else if (this.value === 'poisson') {
+                    addLinkOption('log', 'Log', true);
+                    addLinkOption('identity', 'Identity');
+                    addLinkOption('sqrt', 'Square Root');
+                } else if (this.value === 'gamma') {
+                    addLinkOption('inverse', 'Inverse', true);
+                    addLinkOption('log', 'Log');
+                    addLinkOption('identity', 'Identity');
+                } else if (this.value === 'binomial') {
+                    addLinkOption('logit', 'Logit', true);
+                    addLinkOption('probit', 'Probit');
+                    addLinkOption('cloglog', 'Complementary Log-Log');
+                }
+            });
+            
+            function addLinkOption(value, text, selected = false) {
+                const option = document.createElement('option');
+                option.value = value;
+                option.textContent = text;
+                if (selected) option.selected = true;
+                linkFunctionSelect.appendChild(option);
+            }
+            
+            // Handle form submission for building GLM model
+            const buildGLMForm = document.getElementById('buildGLMForm');
+            buildGLMForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                // Get form values
+                const targetColumn = document.getElementById('targetColumn').value;
+                if (!targetColumn) {
+                    alert('Please select a target column');
+                    return;
+                }
+                
+                // Get selected features
+                const featureColumns = [];
+                document.querySelectorAll('.feature-column:checked').forEach(checkbox => {
+                    featureColumns.push(checkbox.value);
+                });
+                
+                if (featureColumns.length === 0) {
+                    alert('Please select at least one feature column');
+                    return;
+                }
+                
+                const distribution = document.getElementById('distribution').value;
+                const linkFunction = document.getElementById('linkFunction').value;
+                const alpha = parseFloat(document.getElementById('alpha').value);
+                const penalty = document.getElementById('penalty').value;
+                const l1Ratio = parseFloat(document.getElementById('l1Ratio').value || 0.5);
+                const includeInteraction = document.getElementById('includeInteraction').checked;
+                
+                // Display loading message
+                document.getElementById('modelResultCard').style.display = 'block';
+                document.getElementById('modelResult').innerHTML = `
+                    <div class="text-center py-4">
+                        <div class="spinner-border text-primary" role="status"></div>
+                        <p class="mt-2">Building GLM model, please wait...</p>
+                    </div>
+                `;
+                
+                // Send request to API
+                fetch('/api/build_glm_model', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        target_column: targetColumn,
+                        feature_columns: featureColumns,
+                        distribution: distribution,
+                        link_function: linkFunction,
+                        alpha: alpha,
+                        penalty: penalty,
+                        l1_ratio: l1Ratio,
+                        include_interaction: includeInteraction
+                    }),
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error) {
+                        document.getElementById('modelResult').innerHTML = `
+                            <div class="alert alert-danger">${data.error}</div>
+                        `;
+                    } else {
+                        // Store model information
+                        glmModel.trained = true;
+                        glmModel.features = featureColumns;
+                        glmModel.target = targetColumn;
+                        glmModel.distribution = distribution;
+                        glmModel.link = linkFunction;
+                        glmModel.formula = data.formula;
+                        glmModel.coefficients = data.coefficients;
+                        
+                        // Display model summary
+                        let modelHTML = `
+                            <div class="alert alert-success">
+                                <i class="bi bi-check-circle-fill"></i> GLM model built successfully!
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <h6>Model Metrics</h6>
+                                    <table class="table table-bordered">
+                                        <thead class="table-primary">
+                                            <tr>
+                                                <th>Metric</th>
+                                                <th>Value</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td>AIC</td>
+                                                <td>${data.metrics.aic.toFixed(2)}</td>
+                                            </tr>
+                                            <tr>
+                                                <td>BIC</td>
+                                                <td>${data.metrics.bic.toFixed(2)}</td>
+                                            </tr>
+                                            <tr>
+                                                <td>Log-likelihood</td>
+                                                <td>${data.metrics.log_likelihood.toFixed(2)}</td>
+                                            </tr>
+                                            <tr>
+                                                <td>Deviance</td>
+                                                <td>${data.metrics.deviance.toFixed(2)}</td>
+                                            </tr>
+                                            <tr>
+                                                <td>R² (Pseudo R²)</td>
+                                                <td>${(data.metrics.r_squared * 100).toFixed(2)}%</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <div class="col-md-6">
+                                    <h6>Model Information</h6>
+                                    <div class="mb-3">
+                                        <p><strong>Distribution:</strong> ${distribution}</p>
+                                        <p><strong>Link Function:</strong> ${linkFunction}</p>
+                                        <p><strong>Regularization:</strong> ${penalty} (Alpha: ${alpha})</p>
+                                        <p><strong>Features:</strong> ${featureColumns.length}</p>
+                                        ${includeInteraction ? '<p><strong>Interactions:</strong> Included</p>' : ''}
+                                    </div>
+                                    <div class="mb-3">
+                                        <p><strong>Model Formula:</strong></p>
+                                        <div class="bg-light p-2 rounded">
+                                            <code>${data.formula}</code>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                        
+                        document.getElementById('modelResult').innerHTML = modelHTML;
+                        
+                        // Show coefficient chart
+                        document.getElementById('coefficientCard').style.display = 'block';
+                        createCoefficientChart(data.coefficients);
+                        
+                        // Update other tabs
+                        createPredictionForm(featureColumns);
+                        updateDiagnosticsTab(data.diagnostics);
+                        updateInterpretationTab(data);
+                    }
+                })
+                .catch(error => {
+                    document.getElementById('modelResult').innerHTML = `
+                        <div class="alert alert-danger">Error building model: ${error.message}</div>
+                    `;
+                });
+            });
+            
+            // Function to create coefficient chart
+            function createCoefficientChart(coefficients) {
+                const terms = Object.keys(coefficients);
+                const values = terms.map(term => coefficients[term].value);
+                const errors = terms.map(term => coefficients[term].std_err || 0);
+                const pValues = terms.map(term => coefficients[term].p_value || 0);
+                
+                // Create significance markers
+                const significanceColors = pValues.map(p => {
+                    if (p < 0.001) return 'rgba(55, 128, 191, 0.9)'; // Highly significant
+                    if (p < 0.05) return 'rgba(55, 128, 191, 0.7)';  // Significant
+                    return 'rgba(55, 128, 191, 0.4)';               // Not significant
+                });
+                
+                // Sort by absolute value of coefficient
+                const indices = Array.from(Array(terms.length).keys())
+                    .sort((a, b) => Math.abs(values[b]) - Math.abs(values[a]));
+                
+                const sortedTerms = indices.map(i => terms[i]);
+                const sortedValues = indices.map(i => values[i]);
+                const sortedErrors = indices.map(i => errors[i]);
+                const sortedColors = indices.map(i => significanceColors[i]);
+                
+                // Create error bars
+                const error_y = {
+                    type: 'data',
+                    array: sortedErrors,
+                    visible: true
+                };
+                
+                // Create the chart
+                const chartData = [{
+                    type: 'bar',
+                    x: sortedValues,
+                    y: sortedTerms,
+                    orientation: 'h',
+                    error_x: error_y,
+                    marker: {
+                        color: sortedColors
+                    }
+                }];
+                
+                const layout = {
+                    title: 'Model Coefficients and Standard Errors',
+                    xaxis: {
+                        title: 'Coefficient Value',
+                        automargin: true
+                    },
+                    yaxis: {
+                        title: 'Term',
+                        automargin: true
+                    },
+                    margin: {
+                        l: 150
+                    }
+                };
+                
+                Plotly.newPlot('coefficientChart', chartData, layout);
+            }
+            
+            // Function to create prediction form
+            function createPredictionForm(features) {
+                if (!features || features.length === 0) return;
+                
+                let formHTML = `
+                    <form id="makePredictionForm">
+                        <div class="mb-3">
+                            <p class="text-success"><i class="bi bi-check-circle-fill"></i> Model is ready for predictions</p>
+                        </div>
+                `;
+                
+                // Create input fields for each feature
+                features.forEach(feature => {
+                    formHTML += `
+                        <div class="mb-3">
+                            <label for="pred-${feature}" class="form-label">${feature}</label>
+                            <input type="text" class="form-control" id="pred-${feature}" name="${feature}" required>
+                        </div>
+                    `;
+                });
+                
+                formHTML += `
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary">Make Prediction</button>
+                        </div>
+                    </form>
+                `;
+                
+                document.getElementById('predictionInputForm').innerHTML = formHTML;
+                
+                // Add event listener to the form
+                document.getElementById('makePredictionForm').addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    
+                    // Collect input values
+                    const inputData = {};
+                    features.forEach(feature => {
+                        const input = document.getElementById(`pred-${feature}`);
+                        // Try to convert to number if possible
+                        const value = isNaN(input.value) ? input.value : Number(input.value);
+                        inputData[feature] = value;
+                    });
+                    
+                    // Display loading
+                    document.getElementById('predictionResult').innerHTML = `
+                        <div class="text-center py-4">
+                            <div class="spinner-border text-primary" role="status"></div>
+                            <p class="mt-2">Making prediction, please wait...</p>
+                        </div>
+                    `;
+                    
+                    // Send request to API
+                    fetch('/api/predict_glm', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            data: inputData
+                        }),
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.error) {
+                            document.getElementById('predictionResult').innerHTML = `
+                                <div class="alert alert-danger">${data.error}</div>
+                            `;
+                        } else {
+                            // Display prediction
+                            const prediction = data.prediction.value;
+                            const lowerBound = data.prediction.lower_bound;
+                            const upperBound = data.prediction.upper_bound;
+                            
+                            let resultHTML = `
+                                <div class="text-center">
+                                    <div class="display-6 mb-3">${prediction.toFixed(2)}</div>
+                                    <p>95% Confidence Interval: [${lowerBound.toFixed(2)}, ${upperBound.toFixed(2)}]</p>
+                                </div>
+                                
+                                <div id="predictionGauge" style="height: 300px;"></div>
+                            `;
+                            
+                            document.getElementById('predictionResult').innerHTML = resultHTML;
+                            
+                            // Create gauge chart for prediction
+                            const minValue = Math.min(lowerBound, 0);
+                            const maxValue = Math.max(upperBound, prediction * 1.5);
+                            
+                            const gaugeData = [
+                                {
+                                    type: "indicator",
+                                    mode: "gauge+number",
+                                    value: prediction,
+                                    gauge: {
+                                        axis: { range: [minValue, maxValue] },
+                                        bar: { color: "darkblue" },
+                                        bgcolor: "white",
+                                        borderwidth: 2,
+                                        bordercolor: "gray",
+                                        steps: [
+                                            { range: [lowerBound, upperBound], color: "rgba(55, 128, 191, 0.3)" }
+                                        ],
+                                        threshold: {
+                                            line: { color: "red", width: 2 },
+                                            thickness: 0.75,
+                                            value: prediction
+                                        }
+                                    },
+                                    number: {
+                                        valueformat: ".2f"
+                                    }
+                                }
+                            ];
+                            
+                            const layout = {
+                                title: `Predicted ${glmModel.target}`,
+                                margin: { t: 40, b: 0, l: 0, r: 0 }
+                            };
+                            
+                            Plotly.newPlot('predictionGauge', gaugeData, layout);
+                        }
+                    })
+                    .catch(error => {
+                        document.getElementById('predictionResult').innerHTML = `
+                            <div class="alert alert-danger">Error making prediction: ${error.message}</div>
+                        `;
+                    });
+                });
+            }
+            
+            // Function to update diagnostics tab
+            function updateDiagnosticsTab(diagnostics) {
+                if (!diagnostics) return;
+                
+                const diagnosticsHTML = `
+                    <div class="row">
+                        <div class="col-md-12">
+                            <h6>Model Fit Diagnostics</h6>
+                            <table class="table table-bordered">
+                                <thead class="table-primary">
+                                    <tr>
+                                        <th>Diagnostic</th>
+                                        <th>Value</th>
+                                        <th>Interpretation</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>Null Deviance</td>
+                                        <td>${diagnostics.null_deviance.toFixed(2)}</td>
+                                        <td>Deviance of model with only intercept</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Residual Deviance</td>
+                                        <td>${diagnostics.residual_deviance.toFixed(2)}</td>
+                                        <td>Deviance of fitted model</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Degrees of Freedom</td>
+                                        <td>${diagnostics.degrees_of_freedom}</td>
+                                        <td>Number of observations minus parameters</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Dispersion Parameter</td>
+                                        <td>${diagnostics.dispersion.toFixed(4)}</td>
+                                        <td>${diagnostics.dispersion > 1.5 ? 'Overdispersion present' : 
+                                            diagnostics.dispersion < 0.5 ? 'Underdispersion present' : 
+                                            'Dispersion is acceptable'}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                `;
+                
+                document.getElementById('diagnosticsContent').innerHTML = diagnosticsHTML;
+                
+                // Show diagnostic plots
+                document.getElementById('residualPlotCard').style.display = 'block';
+                document.getElementById('qqPlotCard').style.display = 'block';
+                
+                // Create residual plot
+                if (diagnostics.residuals && diagnostics.fitted) {
+                    const residualData = [{
+                        x: diagnostics.fitted,
+                        y: diagnostics.residuals,
+                        mode: 'markers',
+                        type: 'scatter',
+                        marker: {
+                            color: 'rgba(55, 128, 191, 0.7)'
+                        }
+                    }];
+                    
+                    const residualLayout = {
+                        title: 'Residuals vs Fitted Values',
+                        xaxis: {
+                            title: 'Fitted Values'
+                        },
+                        yaxis: {
+                            title: 'Residuals'
+                        },
+                        shapes: [
+                            {
+                                type: 'line',
+                                x0: Math.min(...diagnostics.fitted),
+                                y0: 0,
+                                x1: Math.max(...diagnostics.fitted),
+                                y1: 0,
+                                line: {
+                                    color: 'red',
+                                    width: 2,
+                                    dash: 'dash'
+                                }
+                            }
+                        ]
+                    };
+                    
+                    Plotly.newPlot('residualPlot', residualData, residualLayout);
+                }
+                
+                // Create Q-Q plot
+                if (diagnostics.qq_x && diagnostics.qq_y) {
+                    const qqData = [{
+                        x: diagnostics.qq_x,
+                        y: diagnostics.qq_y,
+                        mode: 'markers',
+                        type: 'scatter',
+                        marker: {
+                            color: 'rgba(55, 128, 191, 0.7)'
+                        }
+                    }];
+                    
+                    // Create reference line
+                    const minX = Math.min(...diagnostics.qq_x);
+                    const maxX = Math.max(...diagnostics.qq_x);
+                    
+                    const refData = [{
+                        x: [minX, maxX],
+                        y: [minX, maxX],
+                        mode: 'lines',
+                        type: 'scatter',
+                        line: {
+                            color: 'red',
+                            width: 2,
+                            dash: 'dash'
+                        }
+                    }];
+                    
+                    const qqLayout = {
+                        title: 'Normal Q-Q Plot',
+                        xaxis: {
+                            title: 'Theoretical Quantiles'
+                        },
+                        yaxis: {
+                            title: 'Sample Quantiles'
+                        }
+                    };
+                    
+                    Plotly.newPlot('qqPlot', [...qqData, ...refData], qqLayout);
+                }
+            }
+            
+            // Function to update interpretation tab
+            function updateInterpretationTab(data) {
+                if (!data || !data.coefficients) return;
+                
+                // Get coefficients
+                const coefficients = data.coefficients;
+                
+                // Prepare interpretation text
+                const intercept = coefficients['(Intercept)']?.value || 0;
+                const targetColumn = document.getElementById('targetColumn').value;
+                const distribution = document.getElementById('distribution').value;
+                const linkFunction = document.getElementById('linkFunction').value;
+                
+                let interpretationHTML = `
+                    <div class="row">
+                        <div class="col-md-12">
+                            <h6>Key Model Findings</h6>
+                            <p>
+                                This GLM model uses a ${distribution} distribution with a ${linkFunction} link function
+                                to predict ${targetColumn}. The model has an R² of ${(data.metrics.r_squared * 100).toFixed(2)}%,
+                                indicating that it explains ${(data.metrics.r_squared * 100).toFixed(2)}% of the variation in ${targetColumn}.
+                            </p>
+                `;
+                
+                // List most significant predictors
+                interpretationHTML += `<h6 class="mt-3">Most Significant Predictors</h6><ul>`;
+                
+                // Filter out intercept and sort by p-value
+                const predictors = Object.entries(coefficients)
+                    .filter(([term, _]) => term !== '(Intercept)')
+                    .sort((a, b) => a[1].p_value - b[1].p_value);
+                
+                // List top 5 or fewer significant predictors
+                const significantPredictors = predictors
+                    .filter(([_, coef]) => coef.p_value < 0.05)
+                    .slice(0, 5);
+                
+                if (significantPredictors.length > 0) {
+                    for (const [term, coef] of significantPredictors) {
+                        const effect = coef.value > 0 ? 'positive' : 'negative';
+                        const significance = coef.p_value < 0.001 ? 'highly significant' : 
+                                            coef.p_value < 0.01 ? 'very significant' : 'significant';
+                        
+                        interpretationHTML += `
+                            <li>
+                                <strong>${term}</strong>: Has a ${effect} effect (coefficient = ${coef.value.toFixed(4)})
+                                and is ${significance} (p-value = ${coef.p_value.toFixed(4)}).
+                            </li>
+                        `;
+                    }
+                } else {
+                    interpretationHTML += `<li>No significant predictors found at the 0.05 level.</li>`;
+                }
+                
+                interpretationHTML += `</ul>`;
+                
+                // Link function interpretation
+                interpretationHTML += `<h6 class="mt-3">Interpreting Coefficients</h6>`;
+                
+                if (linkFunction === 'identity') {
+                    interpretationHTML += `
+                        <p>
+                            With an identity link, coefficients can be directly interpreted: a one-unit change in the 
+                            predictor results in a change of the coefficient value in the response variable.
+                        </p>
+                    `;
+                } else if (linkFunction === 'log') {
+                    interpretationHTML += `
+                        <p>
+                            With a log link, coefficients represent changes in the log of the response. A coefficient of 0.1 
+                            means a one-unit change in the predictor results in approximately a 10.5% increase in the response 
+                            (e^0.1 = 1.105).
+                        </p>
+                    `;
+                } else if (linkFunction === 'logit') {
+                    interpretationHTML += `
+                        <p>
+                            With a logit link, coefficients represent changes in the log-odds. A coefficient of 0.5 means 
+                            a one-unit change in the predictor multiplies the odds by e^0.5 = 1.65 (a 65% increase in odds).
+                        </p>
+                    `;
+                } else {
+                    interpretationHTML += `
+                        <p>
+                            With this link function, coefficients need to be transformed to interpret their effect on the 
+                            response variable.
+                        </p>
+                    `;
+                }
+                
+                interpretationHTML += `
+                        </div>
+                    </div>
+                `;
+                
+                document.getElementById('interpretationContent').innerHTML = interpretationHTML;
+                
+                // Show effects plots
+                document.getElementById('effectsPlotCard').style.display = 'block';
+                
+                // Create marginal effects plot if there are marginal effects in the data
+                if (data.marginal_effects) {
+                    const features = Object.keys(data.marginal_effects);
+                    const effects = features.map(f => data.marginal_effects[f].effect);
+                    const errors = features.map(f => data.marginal_effects[f].std_err || 0);
+                    
+                    // Sort by absolute effect size
+                    const indices = Array.from(Array(features.length).keys())
+                        .sort((a, b) => Math.abs(effects[b]) - Math.abs(effects[a]));
+                    
+                    const sortedFeatures = indices.map(i => features[i]);
+                    const sortedEffects = indices.map(i => effects[i]);
+                    const sortedErrors = indices.map(i => errors[i]);
+                    
+                    // Create error bars
+                    const error_x = {
+                        type: 'data',
+                        array: sortedErrors,
+                        visible: true
+                    };
+                    
+                    // Create the chart
+                    const effectsData = [{
+                        type: 'bar',
+                        x: sortedEffects,
+                        y: sortedFeatures,
+                        orientation: 'h',
+                        error_x: error_x,
+                        marker: {
+                            color: 'rgba(55, 128, 191, 0.7)'
+                        }
+                    }];
+                    
+                    const effectsLayout = {
+                        title: 'Marginal Effects',
+                        xaxis: {
+                            title: 'Effect on Response',
+                            automargin: true
+                        },
+                        yaxis: {
+                            title: 'Feature',
+                            automargin: true
+                        },
+                        margin: {
+                            l: 150
+                        }
+                    };
+                    
+                    Plotly.newPlot('effectsPlot', effectsData, effectsLayout);
+                }
+                
+                // Show interaction plot if there are interactions
+                if (data.interactions && Object.keys(data.interactions).length > 0) {
+                    document.getElementById('interactionPlotCard').style.display = 'block';
+                    
+                    // Get first interaction as an example
+                    const interactionKey = Object.keys(data.interactions)[0];
+                    const interaction = data.interactions[interactionKey];
+                    
+                    // Create interaction heatmap
+                    const interactionData = [{
+                        z: interaction.values,
+                        x: interaction.x_values,
+                        y: interaction.y_values,
+                        type: 'heatmap',
+                        colorscale: 'Viridis'
+                    }];
+                    
+                    const interactionLayout = {
+                        title: `Interaction: ${interactionKey}`,
+                        xaxis: {
+                            title: interaction.x_name
+                        },
+                        yaxis: {
+                            title: interaction.y_name
+                        }
+                    };
+                    
+                    Plotly.newPlot('interactionPlot', interactionData, interactionLayout);
+                }
+            }
+        });
+    </script>
+</body>
+</html>
