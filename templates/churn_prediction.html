@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Classification Model - Data Science Platform</title>
+    <title>Churn Prediction - Data Science Platform</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
@@ -31,10 +31,7 @@
                         <a class="nav-link" href="/visualize">Visualize</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link active" href="/churn_prediction">Classification</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/sales_forecast">Sales Forecast</a>
+                        <a class="nav-link active" href="/churn_prediction">Churn Prediction</a>
                     </li>
                 </ul>
             </div>
@@ -46,7 +43,7 @@
             <div class="col-md-12">
                 <div class="card shadow-sm mb-4">
                     <div class="card-header bg-primary text-white">
-                        <h3 class="card-title mb-0">Classification Model</h3>
+                        <h3 class="card-title mb-0">Churn Prediction Model</h3>
                     </div>
                     <div class="card-body">
                         <ul class="nav nav-tabs" id="churnTabs" role="tablist">
@@ -78,11 +75,15 @@
                                                             <option value="{{ column }}">{{ column }}</option>
                                                             {% endfor %}
                                                         </select>
-                                                        <div class="form-text">Select the column you want to predict</div>
+                                                        <div class="form-text">Select the column you want to predict (usually 'Churn')</div>
                                                     </div>
                                                     
                                                     <div class="mb-3">
                                                         <label class="form-label">Feature Columns</label>
+                                                        <div class="mb-2">
+                                                            <button type="button" id="selectAllFeatures" class="btn btn-sm btn-outline-primary me-2">Select All</button>
+                                                            <button type="button" id="deselectAllFeatures" class="btn btn-sm btn-outline-secondary">Deselect All</button>
+                                                        </div>
                                                         <div style="max-height: 200px; overflow-y: auto; border: 1px solid #dee2e6; border-radius: 0.25rem; padding: 0.5rem;">
                                                             {% for column in columns %}
                                                             <div class="form-check">
@@ -94,14 +95,6 @@
                                                             {% endfor %}
                                                         </div>
                                                         <div class="form-text">Select columns to use as features for prediction</div>
-                                                    </div>
-                                                    
-                                                    <div class="mb-3">
-                                                        <label for="modelType" class="form-label">Model Type</label>
-                                                        <select class="form-select" id="modelType">
-                                                            <option value="random_forest" selected>Random Forest</option>
-                                                            <option value="xgboost">XGBoost</option>
-                                                        </select>
                                                     </div>
                                                     
                                                     <div class="d-grid gap-2">
@@ -221,6 +214,22 @@
                 });
             });
             
+            // Select All / Deselect All Features
+            document.getElementById('selectAllFeatures').addEventListener('click', function() {
+                const selectedTarget = targetColumnSelect.value;
+                document.querySelectorAll('.feature-column').forEach(checkbox => {
+                    if (checkbox.value !== selectedTarget) {
+                        checkbox.checked = true;
+                    }
+                });
+            });
+            
+            document.getElementById('deselectAllFeatures').addEventListener('click', function() {
+                document.querySelectorAll('.feature-column').forEach(checkbox => {
+                    checkbox.checked = false;
+                });
+            });
+            
             // Handle form submission for training
             const trainModelForm = document.getElementById('trainModelForm');
             trainModelForm.addEventListener('submit', function(e) {
@@ -244,8 +253,8 @@
                     return;
                 }
                 
-                // Get model type
-                const modelType = document.getElementById('modelType').value;
+                // Always use XGBoost
+                const modelType = 'xgboost';
                 
                 // Display loading message
                 document.getElementById('trainingResultCard').style.display = 'block';
@@ -329,7 +338,7 @@
                                     </table>
                                 </div>
                                 <div class="col-md-6">
-                                    <p><strong>Model Type:</strong> ${modelType === 'random_forest' ? 'Random Forest' : 'XGBoost'}</p>
+                                    <p><strong>Model Type:</strong> XGBoost</p>
                                     <p><strong>Target Column:</strong> ${targetColumn}</p>
                                     <p><strong>Features Used:</strong> ${featureColumns.length}</p>
                                     <p><strong>Classification Type:</strong> ${data.metrics.num_classes > 2 ? 'Multi-class' : 'Binary'}</p>
@@ -374,6 +383,10 @@
                                 },
                                 margin: {
                                     l: 150
+                                },
+                                plot_bgcolor: 'white',
+                                font: {
+                                    size: 12
                                 }
                             };
                             
@@ -475,7 +488,7 @@
                                         type: "indicator",
                                         mode: "gauge+number",
                                         value: churnProb,
-                                        title: { text: "Probability", font: { size: 16 } },
+                                        title: { text: "Churn Probability", font: { size: 16 } },
                                         gauge: {
                                             axis: { range: [null, 100] },
                                             bar: { color: "darkblue" },
@@ -497,7 +510,11 @@
                                     }
                                 ];
                                 
-                                const layout = { margin: { t: 25, b: 25, l: 25, r: 25 } };
+                                const layout = {
+                                    margin: { t: 25, b: 25, l: 25, r: 25 },
+                                    paper_bgcolor: "white",
+                                    font: { size: 12 }
+                                };
                                 
                                 Plotly.newPlot('probabilityGauge', gaugeData, layout);
                             }
@@ -577,9 +594,37 @@
                         predictionText = `Predicted Class: ${prediction}`;
                     }
                     
+                    // Create a nicer result card with churn/not churn
+                    let churnCard;
+                    
+                    if (prediction == true || prediction == 1 || 
+                        prediction == 'true' || prediction == 'True') {
+                        // Will churn - red card
+                        churnCard = `
+                            <div class="card bg-danger text-white mb-3">
+                                <div class="card-body text-center">
+                                    <h5 class="card-title">Churn Risk</h5>
+                                    <p class="display-4"><i class="bi bi-exclamation-triangle-fill"></i></p>
+                                    <p class="card-text">This customer is likely to churn</p>
+                                </div>
+                            </div>
+                        `;
+                    } else {
+                        // Will not churn - green card
+                        churnCard = `
+                            <div class="card bg-success text-white mb-3">
+                                <div class="card-body text-center">
+                                    <h5 class="card-title">Retention</h5>
+                                    <p class="display-4"><i class="bi bi-check-circle-fill"></i></p>
+                                    <p class="card-text">This customer is likely to stay</p>
+                                </div>
+                            </div>
+                        `;
+                    }
+                    
                     resultHTML = `
                         <div class="text-center">
-                            <div class="display-6 mb-3">${predictionText}</div>
+                            ${churnCard}
                     `;
                     
                     // Display probability if available
@@ -593,7 +638,7 @@
                         const probability = predictionData.probabilities[0][probIndex] * 100;
                         resultHTML += `
                             <div class="h4 text-${probability > 50 ? 'danger' : 'success'}">
-                                Probability: ${probability.toFixed(2)}%
+                                Churn Probability: ${probability.toFixed(2)}%
                             </div>
                         `;
                         
@@ -655,23 +700,23 @@
                             </table>
                         </div>
                         <div class="col-md-6">
-                            <h5>What These Metrics Mean</h5>
+                            <h5>What These Metrics Mean for Churn Prediction</h5>
                             <ul class="list-group">
                                 <li class="list-group-item">
-                                    <strong>Accuracy:</strong> Overall correctness of predictions
+                                    <strong>Accuracy:</strong> Overall correctness of predictions (${(metrics.accuracy * 100).toFixed(2)}% of predictions are correct)
                                 </li>
                                 <li class="list-group-item">
-                                    <strong>Precision:</strong> Accuracy of positive predictions (low false positives)
+                                    <strong>Precision:</strong> When the model predicts a customer will churn, it's right ${(metrics.precision * 100).toFixed(2)}% of the time
                                 </li>
                                 <li class="list-group-item">
-                                    <strong>Recall:</strong> Ability to find all positive samples (low false negatives)
+                                    <strong>Recall:</strong> The model correctly identifies ${(metrics.recall * 100).toFixed(2)}% of all customers who actually churn
                                 </li>
                                 <li class="list-group-item">
-                                    <strong>F1 Score:</strong> Balance between precision and recall
+                                    <strong>F1 Score:</strong> Balance between precision and recall (${(metrics.f1 * 100).toFixed(2)}%)
                                 </li>
                                 ${metrics.roc_auc ? `
                                 <li class="list-group-item">
-                                    <strong>ROC AUC:</strong> Ability to distinguish between classes
+                                    <strong>ROC AUC:</strong> Model's ability to distinguish between customers who will churn and those who won't (${(metrics.roc_auc * 100).toFixed(2)}%)
                                 </li>
                                 ` : ''}
                             </ul>
@@ -679,15 +724,35 @@
                     </div>
                     
                     <div class="mt-4">
-                        <h5>Model Interpretation</h5>
+                        <h5>Model Interpretation for Churn Prediction</h5>
                         <div class="card">
                             <div class="card-body">
-                                <p>Based on the metrics above, this model ${metrics.accuracy > 0.8 ? 'performs well' : 'may need improvement'} for classification.</p>
-                                <p>Businesses should focus on the following when using this model:</p>
+                                <p>Based on the metrics above, this model ${metrics.accuracy > 0.8 ? 'performs well' : 'may need improvement'} for predicting customer churn.</p>
+                                
+                                <h6>Business Insights:</h6>
                                 <ul>
-                                    <li>High precision means fewer false alarms when identifying classes</li>
-                                    <li>High recall means the model can catch most instances of each class</li>
-                                    <li>The most important features for prediction are shown in the Feature Importance chart on the Train Model tab</li>
+                                    <li><strong>Accuracy ${(metrics.accuracy * 100).toFixed(2)}%:</strong> ${
+                                        metrics.accuracy > 0.9 ? 'Excellent overall performance' : 
+                                        metrics.accuracy > 0.8 ? 'Good overall performance' : 
+                                        metrics.accuracy > 0.7 ? 'Moderate performance' : 'Needs improvement'
+                                    }</li>
+                                    <li><strong>Precision ${(metrics.precision * 100).toFixed(2)}%:</strong> ${
+                                        metrics.precision > 0.9 ? 'Very few false alarms when predicting churn' : 
+                                        metrics.precision > 0.8 ? 'Good precision with few false alarms' : 
+                                        metrics.precision > 0.7 ? 'Moderate precision' : 'May have too many false alarms'
+                                    }</li>
+                                    <li><strong>Recall ${(metrics.recall * 100).toFixed(2)}%:</strong> ${
+                                        metrics.recall > 0.9 ? 'Catches almost all customers who will churn' : 
+                                        metrics.recall > 0.8 ? 'Catches most customers who will churn' : 
+                                        metrics.recall > 0.7 ? 'Misses some customers who will churn' : 'Misses many customers who will churn'
+                                    }</li>
+                                </ul>
+                                
+                                <h6>Recommendations:</h6>
+                                <ul>
+                                    <li>Focus retention efforts on customers the model predicts will churn</li>
+                                    <li>Review the Feature Importance chart to understand key churn drivers</li>
+                                    <li>Consider ${metrics.recall < 0.8 ? 'improving the model\'s ability to catch all churning customers' : 'the balance between precision and recall based on business costs'}</li>
                                 </ul>
                             </div>
                         </div>

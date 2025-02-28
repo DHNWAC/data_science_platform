@@ -16,90 +16,49 @@ document.addEventListener('DOMContentLoaded', function() {
         return new bootstrap.Popover(popoverTriggerEl);
     });
     
-    // Sample data functionality
-    const sampleDataLink = document.querySelector('.sample-data-link');
-    if (sampleDataLink) {
-        sampleDataLink.addEventListener('click', function(e) {
-            e.preventDefault();
-            
-            // Show modal for sample data selection
-            const modal = new bootstrap.Modal(document.getElementById('sampleDataModal'));
-            if (modal) {
-                modal.show();
-            } else {
-                // Create a modal dynamically if it doesn't exist
-                createSampleDataModal();
-            }
-        });
-    }
-    
-    // Function to create sample data modal dynamically
-    function createSampleDataModal() {
-        const modalHTML = `
-            <div class="modal fade" id="sampleDataModal" tabindex="-1" aria-labelledby="sampleDataModalLabel" aria-hidden="true">
-                <div class="modal-dialog">
-                    <div class="modal-content">
-                        <div class="modal-header bg-primary text-white">
-                            <h5 class="modal-title" id="sampleDataModalLabel">Choose Sample Dataset</h5>
-                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-                        </div>
-                        <div class="modal-body">
-                            <div class="list-group">
-                                <button type="button" class="list-group-item list-group-item-action" data-dataset="customer_churn">
-                                    <strong>Customer Churn Dataset</strong>
-                                    <p class="mb-0 text-muted">Sample dataset for Classification prediction with customer demographics and usage metrics.</p>
-                                </button>
-                                <button type="button" class="list-group-item list-group-item-action" data-dataset="sales_forecasting">
-                                    <strong>Retail Sales Dataset</strong>
-                                    <p class="mb-0 text-muted">Time series data for sales forecasting with monthly sales figures.</p>
-                                </button>
-                                <button type="button" class="list-group-item list-group-item-action" data-dataset="marketing_campaign">
-                                    <strong>Marketing Campaign Dataset</strong>
-                                    <p class="mb-0 text-muted">Data for marketing campaign analysis with customer responses.</p>
-                                </button>
-                            </div>
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        `;
-        
-        // Append the modal to the body
-        document.body.insertAdjacentHTML('beforeend', modalHTML);
-        
-        // Initialize the modal
-        const modal = new bootstrap.Modal(document.getElementById('sampleDataModal'));
-        modal.show();
-        
-        // Add event listeners to the dataset buttons
-        document.querySelectorAll('[data-dataset]').forEach(button => {
-            button.addEventListener('click', function() {
-                const dataset = this.getAttribute('data-dataset');
-                // Load the selected sample dataset
-                loadSampleDataset(dataset);
-                // Hide the modal
-                modal.hide();
+    // Sample data functionality - using the API route
+    const loadSampleDataButtons = document.querySelectorAll('#loadSampleData');
+    if (loadSampleDataButtons.length > 0) {
+        loadSampleDataButtons.forEach(button => {
+            button.addEventListener('click', function(e) {
+                e.preventDefault();
+                
+                // Show loading status
+                const originalText = this.innerHTML;
+                this.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Loading...';
+                this.disabled = true;
+                
+                // Call API to load sample data
+                fetch('/api/load_sample_data', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({})
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error) {
+                        createToast('Error: ' + data.error, 'danger');
+                        this.innerHTML = originalText;
+                        this.disabled = false;
+                    } else {
+                        createToast('Sample data loaded successfully!', 'success');
+                        // Redirect to EDA page
+                        window.location.href = '/eda';
+                    }
+                })
+                .catch(error => {
+                    createToast('Error: ' + error.message, 'danger');
+                    this.innerHTML = originalText;
+                    this.disabled = false;
+                });
             });
         });
     }
     
-    // Function to load a sample dataset
-    function loadSampleDataset(dataset) {
-        // Show loading indicator
-        const loadingToast = createToast('Loading sample dataset...', 'info');
-        
-        // Simulated API request to load the sample dataset
-        setTimeout(() => {
-            // Redirect to the EDA page (in a real app, this would happen after actual data loading)
-            window.location.href = '/eda';
-        }, 1500);
-    }
-    
     // Function to create a toast notification
-    function createToast(message, type = 'info') {
+    window.createToast = function(message, type = 'info') {
         // Check if toast container exists, create if not
         let toastContainer = document.querySelector('.toast-container');
         if (!toastContainer) {
@@ -134,7 +93,7 @@ document.addEventListener('DOMContentLoaded', function() {
         toast.show();
         
         return toast;
-    }
+    };
     
     // Global error handler for fetch requests
     window.handleFetchError = function(error, elementId) {

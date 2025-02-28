@@ -8,6 +8,18 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <style>
+        /* Additional styles for correlation matrix */
+        .correlation-matrix-container {
+            overflow-x: auto;
+            overflow-y: auto;
+        }
+        
+        #chartContainer {
+            width: 100%;
+            transition: height 0.3s ease;
+        }
+    </style>
 </head>
 <body>
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
@@ -31,10 +43,7 @@
                         <a class="nav-link active" href="/visualize">Visualize</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="/churn_prediction">Classification</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/sales_forecast">Sales Forecast</a>
+                        <a class="nav-link" href="/churn_prediction">Churn Prediction</a>
                     </li>
                 </ul>
             </div>
@@ -65,7 +74,6 @@
                                                     <option value="histogram">Histogram</option>
                                                     <option value="box">Box Plot</option>
                                                     <option value="pie">Pie Chart</option>
-                                                    <option value="heatmap">Heatmap</option>
                                                     <option value="correlation">Correlation Matrix</option>
                                                 </select>
                                             </div>
@@ -102,8 +110,18 @@
                                             
                                             <div class="d-grid gap-2">
                                                 <button type="submit" class="btn btn-primary">Generate Visualization</button>
+                                                <button type="button" id="resetForm" class="btn btn-secondary">Reset</button>
                                             </div>
                                         </form>
+                                    </div>
+                                </div>
+                                
+                                <div class="card bg-light mt-3">
+                                    <div class="card-body">
+                                        <h5 class="card-title">Chart Description</h5>
+                                        <div id="chartDescription" class="chart-description p-2">
+                                            <p class="text-muted">Select a chart type to see description</p>
+                                        </div>
                                     </div>
                                 </div>
                                 
@@ -126,7 +144,7 @@
                                 <div class="card shadow-sm" style="min-height: 600px;">
                                     <div class="card-body">
                                         <h5 class="card-title" id="chartTitle">Your Visualization</h5>
-                                        <div id="chartContainer" style="height: 550px;">
+                                        <div id="chartContainer" class="correlation-matrix-container" style="width: 100%; height: 550px;">
                                             <div class="text-center" style="padding-top: 200px;">
                                                 <p class="text-muted">Select chart type and columns to generate visualization</p>
                                             </div>
@@ -157,6 +175,67 @@
             const visualizationForm = document.getElementById('visualizationForm');
             const chartContainer = document.getElementById('chartContainer');
             const chartTitle = document.getElementById('chartTitle');
+            const chartDescription = document.getElementById('chartDescription');
+            const resetFormButton = document.getElementById('resetForm');
+            
+            // Chart descriptions
+            const chartDescriptions = {
+                'bar': `<strong>Bar Chart</strong><br>
+                        Best used for comparing categorical data or showing the distribution of categorical variables.<br><br>
+                        <strong>When to use:</strong><br>
+                        • Comparing values across categories<br>
+                        • Showing the frequency of categories<br>
+                        • Comparing parts to the whole<br><br>
+                        <strong>Example use case:</strong> Comparing churn rates across different subscription types`,
+                        
+                'line': `<strong>Line Chart</strong><br>
+                         Best used for showing trends over time or continuous data.<br><br>
+                         <strong>When to use:</strong><br>
+                         • Visualizing trends over time<br>
+                         • Showing continuous data changes<br>
+                         • Comparing multiple trends<br><br>
+                         <strong>Example use case:</strong> Showing how customer support calls have changed over time`,
+                         
+                'scatter': `<strong>Scatter Plot</strong><br>
+                            Best used for showing relationships between two numerical variables.<br><br>
+                            <strong>When to use:</strong><br>
+                            • Finding correlations between variables<br>
+                            • Identifying clusters or outliers<br>
+                            • Visualizing distribution across two dimensions<br><br>
+                            <strong>Example use case:</strong> Exploring relationship between customer age and total spend`,
+                            
+                'histogram': `<strong>Histogram</strong><br>
+                              Best used for showing the distribution of a numerical variable.<br><br>
+                              <strong>When to use:</strong><br>
+                              • Understanding data distribution<br>
+                              • Identifying outliers<br>
+                              • Checking for normal distribution<br><br>
+                              <strong>Example use case:</strong> Visualizing the distribution of customer ages or usage frequency`,
+                              
+                'box': `<strong>Box Plot</strong><br>
+                        Best used for showing data distribution and identifying outliers.<br><br>
+                        <strong>When to use:</strong><br>
+                        • Comparing distributions across categories<br>
+                        • Identifying outliers<br>
+                        • Visualizing quartiles and median<br><br>
+                        <strong>Example use case:</strong> Comparing payment delays across different customer segments`,
+                        
+                'pie': `<strong>Pie Chart</strong><br>
+                        Best used for showing parts of a whole when there are few categories.<br><br>
+                        <strong>When to use:</strong><br>
+                        • Showing proportion or percentage<br>
+                        • Comparing parts to the whole (with few categories)<br>
+                        • Simple comparisons<br><br>
+                        <strong>Example use case:</strong> Showing the proportion of churned vs. retained customers`,
+                        
+                'correlation': `<strong>Correlation Matrix</strong><br>
+                                Best used for identifying relationships between multiple numerical variables.<br><br>
+                                <strong>When to use:</strong><br>
+                                • Finding correlations between multiple variables<br>
+                                • Feature selection for modeling<br>
+                                • Identifying multicollinearity<br><br>
+                                <strong>Example use case:</strong> Analyzing which features are most related to customer churn`
+            };
             
             // Show/hide controls based on chart type
             chartTypeSelect.addEventListener('change', function() {
@@ -176,7 +255,62 @@
                 } else if (chartType === 'scatter') {
                     colorByContainer.style.display = 'block';
                 }
+                
+                // Update chart description
+                if (chartType && chartDescriptions[chartType]) {
+                    chartDescription.innerHTML = chartDescriptions[chartType];
+                } else {
+                    chartDescription.innerHTML = '<p class="text-muted">Select a chart type to see description</p>';
+                }
             });
+            
+            // Reset form button
+            resetFormButton.addEventListener('click', function() {
+                visualizationForm.reset();
+                chartTypeSelect.dispatchEvent(new Event('change'));
+                chartContainer.innerHTML = '<div class="text-center" style="padding-top: 200px;"><p class="text-muted">Select chart type and columns to generate visualization</p></div>';
+                chartTitle.innerText = 'Your Visualization';
+                // Reset chart container height to default
+                chartContainer.style.height = '550px';
+            });
+            
+            // Function to render visualization with proper handling for correlation matrix
+            function renderVisualization(chartData) {
+                const chartType = document.getElementById('chartType').value;
+                
+                // Parse the chart JSON
+                const chartConfig = JSON.parse(chartData.chart);
+                
+                // If it's a correlation matrix, adjust the container size
+                if (chartType === 'correlation') {
+                    document.getElementById('chartContainer').style.height = '650px';
+                    
+                    // Create a responsive layout for correlation matrix
+                    const config = {
+                        responsive: true,
+                        displayModeBar: true,
+                        displaylogo: false,
+                        modeBarButtonsToRemove: ['lasso2d', 'select2d']
+                    };
+                    
+                    Plotly.newPlot('chartContainer', chartConfig.data, chartConfig.layout, config);
+                } else {
+                    // For other chart types, reset the container height
+                    document.getElementById('chartContainer').style.height = '550px';
+                    
+                    // For all other charts, use the default layout with responsive: true
+                    Plotly.newPlot('chartContainer', chartConfig.data, chartConfig.layout, {
+                        responsive: true,
+                        displayModeBar: true,
+                        displaylogo: false
+                    });
+                }
+                
+                // Add event to handle window resize for responsive charts
+                window.addEventListener('resize', function() {
+                    Plotly.Plots.resize('chartContainer');
+                });
+            }
             
             // Handle form submission
             visualizationForm.addEventListener('submit', function(e) {
@@ -225,7 +359,7 @@
                         chart_type: chartType,
                         x_column: xColumn,
                         y_column: yColumn,
-                        color_by: colorBy
+                        color: colorBy !== '' ? colorBy : null  // Only pass color if selected
                     }),
                 })
                 .then(response => response.json())
@@ -233,9 +367,8 @@
                     if (data.error) {
                         chartContainer.innerHTML = `<div class="alert alert-danger">${data.error}</div>`;
                     } else {
-                        // Parse the chart JSON and render
-                        const chartData = JSON.parse(data.chart);
-                        Plotly.newPlot('chartContainer', chartData.data, chartData.layout);
+                        // Use our custom render function
+                        renderVisualization(data);
                     }
                 })
                 .catch(error => {
@@ -245,7 +378,7 @@
             
             // Handle save chart button
             document.getElementById('saveChart').addEventListener('click', function() {
-                if (chartContainer.data) {
+                if (document.querySelector('.js-plotly-plot')) {
                     Plotly.downloadImage('chartContainer', {
                         format: 'png',
                         filename: 'visualization',

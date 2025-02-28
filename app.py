@@ -107,9 +107,10 @@ def api_visualize():
     chart_type = request.json.get('chart_type')
     x_column = request.json.get('x_column')
     y_column = request.json.get('y_column')
+    color_by = request.json.get('color_by')
     
     # Generate visualization
-    chart_data = visualizer.generate_chart(df, chart_type, x_column, y_column)
+    chart_data = visualizer.generate_chart(df, chart_type, x_column, y_column, color=color_by)
     
     return jsonify(chart_data)
 
@@ -133,7 +134,7 @@ def api_train_churn_model():
     
     target_column = request.json.get('target_column')
     feature_columns = request.json.get('feature_columns', [])
-    model_type = request.json.get('model_type', 'random_forest')  # Default to random forest
+    model_type = request.json.get('model_type', 'xgboost')  # Default to XGBoost
     
     # Train model
     model, metrics = model_trainer.train_model(
@@ -151,83 +152,60 @@ def api_train_churn_model():
 
 @app.route('/api/predict_churn', methods=['POST'])
 def api_predict_churn():
-    # Load the model
-    model_path = os.path.join('models', 'churn_model.pkl')
-    if not os.path.exists(model_path):
-        return jsonify({'error': 'Model not trained yet'}), 400
+    try:
+        # Load the model
+        model_path = os.path.join('models', 'churn_model.pkl')
+        if not os.path.exists(model_path):
+            return jsonify({'error': 'Model not trained yet'}), 400
+        
+        with open(model_path, 'rb') as f:
+            model_data = pickle.load(f)
+            model = model_data['model']
+            # Restore model_trainer with class mapping information
+            model_trainer.__dict__.update(model_data['trainer'].__dict__)
+        
+        # Get data for prediction
+        data = request.json.get('data', {})
+        
+        # Make prediction
+        prediction = model_trainer.predict(model, data)
+        
+        # Return the prediction
+        return jsonify({'prediction': prediction})
     
-    with open(model_path, 'rb') as f:
-        model_data = pickle.load(f)
-        model = model_data['model']
-        # Restore model_trainer with class mapping information
-        model_trainer.__dict__.update(model_data['trainer'].__dict__)
-    
-    # Get data for prediction
-    data = request.json.get('data', {})
-    
-    # Make prediction
-    prediction = model_trainer.predict(model, data)
-    
-    return jsonify({'prediction': prediction})
+    except Exception as e:
+        # Log the error for debugging
+        print(f"Error in prediction: {str(e)}")
+        return jsonify({'error': f"An error occurred during prediction: {str(e)}"}), 500
 
-@app.route('/sales_forecast')
-def sales_forecast():
-    if 'filepath' not in session:
-        return redirect(url_for('upload'))
+# Load sample data if user doesn't have their own
+@app.route('/api/load_sample_data', methods=['POST'])
+def api_load_sample_data():
+    # Copy the sample churn dataset to the uploads folder
+    try:
+        sample_path = os.path.join('sample_data', 'customer_churn_datasettestingmaster.csv')
+        target_path = os.path.join(app.config['UPLOAD_FOLDER'], 'customer_churn_sample.csv')
+        
+        # Ensure sample_data directory exists
+        if not os.path.exists(sample_path):
+            return jsonify({'error': 'Sample data not found'}), 404
+        
+        # Copy the file
+        import shutil
+        shutil.copy(sample_path, target_path)
+        
+        # Process the sample file
+        df = data_processor.load_data(target_path)
+        
+        # Store data info in session
+        session['filepath'] = target_path
+        session['columns'] = df.columns.tolist()
+        session['data_shape'] = df.shape
+        
+        return jsonify({'success': True, 'message': 'Sample data loaded successfully'})
     
-    filepath = session.get('filepath')
-    columns = session.get('columns')
-    
-    return render_template('sales_forecast.html', columns=columns)
-
-@app.route('/api/train_sales_model', methods=['POST'])
-def api_train_sales_model():
-    if 'filepath' not in session:
-        return jsonify({'error': 'No data loaded'}), 400
-    
-    filepath = session.get('filepath')
-    df = data_processor.load_data(filepath)
-    
-    target_column = request.json.get('target_column')
-    feature_columns = request.json.get('feature_columns', [])
-    time_column = request.json.get('time_column')
-    forecast_periods = request.json.get('forecast_periods', 12)  # Default to 12 periods
-    model_type = request.json.get('model_type', 'xgboost')  # Default to XGBoost
-    
-    # Train model
-    model, metrics = model_trainer.train_forecast_model(
-        df, feature_columns, target_column, time_column, 
-        forecast_periods=forecast_periods, model_type=model_type
-    )
-    
-    # Save model
-    model_path = os.path.join('models', 'sales_model.pkl')
-    os.makedirs('models', exist_ok=True)
-    with open(model_path, 'wb') as f:
-        pickle.dump(model, f)
-    
-    return jsonify({'metrics': metrics})
-
-@app.route('/api/predict_sales', methods=['POST'])
-def api_predict_sales():
-    # Load the model
-    model_path = os.path.join('models', 'sales_model.pkl')
-    if not os.path.exists(model_path):
-        return jsonify({'error': 'Model not trained yet'}), 400
-    
-    with open(model_path, 'rb') as f:
-        model = pickle.load(f)
-    
-    # Get parameters for forecast
-    forecast_periods = request.json.get('forecast_periods', 12)
-    
-    # Get data for prediction context if needed
-    data = request.json.get('data', {})
-    
-    # Make prediction
-    forecast = model_trainer.forecast(model, forecast_periods, data)
-    
-    return jsonify({'forecast': forecast})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 if __name__ == '__main__':
     app.run(debug=True)
