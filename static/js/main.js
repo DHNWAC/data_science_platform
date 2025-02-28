@@ -47,7 +47,7 @@ document.addEventListener('DOMContentLoaded', function() {
                             <div class="list-group">
                                 <button type="button" class="list-group-item list-group-item-action" data-dataset="customer_churn">
                                     <strong>Customer Churn Dataset</strong>
-                                    <p class="mb-0 text-muted">Sample dataset for churn prediction with customer demographics and usage metrics.</p>
+                                    <p class="mb-0 text-muted">Sample dataset for Classification prediction with customer demographics and usage metrics.</p>
                                 </button>
                                 <button type="button" class="list-group-item list-group-item-action" data-dataset="sales_forecasting">
                                     <strong>Retail Sales Dataset</strong>

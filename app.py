@@ -143,8 +143,9 @@ def api_train_churn_model():
     # Save model
     model_path = os.path.join('models', 'churn_model.pkl')
     os.makedirs('models', exist_ok=True)
+    # Save model and model_trainer for class label mapping
     with open(model_path, 'wb') as f:
-        pickle.dump(model, f)
+        pickle.dump({'model': model, 'trainer': model_trainer}, f)
     
     return jsonify({'metrics': metrics})
 
@@ -156,7 +157,10 @@ def api_predict_churn():
         return jsonify({'error': 'Model not trained yet'}), 400
     
     with open(model_path, 'rb') as f:
-        model = pickle.load(f)
+        model_data = pickle.load(f)
+        model = model_data['model']
+        # Restore model_trainer with class mapping information
+        model_trainer.__dict__.update(model_data['trainer'].__dict__)
     
     # Get data for prediction
     data = request.json.get('data', {})

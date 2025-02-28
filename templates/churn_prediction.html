@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Churn Prediction - Data Science Platform</title>
+    <title>Classification Model - Data Science Platform</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
@@ -31,7 +31,7 @@
                         <a class="nav-link" href="/visualize">Visualize</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link active" href="/churn_prediction">Churn Prediction</a>
+                        <a class="nav-link active" href="/churn_prediction">Classification</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="/sales_forecast">Sales Forecast</a>
@@ -46,7 +46,7 @@
             <div class="col-md-12">
                 <div class="card shadow-sm mb-4">
                     <div class="card-header bg-primary text-white">
-                        <h3 class="card-title mb-0">Customer Churn Prediction</h3>
+                        <h3 class="card-title mb-0">Classification Model</h3>
                     </div>
                     <div class="card-body">
                         <ul class="nav nav-tabs" id="churnTabs" role="tablist">
@@ -71,14 +71,14 @@
                                                 <h5 class="card-title">Model Configuration</h5>
                                                 <form id="trainModelForm">
                                                     <div class="mb-3">
-                                                        <label for="targetColumn" class="form-label">Target Column (Churn)</label>
+                                                        <label for="targetColumn" class="form-label">Target Column</label>
                                                         <select class="form-select" id="targetColumn" required>
                                                             <option value="" selected disabled>Select target column</option>
                                                             {% for column in columns %}
                                                             <option value="{{ column }}">{{ column }}</option>
                                                             {% endfor %}
                                                         </select>
-                                                        <div class="form-text">Select the column indicating whether a customer churned</div>
+                                                        <div class="form-text">Select the column you want to predict</div>
                                                     </div>
                                                     
                                                     <div class="mb-3">
@@ -202,7 +202,9 @@
             let trainedModel = {
                 trained: false,
                 features: [],
-                metrics: null
+                metrics: null,
+                isMultiClass: false,
+                numClasses: 0
             };
             
             // Handle target column selection to disable it in features
@@ -277,6 +279,8 @@
                         trainedModel.trained = true;
                         trainedModel.features = featureColumns;
                         trainedModel.metrics = data.metrics;
+                        trainedModel.isMultiClass = data.metrics.num_classes > 2;
+                        trainedModel.numClasses = data.metrics.num_classes || 2;
                         
                         // Display metrics
                         let metricsHTML = `
@@ -309,6 +313,18 @@
                                                 <td>F1 Score</td>
                                                 <td>${(data.metrics.f1 * 100).toFixed(2)}%</td>
                                             </tr>
+                                            ${data.metrics.roc_auc ? `
+                                            <tr>
+                                                <td>ROC AUC</td>
+                                                <td>${(data.metrics.roc_auc * 100).toFixed(2)}%</td>
+                                            </tr>
+                                            ` : ''}
+                                            ${data.metrics.num_classes ? `
+                                            <tr>
+                                                <td>Number of Classes</td>
+                                                <td>${data.metrics.num_classes}</td>
+                                            </tr>
+                                            ` : ''}
                                         </tbody>
                                     </table>
                                 </div>
@@ -316,6 +332,7 @@
                                     <p><strong>Model Type:</strong> ${modelType === 'random_forest' ? 'Random Forest' : 'XGBoost'}</p>
                                     <p><strong>Target Column:</strong> ${targetColumn}</p>
                                     <p><strong>Features Used:</strong> ${featureColumns.length}</p>
+                                    <p><strong>Classification Type:</strong> ${data.metrics.num_classes > 2 ? 'Multi-class' : 'Binary'}</p>
                                 </div>
                             </div>
                         `;
@@ -445,32 +462,12 @@
                                 <div class="alert alert-danger">${data.error}</div>
                             `;
                         } else {
-                            // Display prediction
-                            const prediction = data.prediction.predictions[0];
-                            let resultHTML = `
-                                <div class="text-center">
-                                    <div class="display-6 mb-3">${prediction === 1 ? 'Customer will churn' : 'Customer will not churn'}</div>
-                            `;
+                            // Display prediction based on whether it's multi-class or binary
+                            document.getElementById('predictionResult').innerHTML = displayPredictionResult(data.prediction);
                             
-                            // Display probability if available
-                            if (data.prediction.probabilities) {
-                                const churnProb = data.prediction.probabilities[0][1] * 100;
-                                resultHTML += `
-                                    <div class="h4 text-${churnProb > 50 ? 'danger' : 'success'}">
-                                        Churn Probability: ${churnProb.toFixed(2)}%
-                                    </div>
-                                `;
-                                
-                                // Create a gauge chart for probability
-                                resultHTML += `<div id="probabilityGauge" style="height: 300px;"></div>`;
-                            }
-                            
-                            resultHTML += `</div>`;
-                            
-                            document.getElementById('predictionResult').innerHTML = resultHTML;
-                            
-                            // Create gauge chart if probabilities available
-                            if (data.prediction.probabilities) {
+                            // Create gauge chart if binary prediction with probabilities
+                            if (data.prediction.probabilities && 
+                                (!data.prediction.class_labels || data.prediction.class_labels.length <= 2)) {
                                 const churnProb = data.prediction.probabilities[0][1] * 100;
                                 
                                 const gaugeData = [
@@ -478,7 +475,7 @@
                                         type: "indicator",
                                         mode: "gauge+number",
                                         value: churnProb,
-                                        title: { text: "Churn Probability", font: { size: 16 } },
+                                        title: { text: "Probability", font: { size: 16 } },
                                         gauge: {
                                             axis: { range: [null, 100] },
                                             bar: { color: "darkblue" },
@@ -512,6 +509,102 @@
                         `;
                     });
                 });
+            }
+            
+            // Function to display prediction results based on class type
+            function displayPredictionResult(predictionData) {
+                let resultHTML = "";
+                
+                // Check if we have class labels and multiple classes
+                if (predictionData.class_labels && predictionData.class_labels.length > 2) {
+                    // Multi-class case
+                    const predictedClass = predictionData.predictions[0];
+                    resultHTML = `
+                        <div class="text-center">
+                            <div class="display-6 mb-3">Predicted Class: ${predictedClass}</div>
+                            <div class="mt-4">
+                                <h5>Class Probabilities:</h5>
+                                <div class="table-responsive">
+                                    <table class="table table-bordered table-striped">
+                                        <thead class="table-primary">
+                                            <tr>
+                                                <th>Class</th>
+                                                <th>Probability</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                    `;
+                    
+                    // Add rows for each class probability
+                    if (predictionData.probabilities && predictionData.probabilities[0]) {
+                        predictionData.probabilities[0].forEach((prob, idx) => {
+                            const className = predictionData.class_labels[idx];
+                            const probability = (prob * 100).toFixed(2);
+                            const isHighest = predictionData.numeric_predictions[0] == idx;
+                            
+                            resultHTML += `
+                                <tr class="${isHighest ? 'table-success' : ''}">
+                                    <td>${className}</td>
+                                    <td>${probability}%</td>
+                                </tr>
+                            `;
+                        });
+                    }
+                    
+                    resultHTML += `
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    // Binary classification case
+                    const prediction = predictionData.predictions[0];
+                    
+                    // For binary classification, check if the prediction is a boolean or binary value
+                    let predictionText = "";
+                    if (typeof prediction === 'boolean' || prediction === 0 || prediction === 1 || 
+                        prediction === '0' || prediction === '1' || 
+                        prediction === 'true' || prediction === 'false' ||
+                        prediction === 'True' || prediction === 'False') {
+                        // It's a churn prediction
+                        predictionText = prediction == true || prediction == 1 || 
+                                        prediction == 'true' || prediction == 'True' ? 
+                                        'Customer will churn' : 'Customer will not churn';
+                    } else {
+                        // It's some other binary classification
+                        predictionText = `Predicted Class: ${prediction}`;
+                    }
+                    
+                    resultHTML = `
+                        <div class="text-center">
+                            <div class="display-6 mb-3">${predictionText}</div>
+                    `;
+                    
+                    // Display probability if available
+                    if (predictionData.probabilities) {
+                        // For binary classification (usually index 1 is the "positive" class)
+                        let probIndex = 1;
+                        if (predictionData.probabilities[0].length <= 1) {
+                            probIndex = 0;
+                        }
+                        
+                        const probability = predictionData.probabilities[0][probIndex] * 100;
+                        resultHTML += `
+                            <div class="h4 text-${probability > 50 ? 'danger' : 'success'}">
+                                Probability: ${probability.toFixed(2)}%
+                            </div>
+                        `;
+                        
+                        // Create a gauge chart for probability
+                        resultHTML += `<div id="probabilityGauge" style="height: 300px;"></div>`;
+                    }
+                    
+                    resultHTML += `</div>`;
+                }
+                
+                return resultHTML;
             }
             
             // Function to update model evaluation tab
@@ -552,6 +645,12 @@
                                         <td>${(metrics.roc_auc * 100).toFixed(2)}%</td>
                                     </tr>
                                     ` : ''}
+                                    ${metrics.num_classes ? `
+                                    <tr>
+                                        <td>Number of Classes</td>
+                                        <td>${metrics.num_classes}</td>
+                                    </tr>
+                                    ` : ''}
                                 </tbody>
                             </table>
                         </div>
@@ -583,11 +682,11 @@
                         <h5>Model Interpretation</h5>
                         <div class="card">
                             <div class="card-body">
-                                <p>Based on the metrics above, this model ${metrics.accuracy > 0.8 ? 'performs well' : 'may need improvement'} for churn prediction.</p>
+                                <p>Based on the metrics above, this model ${metrics.accuracy > 0.8 ? 'performs well' : 'may need improvement'} for classification.</p>
                                 <p>Businesses should focus on the following when using this model:</p>
                                 <ul>
-                                    <li>High precision means fewer false alarms when identifying potential churners</li>
-                                    <li>High recall means the model can catch most customers who are likely to churn</li>
+                                    <li>High precision means fewer false alarms when identifying classes</li>
+                                    <li>High recall means the model can catch most instances of each class</li>
                                     <li>The most important features for prediction are shown in the Feature Importance chart on the Train Model tab</li>
                                 </ul>
                             </div>
