@@ -8,6 +8,18 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <style>
+        /* Additional styles for correlation matrix */
+        .correlation-matrix-container {
+            overflow-x: auto;
+            overflow-y: auto;
+        }
+        
+        #chartContainer {
+            width: 100%;
+            transition: height 0.3s ease;
+        }
+    </style>
 </head>
 <body>
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
@@ -132,7 +144,7 @@
                                 <div class="card shadow-sm" style="min-height: 600px;">
                                     <div class="card-body">
                                         <h5 class="card-title" id="chartTitle">Your Visualization</h5>
-                                        <div id="chartContainer" style="height: 550px;">
+                                        <div id="chartContainer" class="correlation-matrix-container" style="width: 100%; height: 550px;">
                                             <div class="text-center" style="padding-top: 200px;">
                                                 <p class="text-muted">Select chart type and columns to generate visualization</p>
                                             </div>
@@ -258,7 +270,47 @@
                 chartTypeSelect.dispatchEvent(new Event('change'));
                 chartContainer.innerHTML = '<div class="text-center" style="padding-top: 200px;"><p class="text-muted">Select chart type and columns to generate visualization</p></div>';
                 chartTitle.innerText = 'Your Visualization';
+                // Reset chart container height to default
+                chartContainer.style.height = '550px';
             });
+            
+            // Function to render visualization with proper handling for correlation matrix
+            function renderVisualization(chartData) {
+                const chartType = document.getElementById('chartType').value;
+                
+                // Parse the chart JSON
+                const chartConfig = JSON.parse(chartData.chart);
+                
+                // If it's a correlation matrix, adjust the container size
+                if (chartType === 'correlation') {
+                    document.getElementById('chartContainer').style.height = '650px';
+                    
+                    // Create a responsive layout for correlation matrix
+                    const config = {
+                        responsive: true,
+                        displayModeBar: true,
+                        displaylogo: false,
+                        modeBarButtonsToRemove: ['lasso2d', 'select2d']
+                    };
+                    
+                    Plotly.newPlot('chartContainer', chartConfig.data, chartConfig.layout, config);
+                } else {
+                    // For other chart types, reset the container height
+                    document.getElementById('chartContainer').style.height = '550px';
+                    
+                    // For all other charts, use the default layout with responsive: true
+                    Plotly.newPlot('chartContainer', chartConfig.data, chartConfig.layout, {
+                        responsive: true,
+                        displayModeBar: true,
+                        displaylogo: false
+                    });
+                }
+                
+                // Add event to handle window resize for responsive charts
+                window.addEventListener('resize', function() {
+                    Plotly.Plots.resize('chartContainer');
+                });
+            }
             
             // Handle form submission
             visualizationForm.addEventListener('submit', function(e) {
@@ -307,7 +359,7 @@
                         chart_type: chartType,
                         x_column: xColumn,
                         y_column: yColumn,
-                        color_by: colorBy
+                        color: colorBy !== '' ? colorBy : null  // Only pass color if selected
                     }),
                 })
                 .then(response => response.json())
@@ -315,9 +367,8 @@
                     if (data.error) {
                         chartContainer.innerHTML = `<div class="alert alert-danger">${data.error}</div>`;
                     } else {
-                        // Parse the chart JSON and render
-                        const chartData = JSON.parse(data.chart);
-                        Plotly.newPlot('chartContainer', chartData.data, chartData.layout);
+                        // Use our custom render function
+                        renderVisualization(data);
                     }
                 })
                 .catch(error => {
@@ -327,7 +378,7 @@
             
             // Handle save chart button
             document.getElementById('saveChart').addEventListener('click', function() {
-                if (chartContainer.data) {
+                if (document.querySelector('.js-plotly-plot')) {
                     Plotly.downloadImage('chartContainer', {
                         format: 'png',
                         filename: 'visualization',

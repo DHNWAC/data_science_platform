@@ -138,6 +138,7 @@ class Visualizer:
             paper_bgcolor='white',
             font=dict(size=12),
             margin=dict(l=40, r=40, t=50, b=40),
+            autosize=True
         )
         
         # Make the bars more vibrant
@@ -208,14 +209,17 @@ class Visualizer:
         # Add trendline if appropriate
         if pd.api.types.is_numeric_dtype(df[x_column]) and pd.api.types.is_numeric_dtype(df[y_column]):
             # Add a trendline
-            fig.add_trace(
-                px.scatter(
+            try:
+                trendline_fig = px.scatter(
                     df, 
                     x=x_column, 
                     y=y_column, 
                     trendline="ols"
-                ).data[1]
-            )
+                )
+                fig.add_trace(trendline_fig.data[1])
+            except Exception as e:
+                # If trendline fails (e.g., with non-numeric data), just continue
+                pass
         
         # Enhance overall appearance
         fig.update_layout(
@@ -232,7 +236,8 @@ class Visualizer:
                 y=1.02,
                 xanchor="right",
                 x=1
-            )
+            ),
+            autosize=True
         )
         
         # Add hover template
@@ -287,30 +292,37 @@ class Visualizer:
                 )
                 
             # Add a trendline
-            fig.add_trace(
-                px.scatter(
+            try:
+                trendline_fig = px.scatter(
                     df, 
                     x=x_column, 
                     y=y_column, 
                     trendline="ols"
-                ).data[1]
-            )
+                )
+                fig.add_trace(trendline_fig.data[1])
+            except Exception as e:
+                # If trendline fails, just continue
+                pass
             
             # Add marginal distributions
-            marginal_fig = px.scatter(
-                df, 
-                x=x_column, 
-                y=y_column,
-                color=color_col if color_col else None,
-                marginal_x="histogram", 
-                marginal_y="histogram",
-                opacity=0.8,
-                template="plotly_white",
-                **kwargs
-            )
-            
-            # Use the updated figure with marginals
-            fig = marginal_fig
+            try:
+                marginal_fig = px.scatter(
+                    df, 
+                    x=x_column, 
+                    y=y_column,
+                    color=color_col if color_col else None,
+                    marginal_x="histogram", 
+                    marginal_y="histogram",
+                    opacity=0.8,
+                    template="plotly_white",
+                    **kwargs
+                )
+                
+                # Use the updated figure with marginals
+                fig = marginal_fig
+            except Exception as e:
+                # If marginals fail, use the original scatter
+                pass
         else:
             # For non-numerical values, create a jittered scatter plot
             fig = px.strip(
@@ -338,7 +350,8 @@ class Visualizer:
                 y=1.02,
                 xanchor="right",
                 x=1
-            )
+            ),
+            autosize=True
         )
         
         return {'chart': fig.to_json()}
@@ -433,7 +446,8 @@ class Visualizer:
                 y=1.02,
                 xanchor="right",
                 x=1
-            )
+            ),
+            autosize=True
         )
         
         # Make the bars more vibrant
@@ -503,7 +517,8 @@ class Visualizer:
             plot_bgcolor='#f8f9fa',
             paper_bgcolor='white',
             font=dict(size=12),
-            margin=dict(l=40, r=40, t=50, b=40)
+            margin=dict(l=40, r=40, t=50, b=40),
+            autosize=True
         )
         
         return {'chart': fig.to_json()}
@@ -604,7 +619,8 @@ class Visualizer:
                 y=-0.2,
                 xanchor="center",
                 x=0.5
-            )
+            ),
+            autosize=True
         )
         
         return {'chart': fig.to_json()}
@@ -618,58 +634,52 @@ class Visualizer:
             # Calculate correlation matrix
             corr_matrix = numerical_df.corr()
             
-            # Create a heatmap with improved aesthetics
-            fig = px.imshow(
-                corr_matrix, 
-                text_auto=True, 
-                aspect="auto",
-                color_continuous_scale='RdBu_r',  # Blue-Red diverging colorscale
-                zmin=-1, zmax=1,  # Set fixed scale for correlation
-                template="plotly_white",
-                **kwargs
-            )
+            # Create a heatmap with improved aesthetics - explicitly set x and y data
+            fig = go.Figure(data=go.Heatmap(
+                z=corr_matrix.values,
+                x=corr_matrix.columns,
+                y=corr_matrix.index,
+                colorscale='RdBu_r',
+                zmid=0,
+                zmin=-1,
+                zmax=1,
+                text=corr_matrix.round(2).values,
+                texttemplate="%{text:.2f}",
+                hovertemplate="Row: %{y}<br>Column: %{x}<br>Correlation: %{z:.3f}<extra></extra>"
+            ))
             
-            # Improve layout - ensure axis labels are visible
+            # Improve layout with better axis rendering
             fig.update_layout(
                 title="Correlation Matrix",
-                width=800,
-                height=700,
+                autosize=True,
+                height=600,
                 xaxis=dict(
                     title="",
                     tickangle=-45,
-                    tickfont=dict(size=11),
-                    tickmode='array',
-                    tickvals=list(range(len(corr_matrix.columns))),
-                    ticktext=corr_matrix.columns,
                     side='bottom',
-                    showgrid=True
+                    tickfont=dict(size=11),
+                    automargin=True
                 ),
                 yaxis=dict(
                     title="",
                     tickfont=dict(size=11),
-                    tickmode='array',
-                    tickvals=list(range(len(corr_matrix.index))),
-                    ticktext=corr_matrix.index,
-                    showgrid=True
+                    automargin=True
                 ),
                 coloraxis_colorbar=dict(
                     title="Correlation",
                     thicknessmode="pixels", thickness=20,
-                    lenmode="pixels", len=500,
+                    lenmode="fraction", len=0.8,
                     ticks="outside"
                 ),
                 plot_bgcolor='#f8f9fa',
                 paper_bgcolor='white',
                 font=dict(size=12),
-                margin=dict(l=60, r=40, t=50, b=100)
+                margin=dict(l=10, r=10, t=50, b=70, pad=4)
             )
             
-            # Improve hover details and text formatting
-            fig.update_traces(
-                text=corr_matrix.round(2),
-                texttemplate="%{text:.2f}",
-                hovertemplate="Row: %{y}<br>Column: %{x}<br>Correlation: %{z:.3f}<extra></extra>"
-            )
+            # Add grid lines for better readability
+            fig.update_xaxes(showgrid=True, gridwidth=1, gridcolor='rgba(211,211,211,0.5)')
+            fig.update_yaxes(showgrid=True, gridwidth=1, gridcolor='rgba(211,211,211,0.5)')
             
             return {'chart': fig.to_json()}
         else:
@@ -710,7 +720,8 @@ class Visualizer:
             plot_bgcolor='#f8f9fa',
             paper_bgcolor='white',
             font=dict(size=12),
-            margin=dict(l=40, r=40, t=50, b=40)
+            margin=dict(l=40, r=40, t=50, b=40),
+            autosize=True
         )
         
         return {'chart': fig.to_json()}
