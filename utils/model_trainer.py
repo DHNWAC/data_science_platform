@@ -85,21 +85,38 @@ class ModelTrainer:
         # Make predictions
         predictions = model.predict(data)
         
+        # Convert NumPy int64/float64 to Python native types for JSON serialization
+        predictions_list = [int(pred) if isinstance(pred, (np.integer, np.int64)) else 
+                            float(pred) if isinstance(pred, (np.floating, np.float64)) else 
+                            bool(pred) if isinstance(pred, np.bool_) else 
+                            str(pred) for pred in predictions]
+        
         # For multiclass, convert numeric predictions to original class labels if available
         if hasattr(self, 'target_classes') and len(self.target_classes) > 0:
             # Map numeric predictions back to original class labels
-            class_predictions = [self.target_classes[int(pred)] for pred in predictions]
+            class_predictions = [str(self.target_classes[int(pred)]) for pred in predictions]
         else:
-            class_predictions = predictions.tolist()
+            class_predictions = predictions_list
         
         # Get probabilities for classification
         probabilities = model.predict_proba(data)
         
+        # Convert probabilities to native Python types for JSON serialization
+        probs_list = []
+        for sample_probs in probabilities:
+            probs_list.append([float(prob) for prob in sample_probs])
+        
+        # Convert any NumPy types in target_classes to Python native types
+        target_classes_list = None
+        if hasattr(self, 'target_classes'):
+            target_classes_list = [str(c) if isinstance(c, np.ndarray) or isinstance(c, np.generic) 
+                                else c for c in self.target_classes.tolist()]
+        
         return {
             'predictions': class_predictions,
-            'numeric_predictions': predictions.tolist(),
-            'probabilities': probabilities.tolist(),
-            'class_labels': self.target_classes.tolist() if hasattr(self, 'target_classes') else None
+            'numeric_predictions': predictions_list,
+            'probabilities': probs_list,
+            'class_labels': target_classes_list
         }
     
     def _calculate_metrics(self, y_true, y_pred):
@@ -107,24 +124,24 @@ class ModelTrainer:
         metrics = {}
         
         # Basic metrics for all classification problems
-        metrics['accuracy'] = accuracy_score(y_true, y_pred)
+        metrics['accuracy'] = float(accuracy_score(y_true, y_pred))
         
         if len(np.unique(y_true)) <= 2:  # Binary classification
-            metrics['precision'] = precision_score(y_true, y_pred, zero_division=0)
-            metrics['recall'] = recall_score(y_true, y_pred, zero_division=0)
-            metrics['f1'] = f1_score(y_true, y_pred, zero_division=0)
+            metrics['precision'] = float(precision_score(y_true, y_pred, zero_division=0))
+            metrics['recall'] = float(recall_score(y_true, y_pred, zero_division=0))
+            metrics['f1'] = float(f1_score(y_true, y_pred, zero_division=0))
             
             # ROC AUC only if we have binary targets
             if len(np.unique(y_true)) == 2:
                 try:
-                    metrics['roc_auc'] = roc_auc_score(y_true, y_pred)
+                    metrics['roc_auc'] = float(roc_auc_score(y_true, y_pred))
                 except:
                     pass
         else:  # Multi-class classification
-            metrics['precision'] = precision_score(y_true, y_pred, average='weighted', zero_division=0)
-            metrics['recall'] = recall_score(y_true, y_pred, average='weighted', zero_division=0)
-            metrics['f1'] = f1_score(y_true, y_pred, average='weighted', zero_division=0)
-            metrics['num_classes'] = len(np.unique(y_true))
+            metrics['precision'] = float(precision_score(y_true, y_pred, average='weighted', zero_division=0))
+            metrics['recall'] = float(recall_score(y_true, y_pred, average='weighted', zero_division=0))
+            metrics['f1'] = float(f1_score(y_true, y_pred, average='weighted', zero_division=0))
+            metrics['num_classes'] = int(len(np.unique(y_true)))
         
         return metrics
     
@@ -134,7 +151,7 @@ class ModelTrainer:
             importances = model.feature_importances_
             feature_importance = sorted(zip(feature_names, importances), key=lambda x: x[1], reverse=True)
             return [{
-                'feature': feature,
+                'feature': str(feature),
                 'importance': float(importance)  # Convert to float for JSON serialization
             } for feature, importance in feature_importance]
         else:

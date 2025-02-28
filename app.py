@@ -152,24 +152,31 @@ def api_train_churn_model():
 
 @app.route('/api/predict_churn', methods=['POST'])
 def api_predict_churn():
-    # Load the model
-    model_path = os.path.join('models', 'churn_model.pkl')
-    if not os.path.exists(model_path):
-        return jsonify({'error': 'Model not trained yet'}), 400
+    try:
+        # Load the model
+        model_path = os.path.join('models', 'churn_model.pkl')
+        if not os.path.exists(model_path):
+            return jsonify({'error': 'Model not trained yet'}), 400
+        
+        with open(model_path, 'rb') as f:
+            model_data = pickle.load(f)
+            model = model_data['model']
+            # Restore model_trainer with class mapping information
+            model_trainer.__dict__.update(model_data['trainer'].__dict__)
+        
+        # Get data for prediction
+        data = request.json.get('data', {})
+        
+        # Make prediction
+        prediction = model_trainer.predict(model, data)
+        
+        # Return the prediction
+        return jsonify({'prediction': prediction})
     
-    with open(model_path, 'rb') as f:
-        model_data = pickle.load(f)
-        model = model_data['model']
-        # Restore model_trainer with class mapping information
-        model_trainer.__dict__.update(model_data['trainer'].__dict__)
-    
-    # Get data for prediction
-    data = request.json.get('data', {})
-    
-    # Make prediction
-    prediction = model_trainer.predict(model, data)
-    
-    return jsonify({'prediction': prediction})
+    except Exception as e:
+        # Log the error for debugging
+        print(f"Error in prediction: {str(e)}")
+        return jsonify({'error': f"An error occurred during prediction: {str(e)}"}), 500
 
 # Load sample data if user doesn't have their own
 @app.route('/api/load_sample_data', methods=['POST'])
