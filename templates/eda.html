@@ -31,10 +31,7 @@
                         <a class="nav-link" href="/visualize">Visualize</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="/churn_prediction">Classification</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/sales_forecast">Sales Forecast</a>
+                        <a class="nav-link" href="/churn_prediction">Churn Prediction</a>
                     </li>
                 </ul>
             </div>
@@ -60,10 +57,7 @@
                                     <i class="bi bi-bar-chart-line"></i> Visualize Data
                                 </a>
                                 <a href="/churn_prediction" class="btn btn-info">
-                                    <i class="bi bi-graph-up"></i> Classify Target
-                                </a>
-                                <a href="/sales_forecast" class="btn btn-warning">
-                                    <i class="bi bi-calendar-range"></i> Forecast Sales
+                                    <i class="bi bi-graph-up"></i> Predict Churn
                                 </a>
                             </div>
                         </div>
@@ -236,7 +230,88 @@
                                 <script>
                                     // Create correlation heatmap using Plotly
                                     document.addEventListener('DOMContentLoaded', function() {
-                                        // Code to generate heatmap will be added by JavaScript
+                                        // Get correlation data
+                                        const correlations = {{ correlations|tojson }};
+                                        
+                                        if (correlations && correlations.length > 0) {
+                                            // Get unique column names
+                                            const columns = [...new Set([
+                                                ...correlations.map(item => item.column1),
+                                                ...correlations.map(item => item.column2)
+                                            ])];
+                                            
+                                            // Create matrix
+                                            const matrix = [];
+                                            for (let i = 0; i < columns.length; i++) {
+                                                const row = [];
+                                                for (let j = 0; j < columns.length; j++) {
+                                                    if (i === j) {
+                                                        row.push(1); // Diagonal is always 1
+                                                    } else {
+                                                        const corr = correlations.find(
+                                                            item => (item.column1 === columns[i] && item.column2 === columns[j]) ||
+                                                                   (item.column1 === columns[j] && item.column2 === columns[i])
+                                                        );
+                                                        row.push(corr ? corr.correlation : 0);
+                                                    }
+                                                }
+                                                matrix.push(row);
+                                            }
+                                            
+                                            // Create heatmap
+                                            const data = [{
+                                                z: matrix,
+                                                x: columns,
+                                                y: columns,
+                                                type: 'heatmap',
+                                                colorscale: 'RdBu',
+                                                zmin: -1,
+                                                zmax: 1,
+                                                text: matrix.map((row, i) => 
+                                                    row.map((val, j) => 
+                                                        `${columns[i]} vs ${columns[j]}: ${val.toFixed(3)}`
+                                                    )
+                                                ),
+                                                hoverinfo: 'text',
+                                                showscale: true,
+                                                colorbar: {
+                                                    title: 'Correlation',
+                                                    titleside: 'right'
+                                                }
+                                            }];
+                                            
+                                            const layout = {
+                                                title: 'Correlation Heatmap',
+                                                xaxis: {
+                                                    tickangle: -45
+                                                },
+                                                yaxis: {
+                                                    automargin: true
+                                                },
+                                                margin: {
+                                                    l: 150,
+                                                    r: 50,
+                                                    b: 150,
+                                                    t: 50,
+                                                    pad: 4
+                                                },
+                                                annotations: matrix.map((row, i) => 
+                                                    row.map((val, j) => ({
+                                                        xref: 'x',
+                                                        yref: 'y',
+                                                        x: j,
+                                                        y: i,
+                                                        text: val.toFixed(2),
+                                                        font: {
+                                                            color: Math.abs(val) > 0.5 ? 'white' : 'black'
+                                                        },
+                                                        showarrow: false
+                                                    }))
+                                                ).flat()
+                                            };
+                                            
+                                            Plotly.newPlot('correlation-heatmap', data, layout);
+                                        }
                                     });
                                 </script>
                                 {% else %}

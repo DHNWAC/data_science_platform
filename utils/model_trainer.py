@@ -1,7 +1,6 @@
 import pandas as pd
 import numpy as np
 from sklearn.model_selection import train_test_split, cross_val_score
-from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, roc_auc_score
 from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
 import xgboost as xgb
@@ -12,14 +11,11 @@ warnings.filterwarnings('ignore')
 class ModelTrainer:
     def __init__(self):
         self.models = {
-            'random_forest_classifier': RandomForestClassifier(random_state=42),
-            'random_forest_regressor': RandomForestRegressor(random_state=42),
-            'xgboost_classifier': xgb.XGBClassifier(use_label_encoder=False, eval_metric='mlogloss', random_state=42),
-            'xgboost_regressor': xgb.XGBRegressor(random_state=42)
+            'xgboost_classifier': xgb.XGBClassifier(use_label_encoder=False, eval_metric='mlogloss', random_state=42)
         }
     
-    def train_model(self, df, feature_columns, target_column, test_size=0.2, model_type='random_forest'):
-        """Train a classification model for general classification tasks"""
+    def train_model(self, df, feature_columns, target_column, test_size=0.2, model_type='xgboost'):
+        """Train a classification model for churn prediction"""
         # Prepare data
         X = df[feature_columns]
         y = df[target_column]
@@ -42,24 +38,14 @@ class ModelTrainer:
         # Split the data
         X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=test_size, random_state=42)
         
-        # Select and train the model
-        is_classification = True  # Default to classification
+        # Always use XGBoost for churn prediction regardless of model_type parameter
+        model = self.models['xgboost_classifier']
         
-        if model_type.lower() == 'xgboost':
-            if is_classification:
-                model = self.models['xgboost_classifier']
-                # Set objective based on number of classes
-                if self.num_classes > 2:
-                    model.set_params(objective='multi:softprob', num_class=self.num_classes)
-                else:
-                    model.set_params(objective='binary:logistic')
-            else:
-                model = self.models['xgboost_regressor']
-        else:  # Default to random forest
-            if is_classification:
-                model = self.models['random_forest_classifier']
-            else:
-                model = self.models['random_forest_regressor']
+        # Set objective based on number of classes
+        if self.num_classes > 2:
+            model.set_params(objective='multi:softprob', num_class=self.num_classes)
+        else:
+            model.set_params(objective='binary:logistic')
         
         # Train the model
         model.fit(X_train, y_train)
@@ -106,19 +92,15 @@ class ModelTrainer:
         else:
             class_predictions = predictions.tolist()
         
-        # If it's a classification model, get probabilities too
-        if hasattr(model, 'predict_proba'):
-            probabilities = model.predict_proba(data)
-            return {
-                'predictions': class_predictions,
-                'numeric_predictions': predictions.tolist(),
-                'probabilities': probabilities.tolist(),
-                'class_labels': self.target_classes.tolist() if hasattr(self, 'target_classes') else None
-            }
-        else:
-            return {
-                'predictions': class_predictions,
-            }
+        # Get probabilities for classification
+        probabilities = model.predict_proba(data)
+        
+        return {
+            'predictions': class_predictions,
+            'numeric_predictions': predictions.tolist(),
+            'probabilities': probabilities.tolist(),
+            'class_labels': self.target_classes.tolist() if hasattr(self, 'target_classes') else None
+        }
     
     def _calculate_metrics(self, y_true, y_pred):
         """Calculate classification metrics"""
@@ -143,17 +125,6 @@ class ModelTrainer:
             metrics['recall'] = recall_score(y_true, y_pred, average='weighted', zero_division=0)
             metrics['f1'] = f1_score(y_true, y_pred, average='weighted', zero_division=0)
             metrics['num_classes'] = len(np.unique(y_true))
-        
-        return metrics
-    
-    def _calculate_regression_metrics(self, y_true, y_pred):
-        """Calculate regression metrics"""
-        metrics = {
-            'mse': mean_squared_error(y_true, y_pred),
-            'rmse': np.sqrt(mean_squared_error(y_true, y_pred)),
-            'mae': mean_absolute_error(y_true, y_pred),
-            'r2': r2_score(y_true, y_pred)
-        }
         
         return metrics
     

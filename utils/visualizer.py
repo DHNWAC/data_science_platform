@@ -1,7 +1,5 @@
 import pandas as pd
 import numpy as np
-import matplotlib.pyplot as plt
-import seaborn as sns
 from io import BytesIO
 import base64
 import json
@@ -17,9 +15,9 @@ class Visualizer:
             'histogram': self.create_histogram,
             'box': self.create_box_plot,
             'pie': self.create_pie_chart,
-            'heatmap': self.create_heatmap,
             'correlation': self.create_correlation_matrix
         }
+        # Removed 'heatmap'
     
     def generate_chart(self, df, chart_type, x_column=None, y_column=None, **kwargs):
         """Generate a chart based on the specified type and columns"""
@@ -39,70 +37,535 @@ class Visualizer:
         return self.chart_types[chart_type](df, x_column, y_column, **kwargs)
     
     def create_bar_chart(self, df, x_column, y_column=None, **kwargs):
-        """Create a bar chart"""
+        """Create a bar chart with improved aesthetics"""
         if y_column:
-            # If y_column is provided, create a grouped bar chart
-            fig = px.bar(df, x=x_column, y=y_column, **kwargs)
+            # If both columns are numeric, use averages
+            if pd.api.types.is_numeric_dtype(df[x_column]) and pd.api.types.is_numeric_dtype(df[y_column]):
+                # Bin the x values for better visualization if there are many unique values
+                if df[x_column].nunique() > 20:
+                    df['x_binned'] = pd.cut(df[x_column], bins=10)
+                    grouped = df.groupby('x_binned')[y_column].agg(['mean', 'count']).reset_index()
+                    grouped['x_binned'] = grouped['x_binned'].astype(str)
+                    fig = px.bar(
+                        grouped, 
+                        x='x_binned', 
+                        y='mean',
+                        color='count',
+                        color_continuous_scale='Blues',
+                        labels={'mean': f'Average {y_column}', 'x_binned': x_column, 'count': 'Count'},
+                        template="plotly_white"
+                    )
+                    fig.update_layout(coloraxis_colorbar=dict(title="Count"))
+                else:
+                    # Group by x_column and calculate mean of y_column
+                    grouped = df.groupby(x_column)[y_column].agg(['mean', 'count']).reset_index()
+                    fig = px.bar(
+                        grouped, 
+                        x=x_column, 
+                        y='mean',
+                        color='count',
+                        color_continuous_scale='Blues',
+                        labels={'mean': f'Average {y_column}', 'count': 'Count'},
+                        template="plotly_white"
+                    )
+                    fig.update_layout(coloraxis_colorbar=dict(title="Count"))
+            # If x is categorical and y is numeric, show means per category
+            elif pd.api.types.is_numeric_dtype(df[y_column]):
+                # Group by x_column and calculate statistics of y_column
+                grouped = df.groupby(x_column)[y_column].agg(['mean', 'count']).reset_index()
+                fig = px.bar(
+                    grouped, 
+                    x=x_column, 
+                    y='mean',
+                    color='count',
+                    color_continuous_scale='Blues',
+                    labels={'mean': f'Average {y_column}', 'count': 'Count'},
+                    template="plotly_white"
+                )
+                fig.update_layout(coloraxis_colorbar=dict(title="Count"))
+            else:
+                # For two categorical variables, create a count-based bar chart
+                counts = df.groupby([x_column, y_column]).size().reset_index(name='count')
+                fig = px.bar(
+                    counts, 
+                    x=x_column, 
+                    y='count',
+                    color=y_column,
+                    barmode='group',
+                    template="plotly_white"
+                )
         else:
             # If y_column is not provided, create a count plot
             value_counts = df[x_column].value_counts().reset_index()
             value_counts.columns = ['value', 'count']
-            fig = px.bar(value_counts, x='value', y='count', **kwargs)
-            fig.update_layout(xaxis_title=x_column, yaxis_title='Count')
+            
+            # Sort by count for better visualization
+            value_counts = value_counts.sort_values('count', ascending=False)
+            
+            # If too many categories, limit to top N
+            if len(value_counts) > 15:
+                top_n = value_counts.head(15)
+                other_count = value_counts[15:]['count'].sum()
+                if other_count > 0:
+                    other_row = pd.DataFrame({'value': ['Other'], 'count': [other_count]})
+                    value_counts = pd.concat([top_n, other_row])
+                else:
+                    value_counts = top_n
+            
+            fig = px.bar(
+                value_counts, 
+                x='value', 
+                y='count',
+                color='count',
+                color_continuous_scale='Blues',
+                labels={'value': x_column, 'count': 'Count'},
+                template="plotly_white"
+            )
+            fig.update_layout(
+                coloraxis_showscale=False if len(value_counts) < 3 else True
+            )
+        
+        # Enhance overall appearance
+        fig.update_layout(
+            title=f"{y_column + ' by ' if y_column else 'Distribution of '}{x_column}",
+            xaxis_title=x_column,
+            yaxis_title=y_column if y_column else 'Count',
+            plot_bgcolor='white',
+            font=dict(size=12),
+            margin=dict(l=40, r=40, t=50, b=40),
+        )
         
         return {'chart': fig.to_json()}
     
     def create_line_chart(self, df, x_column, y_column, **kwargs):
-        """Create a line chart"""
-        fig = px.line(df, x=x_column, y=y_column, **kwargs)
+        """Create a line chart with improved aesthetics"""
+        # Check if x_column is datetime
+        if pd.api.types.is_datetime64_any_dtype(df[x_column]) or 'date' in x_column.lower() or 'time' in x_column.lower():
+            # Try to convert to datetime if it's not already
+            if not pd.api.types.is_datetime64_any_dtype(df[x_column]):
+                try:
+                    df = df.copy()
+                    df[x_column] = pd.to_datetime(df[x_column])
+                except:
+                    pass  # If conversion fails, proceed with original column
+            
+            # Sort by date/time for proper line chart
+            df = df.sort_values(by=x_column)
+            
+        # If we have categorical X and numeric Y, we might want to group and aggregate
+        if pd.api.types.is_categorical_dtype(df[x_column]) or df[x_column].dtype == 'object':
+            if pd.api.types.is_numeric_dtype(df[y_column]):
+                # Group by x_column and calculate mean of y_column
+                grouped = df.groupby(x_column)[y_column].mean().reset_index()
+                fig = px.line(
+                    grouped, 
+                    x=x_column, 
+                    y=y_column,
+                    markers=True,
+                    line_shape='linear',
+                    template="plotly_white",
+                    **kwargs
+                )
+            else:
+                # For two categorical variables, create a count-based line chart
+                counts = df.groupby(x_column)[y_column].count().reset_index(name='count')
+                fig = px.line(
+                    counts, 
+                    x=x_column, 
+                    y='count',
+                    markers=True,
+                    line_shape='linear',
+                    template="plotly_white",
+                    **kwargs
+                )
+                fig.update_layout(yaxis_title='Count')
+        else:
+            # For numeric x and y, create a standard line chart
+            fig = px.line(
+                df, 
+                x=x_column, 
+                y=y_column,
+                markers=True,
+                line_shape='linear',
+                template="plotly_white",
+                **kwargs
+            )
+        
+        # Add trendline if appropriate
+        if pd.api.types.is_numeric_dtype(df[x_column]) and pd.api.types.is_numeric_dtype(df[y_column]):
+            # Add a trendline
+            fig.add_trace(
+                px.scatter(
+                    df, 
+                    x=x_column, 
+                    y=y_column, 
+                    trendline="ols"
+                ).data[1]
+            )
+        
+        # Enhance overall appearance
+        fig.update_layout(
+            title=f"{y_column} by {x_column}",
+            xaxis_title=x_column,
+            yaxis_title=y_column,
+            plot_bgcolor='white',
+            font=dict(size=12),
+            margin=dict(l=40, r=40, t=50, b=40),
+            legend=dict(
+                orientation="h",
+                yanchor="bottom",
+                y=1.02,
+                xanchor="right",
+                x=1
+            )
+        )
+        
+        # Add hover template
+        fig.update_traces(
+            hovertemplate=f"{x_column}: %{{x}}<br>{y_column}: %{{y}}<extra></extra>"
+        )
+        
         return {'chart': fig.to_json()}
     
     def create_scatter_plot(self, df, x_column, y_column, color=None, **kwargs):
-        """Create a scatter plot"""
-        fig = px.scatter(df, x=x_column, y=y_column, color=color, **kwargs)
+        """Create a scatter plot with improved aesthetics"""
+        if pd.api.types.is_numeric_dtype(df[x_column]) and pd.api.types.is_numeric_dtype(df[y_column]):
+            # For numerical x and y
+            if color:
+                # If color is categorical
+                if not pd.api.types.is_numeric_dtype(df[color]):
+                    fig = px.scatter(
+                        df, 
+                        x=x_column, 
+                        y=y_column, 
+                        color=color,
+                        color_discrete_sequence=px.colors.qualitative.Bold,
+                        opacity=0.7,
+                        template="plotly_white",
+                        **kwargs
+                    )
+                else:
+                    # If color is numerical
+                    fig = px.scatter(
+                        df, 
+                        x=x_column, 
+                        y=y_column, 
+                        color=color,
+                        color_continuous_scale='Viridis',
+                        opacity=0.7,
+                        template="plotly_white",
+                        **kwargs
+                    )
+            else:
+                # No color variable
+                fig = px.scatter(
+                    df, 
+                    x=x_column, 
+                    y=y_column,
+                    color_discrete_sequence=['#3366CC'],
+                    opacity=0.7,
+                    template="plotly_white",
+                    **kwargs
+                )
+                
+            # Add a trendline
+            fig.add_trace(
+                px.scatter(
+                    df, 
+                    x=x_column, 
+                    y=y_column, 
+                    trendline="ols"
+                ).data[1]
+            )
+            
+            # Add marginal distributions
+            fig = px.scatter(
+                df, 
+                x=x_column, 
+                y=y_column,
+                color=color,
+                marginal_x="histogram", 
+                marginal_y="histogram",
+                opacity=0.7,
+                template="plotly_white",
+                **kwargs
+            )
+        else:
+            # For non-numerical values, create a jittered scatter plot
+            fig = px.strip(
+                df, 
+                x=x_column, 
+                y=y_column,
+                color=color,
+                opacity=0.7,
+                template="plotly_white",
+                **kwargs
+            )
+        
+        # Enhance overall appearance
+        fig.update_layout(
+            title=f"Scatter Plot: {y_column} vs {x_column}",
+            xaxis_title=x_column,
+            yaxis_title=y_column,
+            plot_bgcolor='white',
+            font=dict(size=12),
+            margin=dict(l=40, r=40, t=50, b=40),
+            legend=dict(
+                orientation="h",
+                yanchor="bottom",
+                y=1.02,
+                xanchor="right",
+                x=1
+            )
+        )
+        
         return {'chart': fig.to_json()}
     
     def create_histogram(self, df, x_column, y_column=None, **kwargs):
-        """Create a histogram"""
-        fig = px.histogram(df, x=x_column, y=y_column, **kwargs)
+        """Create a histogram with improved aesthetics"""
+        # For numerical columns
+        if pd.api.types.is_numeric_dtype(df[x_column]):
+            if y_column and pd.api.types.is_numeric_dtype(df[y_column]):
+                # Colored histogram by a second variable if provided
+                fig = px.histogram(
+                    df, 
+                    x=x_column, 
+                    color=y_column,
+                    marginal="box",
+                    opacity=0.7,
+                    barmode="overlay",
+                    template="plotly_white",
+                    **kwargs
+                )
+            else:
+                # Basic histogram with KDE curve
+                fig = px.histogram(
+                    df, 
+                    x=x_column,
+                    histnorm='probability density',
+                    marginal="box",
+                    opacity=0.7,
+                    template="plotly_white",
+                    **kwargs
+                )
+                
+                # Add KDE curve
+                from scipy.stats import gaussian_kde
+                data = df[x_column].dropna()
+                kde = gaussian_kde(data)
+                x_range = np.linspace(data.min(), data.max(), 1000)
+                y_kde = kde(x_range)
+                
+                fig.add_trace(
+                    go.Scatter(
+                        x=x_range,
+                        y=y_kde,
+                        mode='lines',
+                        name='KDE',
+                        line=dict(color='red', width=2)
+                    )
+                )
+        else:
+            # For categorical data, create a count-based histogram
+            value_counts = df[x_column].value_counts().reset_index()
+            value_counts.columns = ['value', 'count']
+            
+            # Sort by count for better visualization
+            value_counts = value_counts.sort_values('count', ascending=False)
+            
+            fig = px.bar(
+                value_counts, 
+                x='value', 
+                y='count',
+                color='count',
+                color_continuous_scale='Blues',
+                template="plotly_white",
+                **kwargs
+            )
+            fig.update_layout(
+                xaxis_title=x_column,
+                yaxis_title='Count',
+                coloraxis_showscale=False if len(value_counts) < 3 else True
+            )
+        
+        # Enhance overall appearance
+        fig.update_layout(
+            title=f"Distribution of {x_column}",
+            xaxis_title=x_column,
+            yaxis_title="Density" if pd.api.types.is_numeric_dtype(df[x_column]) else "Count",
+            plot_bgcolor='white',
+            font=dict(size=12),
+            margin=dict(l=40, r=40, t=50, b=40),
+            legend=dict(
+                orientation="h",
+                yanchor="bottom",
+                y=1.02,
+                xanchor="right",
+                x=1
+            )
+        )
+        
         return {'chart': fig.to_json()}
     
     def create_box_plot(self, df, x_column, y_column=None, **kwargs):
-        """Create a box plot"""
+        """Create a box plot with improved aesthetics"""
         if y_column:
-            fig = px.box(df, x=x_column, y=y_column, **kwargs)
+            # Box plot with categories on x-axis
+            if pd.api.types.is_numeric_dtype(df[y_column]):
+                fig = px.box(
+                    df, 
+                    x=x_column, 
+                    y=y_column,
+                    notched=True,
+                    points="outliers",
+                    template="plotly_white",
+                    **kwargs
+                )
+            else:
+                # Both columns are categorical, create a count-based box plot
+                counts = df.groupby([x_column, y_column]).size().reset_index(name='count')
+                fig = px.box(
+                    counts, 
+                    x=x_column, 
+                    y='count',
+                    color=y_column,
+                    notched=True,
+                    template="plotly_white",
+                    **kwargs
+                )
+                fig.update_layout(yaxis_title='Count')
         else:
-            fig = px.box(df, y=x_column, **kwargs)
+            # Single column box plot
+            if pd.api.types.is_numeric_dtype(df[x_column]):
+                fig = px.box(
+                    df, 
+                    y=x_column,
+                    notched=True,
+                    points="outliers",
+                    template="plotly_white",
+                    **kwargs
+                )
+            else:
+                # For categorical column, create a count box plot
+                return {'error': 'Box plot requires at least one numerical column'}
+        
+        # Enhance overall appearance
+        if y_column:
+            title = f"Box Plot: {y_column} by {x_column}"
+        else:
+            title = f"Box Plot: {x_column}"
+            
+        fig.update_layout(
+            title=title,
+            xaxis_title=x_column if y_column else "",
+            yaxis_title=y_column if y_column else x_column,
+            plot_bgcolor='white',
+            font=dict(size=12),
+            margin=dict(l=40, r=40, t=50, b=40)
+        )
         
         return {'chart': fig.to_json()}
     
     def create_pie_chart(self, df, x_column, y_column=None, **kwargs):
-        """Create a pie chart"""
+        """Create a pie chart with improved aesthetics"""
         if y_column:
             # Group by x_column and calculate sum of y_column
-            grouped_df = df.groupby(x_column)[y_column].sum().reset_index()
-            fig = px.pie(grouped_df, names=x_column, values=y_column, **kwargs)
+            if pd.api.types.is_numeric_dtype(df[y_column]):
+                grouped = df.groupby(x_column)[y_column].sum().reset_index()
+                
+                # If too many categories, limit to top N and group others
+                if len(grouped) > 10:
+                    grouped = grouped.sort_values(y_column, ascending=False)
+                    top_n = grouped.head(9)
+                    other_sum = grouped.iloc[9:][y_column].sum()
+                    other_row = pd.DataFrame({x_column: ['Other'], y_column: [other_sum]})
+                    grouped = pd.concat([top_n, other_row])
+                
+                fig = px.pie(
+                    grouped, 
+                    names=x_column, 
+                    values=y_column,
+                    hole=0.4,
+                    template="plotly_white",
+                    color_discrete_sequence=px.colors.qualitative.Set3,
+                    **kwargs
+                )
+                
+                # Add total in the center
+                total = grouped[y_column].sum()
+                fig.add_annotation(
+                    text=f"Total<br>{total:,.0f}",
+                    x=0.5, y=0.5,
+                    font_size=14,
+                    showarrow=False
+                )
+            else:
+                # For non-numeric y_column, use counts
+                counts = df.groupby([x_column, y_column]).size().reset_index(name='count')
+                
+                # Create sunburst chart instead for hierarchical data
+                fig = px.sunburst(
+                    counts, 
+                    path=[x_column, y_column], 
+                    values='count',
+                    template="plotly_white",
+                    color_discrete_sequence=px.colors.qualitative.Set3,
+                    **kwargs
+                )
         else:
             # Count occurrences of each category
             value_counts = df[x_column].value_counts().reset_index()
             value_counts.columns = ['value', 'count']
-            fig = px.pie(value_counts, names='value', values='count', **kwargs)
+            
+            # If too many categories, limit to top N and group others
+            if len(value_counts) > 10:
+                top_n = value_counts.head(9)
+                other_count = value_counts.iloc[9:]['count'].sum()
+                other_row = pd.DataFrame({'value': ['Other'], 'count': [other_count]})
+                value_counts = pd.concat([top_n, other_row])
+            
+            fig = px.pie(
+                value_counts, 
+                names='value', 
+                values='count',
+                hole=0.4,
+                template="plotly_white",
+                color_discrete_sequence=px.colors.qualitative.Set3,
+                **kwargs
+            )
+            
+            # Add total in the center
+            total = value_counts['count'].sum()
+            fig.add_annotation(
+                text=f"Total<br>{total:,.0f}",
+                x=0.5, y=0.5,
+                font_size=14,
+                showarrow=False
+            )
         
-        return {'chart': fig.to_json()}
-    
-    def create_heatmap(self, df, x_column, y_column, **kwargs):
-        """Create a heatmap"""
-        # Pivot the data to create a matrix suitable for a heatmap
-        pivot_table = df.pivot_table(index=y_column, columns=x_column, aggfunc='size', fill_value=0)
-        
-        # Create a heatmap using Plotly
-        fig = px.imshow(pivot_table, **kwargs)
-        fig.update_layout(xaxis_title=x_column, yaxis_title=y_column)
+        # Enhance overall appearance
+        if y_column:
+            title = f"Pie Chart: {y_column} by {x_column}"
+        else:
+            title = f"Distribution of {x_column}"
+            
+        fig.update_layout(
+            title=title,
+            font=dict(size=12),
+            margin=dict(l=40, r=40, t=50, b=40),
+            legend=dict(
+                orientation="h",
+                yanchor="bottom",
+                y=-0.2,
+                xanchor="center",
+                x=0.5
+            )
+        )
         
         return {'chart': fig.to_json()}
     
     def create_correlation_matrix(self, df, **kwargs):
-        """Create a correlation matrix heatmap"""
+        """Create a correlation matrix heatmap with improved aesthetics"""
         # Get only numerical columns
         numerical_df = df.select_dtypes(include=['int64', 'float64'])
         
@@ -110,26 +573,83 @@ class Visualizer:
             # Calculate correlation matrix
             corr_matrix = numerical_df.corr()
             
-            # Create a heatmap
-            fig = px.imshow(corr_matrix, text_auto=True, aspect="auto", **kwargs)
-            fig.update_layout(title="Correlation Matrix")
+            # Create a heatmap with improved aesthetics
+            fig = px.imshow(
+                corr_matrix, 
+                text_auto=True, 
+                aspect="auto",
+                color_continuous_scale='RdBu_r',  # Blue-Red diverging colorscale
+                zmin=-1, zmax=1,  # Set fixed scale for correlation
+                template="plotly_white",
+                **kwargs
+            )
+            
+            # Improve layout
+            fig.update_layout(
+                title="Correlation Matrix",
+                width=800,
+                height=700,
+                xaxis=dict(
+                    title="",
+                    tickangle=-45
+                ),
+                yaxis=dict(
+                    title=""
+                ),
+                coloraxis_colorbar=dict(
+                    title="Correlation",
+                    thicknessmode="pixels", thickness=20,
+                    lenmode="pixels", len=500,
+                    ticks="outside"
+                ),
+                plot_bgcolor='white',
+                font=dict(size=12),
+                margin=dict(l=40, r=40, t=50, b=40)
+            )
+            
+            # Improve hover details and text formatting
+            fig.update_traces(
+                text=corr_matrix.round(2),
+                texttemplate="%{text:.2f}",
+                hovertemplate="Row: %{y}<br>Column: %{x}<br>Correlation: %{z:.3f}<extra></extra>"
+            )
             
             return {'chart': fig.to_json()}
         else:
-            return {'error': 'Not enough numerical columns for correlation matrix'}
+            return {'error': 'Not enough numerical columns for correlation matrix. Need at least 2 numerical columns.'}
     
     def create_time_series_plot(self, df, time_column, value_column, **kwargs):
         """Create a time series plot"""
         # Ensure time_column is in datetime format
         if df[time_column].dtype != 'datetime64[ns]':
-            df[time_column] = pd.to_datetime(df[time_column])
+            try:
+                df = df.copy()
+                df[time_column] = pd.to_datetime(df[time_column])
+            except:
+                return {'error': 'Unable to convert time column to datetime format'}
         
         # Sort by time
         df = df.sort_values(by=time_column)
         
         # Create the time series plot
-        fig = px.line(df, x=time_column, y=value_column, **kwargs)
-        fig.update_layout(xaxis_title=time_column, yaxis_title=value_column)
+        fig = px.line(
+            df, 
+            x=time_column, 
+            y=value_column, 
+            markers=True,
+            template="plotly_white",
+            **kwargs
+        )
+        
+        # Enhance overall appearance
+        fig.update_layout(
+            title=f"Time Series: {value_column} over Time",
+            xaxis_title=time_column,
+            yaxis_title=value_column,
+            plot_bgcolor='white',
+            font=dict(size=12),
+            margin=dict(l=40, r=40, t=50, b=40)
+        )
         
         return {'chart': fig.to_json()}
     
@@ -143,6 +663,21 @@ class Visualizer:
             return {'error': 'Need at least 2 columns for a pair plot'}
         
         # Create a scatter matrix
-        fig = px.scatter_matrix(df, dimensions=columns, color=hue, **kwargs)
+        fig = px.scatter_matrix(
+            df, 
+            dimensions=columns, 
+            color=hue,
+            opacity=0.7,
+            template="plotly_white",
+            **kwargs
+        )
+        
+        # Enhance overall appearance
+        fig.update_layout(
+            title="Pair Plot",
+            plot_bgcolor='white',
+            font=dict(size=12),
+            margin=dict(l=40, r=40, t=50, b=40)
+        )
         
         return {'chart': fig.to_json()}
