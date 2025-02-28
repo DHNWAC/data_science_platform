@@ -31,10 +31,7 @@
                         <a class="nav-link active" href="/visualize">Visualize</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="/churn_prediction">Classification</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/sales_forecast">Sales Forecast</a>
+                        <a class="nav-link" href="/prediction">Prediction</a>
                     </li>
                 </ul>
             </div>
@@ -114,9 +111,9 @@
                                             <button id="saveChart" class="btn btn-success btn-sm">
                                                 <i class="bi bi-download"></i> Save Chart
                                             </button>
-                                            <button id="shareChart" class="btn btn-info btn-sm">
-                                                <i class="bi bi-share"></i> Share Chart
-                                            </button>
+                                            <a href="/prediction" class="btn btn-info btn-sm">
+                                                <i class="bi bi-graph-up"></i> Build Prediction Model
+                                            </a>
                                         </div>
                                     </div>
                                 </div>
@@ -255,11 +252,6 @@
                 } else {
                     alert('Please generate a chart first');
                 }
-            });
-            
-            // Handle share chart button
-            document.getElementById('shareChart').addEventListener('click', function() {
-                alert('Sharing functionality will be added in a future update');
             });
         });
     </script>

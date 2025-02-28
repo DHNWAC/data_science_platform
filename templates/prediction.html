@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Classification Model - Data Science Platform</title>
+    <title>Prediction - Data Science Platform</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
@@ -31,10 +31,7 @@
                         <a class="nav-link" href="/visualize">Visualize</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link active" href="/churn_prediction">Classification</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/sales_forecast">Sales Forecast</a>
+                        <a class="nav-link active" href="/prediction">Prediction</a>
                     </li>
                 </ul>
             </div>
@@ -46,10 +43,10 @@
             <div class="col-md-12">
                 <div class="card shadow-sm mb-4">
                     <div class="card-header bg-primary text-white">
-                        <h3 class="card-title mb-0">Classification Model</h3>
+                        <h3 class="card-title mb-0">Predictive Analytics</h3>
                     </div>
                     <div class="card-body">
-                        <ul class="nav nav-tabs" id="churnTabs" role="tablist">
+                        <ul class="nav nav-tabs" id="predictionTabs" role="tablist">
                             <li class="nav-item" role="presentation">
                                 <button class="nav-link active" id="train-tab" data-bs-toggle="tab" data-bs-target="#train" type="button" role="tab">Train Model</button>
                             </li>
@@ -61,7 +58,7 @@
                             </li>
                         </ul>
                         
-                        <div class="tab-content mt-3" id="churnTabContent">
+                        <div class="tab-content mt-3" id="predictionTabContent">
                             <!-- Train Model Tab -->
                             <div class="tab-pane fade show active" id="train" role="tabpanel">
                                 <div class="row">
@@ -70,6 +67,17 @@
                                             <div class="card-body">
                                                 <h5 class="card-title">Model Configuration</h5>
                                                 <form id="trainModelForm">
+                                                    <div class="mb-3">
+                                                        <label for="taskType" class="form-label">Prediction Task</label>
+                                                        <select class="form-select" id="taskType" required>
+                                                            <option value="" selected disabled>Select prediction task</option>
+                                                            <option value="classification">Classification (e.g., Churn Prediction)</option>
+                                                            <option value="regression">Regression (e.g., Price Prediction)</option>
+                                                            <option value="timeseries">Time Series (e.g., Sales Forecast)</option>
+                                                        </select>
+                                                        <div class="form-text">Select the type of prediction task</div>
+                                                    </div>
+                                                    
                                                     <div class="mb-3">
                                                         <label for="targetColumn" class="form-label">Target Column</label>
                                                         <select class="form-select" id="targetColumn" required>
@@ -81,8 +89,30 @@
                                                         <div class="form-text">Select the column you want to predict</div>
                                                     </div>
                                                     
+                                                    <div id="timeColumnContainer" class="mb-3" style="display: none;">
+                                                        <label for="timeColumn" class="form-label">Time Column</label>
+                                                        <select class="form-select" id="timeColumn">
+                                                            <option value="" selected disabled>Select time column</option>
+                                                            {% for column in columns %}
+                                                            <option value="{{ column }}">{{ column }}</option>
+                                                            {% endfor %}
+                                                        </select>
+                                                        <div class="form-text">Select the column containing date/time information</div>
+                                                    </div>
+                                                    
+                                                    <div id="forecastPeriodsContainer" class="mb-3" style="display: none;">
+                                                        <label for="forecastPeriods" class="form-label">Forecast Periods</label>
+                                                        <input type="number" class="form-control" id="forecastPeriods" value="12" min="1" max="36">
+                                                        <div class="form-text">Number of future periods to forecast</div>
+                                                    </div>
+                                                    
                                                     <div class="mb-3">
                                                         <label class="form-label">Feature Columns</label>
+                                                        <div class="mb-2">
+                                                            <button type="button" class="btn btn-sm btn-outline-primary" id="selectAllFeatures">Select All</button>
+                                                            <button type="button" class="btn btn-sm btn-outline-secondary" id="deselectAllFeatures">Deselect All</button>
+                                                            <button type="button" class="btn btn-sm btn-outline-info" id="selectAllButTarget">All Except Target</button>
+                                                        </div>
                                                         <div style="max-height: 200px; overflow-y: auto; border: 1px solid #dee2e6; border-radius: 0.25rem; padding: 0.5rem;">
                                                             {% for column in columns %}
                                                             <div class="form-check">
@@ -94,14 +124,6 @@
                                                             {% endfor %}
                                                         </div>
                                                         <div class="form-text">Select columns to use as features for prediction</div>
-                                                    </div>
-                                                    
-                                                    <div class="mb-3">
-                                                        <label for="modelType" class="form-label">Model Type</label>
-                                                        <select class="form-select" id="modelType">
-                                                            <option value="random_forest" selected>Random Forest</option>
-                                                            <option value="xgboost">XGBoost</option>
-                                                        </select>
                                                     </div>
                                                     
                                                     <div class="d-grid gap-2">
@@ -201,36 +223,114 @@
             // Store model information
             let trainedModel = {
                 trained: false,
+                taskType: '',
                 features: [],
                 metrics: null,
-                isMultiClass: false,
-                numClasses: 0
+                timeColumn: null,
+                forecastPeriods: 12,
+                targetColumn: null
             };
+            
+            // Task type selector
+            const taskTypeSelect = document.getElementById('taskType');
+            const timeColumnContainer = document.getElementById('timeColumnContainer');
+            const forecastPeriodsContainer = document.getElementById('forecastPeriodsContainer');
+            
+            taskTypeSelect.addEventListener('change', function() {
+                const taskType = this.value;
+                
+                // Show/hide time-series specific fields
+                if (taskType === 'timeseries') {
+                    timeColumnContainer.style.display = 'block';
+                    forecastPeriodsContainer.style.display = 'block';
+                } else {
+                    timeColumnContainer.style.display = 'none';
+                    forecastPeriodsContainer.style.display = 'none';
+                }
+            });
+            
+            // Feature selection buttons
+            const selectAllFeaturesBtn = document.getElementById('selectAllFeatures');
+            const deselectAllFeaturesBtn = document.getElementById('deselectAllFeatures');
+            const selectAllButTargetBtn = document.getElementById('selectAllButTarget');
+            
+            selectAllFeaturesBtn.addEventListener('click', function() {
+                document.querySelectorAll('.feature-column').forEach(checkbox => {
+                    if (!checkbox.disabled) {
+                        checkbox.checked = true;
+                    }
+                });
+            });
+            
+            deselectAllFeaturesBtn.addEventListener('click', function() {
+                document.querySelectorAll('.feature-column').forEach(checkbox => {
+                    checkbox.checked = false;
+                });
+            });
+            
+            selectAllButTargetBtn.addEventListener('click', function() {
+                const targetColumn = document.getElementById('targetColumn').value;
+                const timeColumn = document.getElementById('timeColumn').value;
+                
+                document.querySelectorAll('.feature-column').forEach(checkbox => {
+                    if (checkbox.value !== targetColumn && checkbox.value !== timeColumn) {
+                        checkbox.checked = true;
+                    } else {
+                        checkbox.checked = false;
+                    }
+                });
+            });
             
             // Handle target column selection to disable it in features
             const targetColumnSelect = document.getElementById('targetColumn');
-            targetColumnSelect.addEventListener('change', function() {
-                const selectedTarget = this.value;
+            const timeColumnSelect = document.getElementById('timeColumn');
+            
+            targetColumnSelect.addEventListener('change', updateFeatureDisabled);
+            timeColumnSelect.addEventListener('change', updateFeatureDisabled);
+            
+            function updateFeatureDisabled() {
+                const targetColumn = targetColumnSelect.value;
+                const timeColumn = timeColumnSelect.value;
+                
                 document.querySelectorAll('.feature-column').forEach(checkbox => {
-                    if (checkbox.value === selectedTarget) {
+                    if (checkbox.value === targetColumn || checkbox.value === timeColumn) {
                         checkbox.checked = false;
                         checkbox.disabled = true;
                     } else {
                         checkbox.disabled = false;
                     }
                 });
-            });
+            }
             
             // Handle form submission for training
             const trainModelForm = document.getElementById('trainModelForm');
             trainModelForm.addEventListener('submit', function(e) {
                 e.preventDefault();
                 
+                // Get task type
+                const taskType = document.getElementById('taskType').value;
+                if (!taskType) {
+                    alert('Please select a prediction task type');
+                    return;
+                }
+                
                 // Get target column
                 const targetColumn = document.getElementById('targetColumn').value;
                 if (!targetColumn) {
                     alert('Please select a target column');
                     return;
+                }
+                
+                // Get time column for time series
+                let timeColumn = null;
+                let forecastPeriods = null;
+                if (taskType === 'timeseries') {
+                    timeColumn = document.getElementById('timeColumn').value;
+                    if (!timeColumn) {
+                        alert('Please select a time column for time series forecasting');
+                        return;
+                    }
+                    forecastPeriods = parseInt(document.getElementById('forecastPeriods').value);
                 }
                 
                 // Get selected features
@@ -244,9 +344,6 @@
                     return;
                 }
                 
-                // Get model type
-                const modelType = document.getElementById('modelType').value;
-                
                 // Display loading message
                 document.getElementById('trainingResultCard').style.display = 'block';
                 document.getElementById('trainingResult').innerHTML = `
@@ -256,17 +353,34 @@
                     </div>
                 `;
                 
+                // Set the API endpoint based on task type
+                let apiEndpoint = '';
+                let requestData = {};
+                
+                if (taskType === 'classification' || taskType === 'regression') {
+                    apiEndpoint = '/api/train_model';
+                    requestData = {
+                        task_type: taskType,
+                        target_column: targetColumn,
+                        feature_columns: featureColumns
+                    };
+                } else if (taskType === 'timeseries') {
+                    apiEndpoint = '/api/train_forecast_model';
+                    requestData = {
+                        target_column: targetColumn,
+                        time_column: timeColumn,
+                        feature_columns: featureColumns,
+                        forecast_periods: forecastPeriods
+                    };
+                }
+                
                 // Send request to API
-                fetch('/api/train_churn_model', {
+                fetch(apiEndpoint, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify({
-                        target_column: targetColumn,
-                        feature_columns: featureColumns,
-                        model_type: modelType
-                    }),
+                    body: JSON.stringify(requestData),
                 })
                 .then(response => response.json())
                 .then(data => {
@@ -277,12 +391,14 @@
                     } else {
                         // Store model information
                         trainedModel.trained = true;
+                        trainedModel.taskType = taskType;
                         trainedModel.features = featureColumns;
                         trainedModel.metrics = data.metrics;
-                        trainedModel.isMultiClass = data.metrics.num_classes > 2;
-                        trainedModel.numClasses = data.metrics.num_classes || 2;
+                        trainedModel.timeColumn = timeColumn;
+                        trainedModel.forecastPeriods = forecastPeriods;
+                        trainedModel.targetColumn = targetColumn;
                         
-                        // Display metrics
+                        // Display metrics based on task type
                         let metricsHTML = `
                             <div class="alert alert-success">
                                 <i class="bi bi-check-circle-fill"></i> Model trained successfully!
@@ -297,42 +413,91 @@
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            <tr>
-                                                <td>Accuracy</td>
-                                                <td>${(data.metrics.accuracy * 100).toFixed(2)}%</td>
-                                            </tr>
-                                            <tr>
-                                                <td>Precision</td>
-                                                <td>${(data.metrics.precision * 100).toFixed(2)}%</td>
-                                            </tr>
-                                            <tr>
-                                                <td>Recall</td>
-                                                <td>${(data.metrics.recall * 100).toFixed(2)}%</td>
-                                            </tr>
-                                            <tr>
-                                                <td>F1 Score</td>
-                                                <td>${(data.metrics.f1 * 100).toFixed(2)}%</td>
-                                            </tr>
-                                            ${data.metrics.roc_auc ? `
-                                            <tr>
-                                                <td>ROC AUC</td>
-                                                <td>${(data.metrics.roc_auc * 100).toFixed(2)}%</td>
-                                            </tr>
-                                            ` : ''}
-                                            ${data.metrics.num_classes ? `
-                                            <tr>
-                                                <td>Number of Classes</td>
-                                                <td>${data.metrics.num_classes}</td>
-                                            </tr>
-                                            ` : ''}
+                        `;
+                        
+                        // Add metrics based on task type
+                        if (taskType === 'classification') {
+                            metricsHTML += `
+                                <tr>
+                                    <td>Accuracy</td>
+                                    <td>${(data.metrics.accuracy * 100).toFixed(2)}%</td>
+                                </tr>
+                                <tr>
+                                    <td>Precision</td>
+                                    <td>${(data.metrics.precision * 100).toFixed(2)}%</td>
+                                </tr>
+                                <tr>
+                                    <td>Recall</td>
+                                    <td>${(data.metrics.recall * 100).toFixed(2)}%</td>
+                                </tr>
+                                <tr>
+                                    <td>F1 Score</td>
+                                    <td>${(data.metrics.f1 * 100).toFixed(2)}%</td>
+                                </tr>
+                                ${data.metrics.roc_auc ? `
+                                <tr>
+                                    <td>ROC AUC</td>
+                                    <td>${(data.metrics.roc_auc * 100).toFixed(2)}%</td>
+                                </tr>
+                                ` : ''}
+                                ${data.metrics.num_classes ? `
+                                <tr>
+                                    <td>Number of Classes</td>
+                                    <td>${data.metrics.num_classes}</td>
+                                </tr>
+                                ` : ''}
+                            `;
+                        } else if (taskType === 'regression') {
+                            metricsHTML += `
+                                <tr>
+                                    <td>R-squared</td>
+                                    <td>${(data.metrics.r2 * 100).toFixed(2)}%</td>
+                                </tr>
+                                <tr>
+                                    <td>Mean Absolute Error</td>
+                                    <td>${data.metrics.mae.toFixed(4)}</td>
+                                </tr>
+                                <tr>
+                                    <td>Mean Squared Error</td>
+                                    <td>${data.metrics.mse.toFixed(4)}</td>
+                                </tr>
+                                <tr>
+                                    <td>Root Mean Squared Error</td>
+                                    <td>${data.metrics.rmse.toFixed(4)}</td>
+                                </tr>
+                            `;
+                        } else if (taskType === 'timeseries') {
+                            metricsHTML += `
+                                <tr>
+                                    <td>R-squared</td>
+                                    <td>${(data.metrics.r2 * 100).toFixed(2)}%</td>
+                                </tr>
+                                <tr>
+                                    <td>RMSE</td>
+                                    <td>${data.metrics.rmse.toFixed(2)}</td>
+                                </tr>
+                                <tr>
+                                    <td>MAE</td>
+                                    <td>${data.metrics.mae.toFixed(2)}</td>
+                                </tr>
+                            `;
+                        }
+                        
+                        metricsHTML += `
                                         </tbody>
                                     </table>
                                 </div>
                                 <div class="col-md-6">
-                                    <p><strong>Model Type:</strong> ${modelType === 'random_forest' ? 'Random Forest' : 'XGBoost'}</p>
+                                    <p><strong>Task Type:</strong> ${taskType.charAt(0).toUpperCase() + taskType.slice(1)}</p>
                                     <p><strong>Target Column:</strong> ${targetColumn}</p>
+                                    <p><strong>Model:</strong> ${taskType === 'classification' ? 'Random Forest' : 
+                                                              taskType === 'regression' ? 'Generalized Linear Model' : 
+                                                              'XGBoost Forecast'}</p>
                                     <p><strong>Features Used:</strong> ${featureColumns.length}</p>
-                                    <p><strong>Classification Type:</strong> ${data.metrics.num_classes > 2 ? 'Multi-class' : 'Binary'}</p>
+                                    ${taskType === 'timeseries' ? `
+                                    <p><strong>Time Column:</strong> ${timeColumn}</p>
+                                    <p><strong>Forecast Periods:</strong> ${forecastPeriods}</p>
+                                    ` : ''}
                                 </div>
                             </div>
                         `;
@@ -381,10 +546,10 @@
                         }
                         
                         // Update prediction form
-                        createPredictionForm(featureColumns);
+                        createPredictionForm(taskType, featureColumns, timeColumn);
                         
                         // Update model evaluation tab
-                        updateModelEvaluation(data.metrics);
+                        updateModelEvaluation(taskType, data.metrics);
                     }
                 })
                 .catch(error => {
@@ -395,7 +560,7 @@
             });
             
             // Function to create prediction form based on trained model features
-            function createPredictionForm(features) {
+            function createPredictionForm(taskType, features, timeColumn) {
                 if (!features || features.length === 0) return;
                 
                 let formHTML = `
@@ -405,15 +570,28 @@
                         </div>
                 `;
                 
-                // Create input fields for each feature
-                features.forEach(feature => {
+                if (taskType === 'timeseries') {
+                    // For time series, we just need the forecast periods
                     formHTML += `
                         <div class="mb-3">
-                            <label for="pred-${feature}" class="form-label">${feature}</label>
-                            <input type="text" class="form-control" id="pred-${feature}" name="${feature}" required>
+                            <label for="forecastPeriodsInput" class="form-label">Forecast Periods</label>
+                            <input type="number" class="form-control" id="forecastPeriodsInput" value="${trainedModel.forecastPeriods}" min="1" max="36">
+                            <div class="form-text">Number of future periods to forecast</div>
                         </div>
                     `;
-                });
+                } else {
+                    // For classification and regression, create input fields for each feature
+                    formHTML += `<p>Enter values for the features used in the model:</p>`;
+                    
+                    features.forEach(feature => {
+                        formHTML += `
+                            <div class="mb-3">
+                                <label for="pred-${feature}" class="form-label">${feature}</label>
+                                <input type="text" class="form-control" id="pred-${feature}" name="${feature}" required>
+                            </div>
+                        `;
+                    });
+                }
                 
                 formHTML += `
                         <div class="d-grid gap-2">
@@ -428,15 +606,6 @@
                 document.getElementById('makePredictionForm').addEventListener('submit', function(e) {
                     e.preventDefault();
                     
-                    // Collect input values
-                    const inputData = {};
-                    features.forEach(feature => {
-                        const input = document.getElementById(`pred-${feature}`);
-                        // Try to convert to number if possible
-                        const value = isNaN(input.value) ? input.value : Number(input.value);
-                        inputData[feature] = value;
-                    });
-                    
                     // Display loading
                     document.getElementById('predictionResult').innerHTML = `
                         <div class="text-center py-4">
@@ -445,15 +614,41 @@
                         </div>
                     `;
                     
+                    let apiEndpoint = '';
+                    let requestData = {};
+                    
+                    if (taskType === 'timeseries') {
+                        // For time series forecast
+                        const forecastPeriods = parseInt(document.getElementById('forecastPeriodsInput').value);
+                        
+                        apiEndpoint = '/api/predict_forecast';
+                        requestData = {
+                            forecast_periods: forecastPeriods
+                        };
+                    } else {
+                        // For classification and regression
+                        const inputData = {};
+                        features.forEach(feature => {
+                            const input = document.getElementById(`pred-${feature}`);
+                            // Try to convert to number if possible
+                            const value = isNaN(input.value) ? input.value : Number(input.value);
+                            inputData[feature] = value;
+                        });
+                        
+                        apiEndpoint = '/api/predict';
+                        requestData = {
+                            data: inputData,
+                            task_type: taskType
+                        };
+                    }
+                    
                     // Send request to API
-                    fetch('/api/predict_churn', {
+                    fetch(apiEndpoint, {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
                         },
-                        body: JSON.stringify({
-                            data: inputData
-                        }),
+                        body: JSON.stringify(requestData),
                     })
                     .then(response => response.json())
                     .then(data => {
@@ -462,44 +657,13 @@
                                 <div class="alert alert-danger">${data.error}</div>
                             `;
                         } else {
-                            // Display prediction based on whether it's multi-class or binary
-                            document.getElementById('predictionResult').innerHTML = displayPredictionResult(data.prediction);
-                            
-                            // Create gauge chart if binary prediction with probabilities
-                            if (data.prediction.probabilities && 
-                                (!data.prediction.class_labels || data.prediction.class_labels.length <= 2)) {
-                                const churnProb = data.prediction.probabilities[0][1] * 100;
-                                
-                                const gaugeData = [
-                                    {
-                                        type: "indicator",
-                                        mode: "gauge+number",
-                                        value: churnProb,
-                                        title: { text: "Probability", font: { size: 16 } },
-                                        gauge: {
-                                            axis: { range: [null, 100] },
-                                            bar: { color: "darkblue" },
-                                            bgcolor: "white",
-                                            borderwidth: 2,
-                                            bordercolor: "gray",
-                                            steps: [
-                                                { range: [0, 25], color: "green" },
-                                                { range: [25, 50], color: "yellow" },
-                                                { range: [50, 75], color: "orange" },
-                                                { range: [75, 100], color: "red" }
-                                            ],
-                                            threshold: {
-                                                line: { color: "red", width: 4 },
-                                                thickness: 0.75,
-                                                value: 50
-                                            }
-                                        }
-                                    }
-                                ];
-                                
-                                const layout = { margin: { t: 25, b: 25, l: 25, r: 25 } };
-                                
-                                Plotly.newPlot('probabilityGauge', gaugeData, layout);
+                            // Display prediction based on task type
+                            if (taskType === 'classification') {
+                                document.getElementById('predictionResult').innerHTML = displayClassificationResult(data.prediction);
+                            } else if (taskType === 'regression') {
+                                document.getElementById('predictionResult').innerHTML = displayRegressionResult(data.prediction);
+                            } else if (taskType === 'timeseries') {
+                                document.getElementById('predictionResult').innerHTML = displayForecastResult(data.forecast);
                             }
                         }
                     })
@@ -511,8 +675,8 @@
                 });
             }
             
-            // Function to display prediction results based on class type
-            function displayPredictionResult(predictionData) {
+            // Function to display classification prediction results
+            function displayClassificationResult(predictionData) {
                 let resultHTML = "";
                 
                 // Check if we have class labels and multiple classes
@@ -550,153 +714,3 @@
                             `;
                         });
                     }
-                    
-                    resultHTML += `
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-                        </div>
-                    `;
-                } else {
-                    // Binary classification case
-                    const prediction = predictionData.predictions[0];
-                    
-                    // For binary classification, check if the prediction is a boolean or binary value
-                    let predictionText = "";
-                    if (typeof prediction === 'boolean' || prediction === 0 || prediction === 1 || 
-                        prediction === '0' || prediction === '1' || 
-                        prediction === 'true' || prediction === 'false' ||
-                        prediction === 'True' || prediction === 'False') {
-                        // It's a churn prediction
-                        predictionText = prediction == true || prediction == 1 || 
-                                        prediction == 'true' || prediction == 'True' ? 
-                                        'Customer will churn' : 'Customer will not churn';
-                    } else {
-                        // It's some other binary classification
-                        predictionText = `Predicted Class: ${prediction}`;
-                    }
-                    
-                    resultHTML = `
-                        <div class="text-center">
-                            <div class="display-6 mb-3">${predictionText}</div>
-                    `;
-                    
-                    // Display probability if available
-                    if (predictionData.probabilities) {
-                        // For binary classification (usually index 1 is the "positive" class)
-                        let probIndex = 1;
-                        if (predictionData.probabilities[0].length <= 1) {
-                            probIndex = 0;
-                        }
-                        
-                        const probability = predictionData.probabilities[0][probIndex] * 100;
-                        resultHTML += `
-                            <div class="h4 text-${probability > 50 ? 'danger' : 'success'}">
-                                Probability: ${probability.toFixed(2)}%
-                            </div>
-                        `;
-                        
-                        // Create a gauge chart for probability
-                        resultHTML += `<div id="probabilityGauge" style="height: 300px;"></div>`;
-                    }
-                    
-                    resultHTML += `</div>`;
-                }
-                
-                return resultHTML;
-            }
-            
-            // Function to update model evaluation tab
-            function updateModelEvaluation(metrics) {
-                if (!metrics) return;
-                
-                let evaluationHTML = `
-                    <div class="row">
-                        <div class="col-md-6">
-                            <h5>Performance Metrics</h5>
-                            <table class="table table-bordered">
-                                <thead class="table-primary">
-                                    <tr>
-                                        <th>Metric</th>
-                                        <th>Value</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <td>Accuracy</td>
-                                        <td>${(metrics.accuracy * 100).toFixed(2)}%</td>
-                                    </tr>
-                                    <tr>
-                                        <td>Precision</td>
-                                        <td>${(metrics.precision * 100).toFixed(2)}%</td>
-                                    </tr>
-                                    <tr>
-                                        <td>Recall</td>
-                                        <td>${(metrics.recall * 100).toFixed(2)}%</td>
-                                    </tr>
-                                    <tr>
-                                        <td>F1 Score</td>
-                                        <td>${(metrics.f1 * 100).toFixed(2)}%</td>
-                                    </tr>
-                                    ${metrics.roc_auc ? `
-                                    <tr>
-                                        <td>ROC AUC</td>
-                                        <td>${(metrics.roc_auc * 100).toFixed(2)}%</td>
-                                    </tr>
-                                    ` : ''}
-                                    ${metrics.num_classes ? `
-                                    <tr>
-                                        <td>Number of Classes</td>
-                                        <td>${metrics.num_classes}</td>
-                                    </tr>
-                                    ` : ''}
-                                </tbody>
-                            </table>
-                        </div>
-                        <div class="col-md-6">
-                            <h5>What These Metrics Mean</h5>
-                            <ul class="list-group">
-                                <li class="list-group-item">
-                                    <strong>Accuracy:</strong> Overall correctness of predictions
-                                </li>
-                                <li class="list-group-item">
-                                    <strong>Precision:</strong> Accuracy of positive predictions (low false positives)
-                                </li>
-                                <li class="list-group-item">
-                                    <strong>Recall:</strong> Ability to find all positive samples (low false negatives)
-                                </li>
-                                <li class="list-group-item">
-                                    <strong>F1 Score:</strong> Balance between precision and recall
-                                </li>
-                                ${metrics.roc_auc ? `
-                                <li class="list-group-item">
-                                    <strong>ROC AUC:</strong> Ability to distinguish between classes
-                                </li>
-                                ` : ''}
-                            </ul>
-                        </div>
-                    </div>
-                    
-                    <div class="mt-4">
-                        <h5>Model Interpretation</h5>
-                        <div class="card">
-                            <div class="card-body">
-                                <p>Based on the metrics above, this model ${metrics.accuracy > 0.8 ? 'performs well' : 'may need improvement'} for classification.</p>
-                                <p>Businesses should focus on the following when using this model:</p>
-                                <ul>
-                                    <li>High precision means fewer false alarms when identifying classes</li>
-                                    <li>High recall means the model can catch most instances of each class</li>
-                                    <li>The most important features for prediction are shown in the Feature Importance chart on the Train Model tab</li>
-                                </ul>
-                            </div>
-                        </div>
-                    </div>
-                `;
-                
-                document.getElementById('modelEvaluation').innerHTML = evaluationHTML;
-            }
-        });
-    </script>
-</body>
-</html>

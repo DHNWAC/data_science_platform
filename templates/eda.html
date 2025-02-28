@@ -31,10 +31,7 @@
                         <a class="nav-link" href="/visualize">Visualize</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="/churn_prediction">Classification</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/sales_forecast">Sales Forecast</a>
+                        <a class="nav-link" href="/prediction">Prediction</a>
                     </li>
                 </ul>
             </div>
@@ -59,11 +56,8 @@
                                 <a href="/visualize" class="btn btn-success">
                                     <i class="bi bi-bar-chart-line"></i> Visualize Data
                                 </a>
-                                <a href="/churn_prediction" class="btn btn-info">
-                                    <i class="bi bi-graph-up"></i> Classify Target
-                                </a>
-                                <a href="/sales_forecast" class="btn btn-warning">
-                                    <i class="bi bi-calendar-range"></i> Forecast Sales
+                                <a href="/prediction" class="btn btn-info">
+                                    <i class="bi bi-graph-up"></i> Prediction Models
                                 </a>
                             </div>
                         </div>
@@ -122,141 +116,3 @@
                                                 <td>{{ "%.2f"|format(stat['50%']) if stat['50%'] is not none }}</td>
                                                 <td>{{ "%.2f"|format(stat['75%']) if stat['75%'] is not none }}</td>
                                                 <td>{{ "%.2f"|format(stat.max) if stat.max is not none }}</td>
-                                            </tr>
-                                            {% endfor %}
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Missing Values Tab -->
-                    <div class="tab-pane fade" id="missing" role="tabpanel">
-                        <div class="card shadow-sm">
-                            <div class="card-body">
-                                <h5 class="card-title">Missing Values</h5>
-                                <div class="table-responsive">
-                                    <table class="table table-striped table-bordered">
-                                        <thead class="table-primary">
-                                            <tr>
-                                                <th>Column</th>
-                                                <th>Missing Count</th>
-                                                <th>Missing Percentage</th>
-                                                <th>Visual</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {% for item in missing_values %}
-                                            <tr>
-                                                <td>{{ item.column }}</td>
-                                                <td>{{ item.missing_count }}</td>
-                                                <td>{{ item.missing_percentage }}%</td>
-                                                <td>
-                                                    <div class="progress">
-                                                        <div class="progress-bar bg-danger" role="progressbar" style="width: {{ item.missing_percentage }}%;" aria-valuenow="{{ item.missing_percentage }}" aria-valuemin="0" aria-valuemax="100">{{ item.missing_percentage }}%</div>
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                            {% endfor %}
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Data Types Tab -->
-                    <div class="tab-pane fade" id="datatypes" role="tabpanel">
-                        <div class="card shadow-sm">
-                            <div class="card-body">
-                                <h5 class="card-title">Data Types</h5>
-                                <div class="table-responsive">
-                                    <table class="table table-striped table-bordered">
-                                        <thead class="table-primary">
-                                            <tr>
-                                                <th>Column</th>
-                                                <th>Data Type</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {% for item in data_types %}
-                                            <tr>
-                                                <td>{{ item.column }}</td>
-                                                <td>
-                                                    <span class="badge bg-info">{{ item.data_type }}</span>
-                                                </td>
-                                            </tr>
-                                            {% endfor %}
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Correlations Tab -->
-                    <div class="tab-pane fade" id="correlations" role="tabpanel">
-                        <div class="card shadow-sm">
-                            <div class="card-body">
-                                <h5 class="card-title">Correlations Between Features</h5>
-                                {% if correlations %}
-                                <div class="table-responsive">
-                                    <table class="table table-striped table-bordered">
-                                        <thead class="table-primary">
-                                            <tr>
-                                                <th>Feature 1</th>
-                                                <th>Feature 2</th>
-                                                <th>Correlation</th>
-                                                <th>Strength</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {% for corr in correlations %}
-                                            <tr>
-                                                <td>{{ corr.column1 }}</td>
-                                                <td>{{ corr.column2 }}</td>
-                                                <td>{{ "%.3f"|format(corr.correlation) }}</td>
-                                                <td>
-                                                    {% if corr.correlation|abs >= 0.7 %}
-                                                    <span class="badge bg-danger">Strong</span>
-                                                    {% elif corr.correlation|abs >= 0.4 %}
-                                                    <span class="badge bg-warning">Moderate</span>
-                                                    {% else %}
-                                                    <span class="badge bg-success">Weak</span>
-                                                    {% endif %}
-                                                </td>
-                                            </tr>
-                                            {% endfor %}
-                                        </tbody>
-                                    </table>
-                                </div>
-                                
-                                <div id="correlation-heatmap" class="mt-4" style="height: 500px;"></div>
-                                <script>
-                                    // Create correlation heatmap using Plotly
-                                    document.addEventListener('DOMContentLoaded', function() {
-                                        // Code to generate heatmap will be added by JavaScript
-                                    });
-                                </script>
-                                {% else %}
-                                <div class="alert alert-info">No correlation data available or not enough numerical columns.</div>
-                                {% endif %}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <footer class="mt-5 py-3 bg-light">
-        <div class="container text-center">
-            <p>Data Science Platform MVP &copy; 2023</p>
-        </div>
-    </footer>
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
-</body>
-</html>
