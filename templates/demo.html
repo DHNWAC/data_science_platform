@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Request Demo - Data Science Platform</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand" href="/">Data Science Platform</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/upload">Upload Data</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/eda">EDA</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/visualize">Visualize</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/churn_prediction">Churn Prediction</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/pricing">Pricing</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/demo">Request Demo</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-5">
+        <div class="row">
+            <div class="col-md-8 offset-md-2">
+                <div class="card shadow">
+                    <div class="card-header bg-primary text-white">
+                        <h3 class="card-title mb-0">Request a Personalized Demo</h3>
+                    </div>
+                    <div class="card-body">
+                        <p class="lead mb-4">Complete the form below and one of our data science experts will contact you to schedule a personalized demo.</p>
+                        
+                        <form id="demoRequestForm" action="/demo" method="post">
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="firstName" class="form-label">First Name*</label>
+                                        <input type="text" class="form-control" id="firstName" name="firstName" required>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="lastName" class="form-label">Last Name*</label>
+                                        <input type="text" class="form-control" id="lastName" name="lastName" required>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="emailAddress" class="form-label">Email Address*</label>
+                                        <input type="email" class="form-control" id="emailAddress" name="emailAddress" required>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="jobTitle" class="form-label">Job Title*</label>
+                                        <input type="text" class="form-control" id="jobTitle" name="jobTitle" required>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="companyName" class="form-label">Company Name*</label>
+                                        <input type="text" class="form-control" id="companyName" name="companyName" required>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="employeeCount" class="form-label">Employee Count*</label>
+                                        <select class="form-select" id="employeeCount" name="employeeCount" required>
+                                            <option value="" selected>Select...</option>
+                                            <option value="1-10">1-10</option>
+                                            <option value="11-50">11-50</option>
+                                            <option value="51-200">51-200</option>
+                                            <option value="201-500">201-500</option>
+                                            <option value="501-1000">501-1000</option>
+                                            <option value="1001-5000">1001-5000</option>
+                                            <option value="5001+">5001+</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="country" class="form-label">Country*</label>
+                                        <select class="form-select" id="country" name="country" required>
+                                            <option value="" selected>Select...</option>
+                                            <option value="United States">United States</option>
+                                            <option value="Canada">Canada</option>
+                                            <option value="United Kingdom">United Kingdom</option>
+                                            <option value="Australia">Australia</option>
+                                            <option value="Germany">Germany</option>
+                                            <option value="France">France</option>
+                                            <option value="Japan">Japan</option>
+                                            <option value="China">China</option>
+                                            <option value="India">India</option>
+                                            <option value="Brazil">Brazil</option>
+                                            <option value="Other">Other</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="phoneNumber" class="form-label">Phone Number*</label>
+                                        <input type="tel" class="form-control" id="phoneNumber" name="phoneNumber" required>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="interests" class="form-label">What features are you most interested in?</label>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" value="Data Exploration" id="interestEDA" name="interests">
+                                    <label class="form-check-label" for="interestEDA">
+                                        Data Exploration & Analysis
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" value="Data Visualization" id="interestViz" name="interests">
+                                    <label class="form-check-label" for="interestViz">
+                                        Data Visualization
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" value="Churn Prediction" id="interestChurn" name="interests">
+                                    <label class="form-check-label" for="interestChurn">
+                                        Customer Churn Prediction
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" value="Automated ML" id="interestAutoML" name="interests">
+                                    <label class="form-check-label" for="interestAutoML">
+                                        Automated Machine Learning
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" value="Enterprise Integration" id="interestIntegration" name="interests">
+                                    <label class="form-check-label" for="interestIntegration">
+                                        Enterprise Integration
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="additionalInfo" class="form-label">Any specific questions or requirements?</label>
+                                <textarea class="form-control" id="additionalInfo" name="additionalInfo" rows="3"></textarea>
+                            </div>
+                            
+                            <div class="mb-3 form-check">
+                                <input type="checkbox" class="form-check-input" id="agreeTerms" name="agreeTerms" required>
+                                <label class="form-check-label" for="agreeTerms">I agree to the <a href="#">privacy policy</a> and <a href="#">terms of service</a>.</label>
+                            </div>
+                            
+                            <div class="d-grid gap-2">
+                                <button type="submit" class="btn btn-primary btn-lg">Request Demo</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                
+                <div class="card mt-4 shadow">
+                    <div class="card-header">
+                        <h4 class="card-title mb-0">What to Expect</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-4 text-center mb-3">
+                                <i class="bi bi-calendar-check text-primary" style="font-size: 2rem;"></i>
+                                <h5 class="mt-2">Quick Response</h5>
+                                <p>We'll contact you within 24 hours to schedule your demo.</p>
+                            </div>
+                            <div class="col-md-4 text-center mb-3">
+                                <i class="bi bi-person-video3 text-primary" style="font-size: 2rem;"></i>
+                                <h5 class="mt-2">Personalized Demo</h5>
+                                <p>Get a customized tour of our platform for your specific needs.</p>
+                            </div>
+                            <div class="col-md-4 text-center mb-3">
+                                <i class="bi bi-graph-up-arrow text-primary" style="font-size: 2rem;"></i>
+                                <h5 class="mt-2">ROI Assessment</h5>
+                                <p>Learn how our platform can improve your data science workflows.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="mt-5 py-3 bg-light">
+        <div class="container text-center">
+            <p>Data Science Platform MVP &copy; 2023</p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Form validation and submission
+            const demoForm = document.getElementById('demoRequestForm');
+            
+            if (demoForm) {
+                demoForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    
+                    // Normally, this would submit to the server
+                    // For this MVP, we'll just show a success message
+                    
+                    // Hide the form
+                    demoForm.style.display = 'none';
+                    
+                    // Insert success message
+                    const successMessage = document.createElement('div');
+                    successMessage.className = 'alert alert-success';
+                    successMessage.innerHTML = `
+                        <h4 class="alert-heading">Thank you for your interest!</h4>
+                        <p>Your demo request has been received. One of our data science experts will contact you shortly at the email address you provided.</p>
+                        <hr>
+                        <p class="mb-0">In the meantime, feel free to explore our <a href="/pricing">pricing plans</a> or try our <a href="/">platform's features</a>.</p>
+                    `;
+                    
+                    demoForm.parentNode.insertBefore(successMessage, demoForm);
+                });
+            }
+        });
+    </script>
+</body>
+</html>
