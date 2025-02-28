@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pricing - Data Science Platform</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        .pricing-card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            border-radius: 0.5rem;
+            overflow: visible; /* Changed from 'hidden' to 'visible' */
+            margin-top: 15px; /* Added margin to make space for the badge */
+            position: relative;
+        }
+
+        
+        .pricing-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+        }
+        
+        .pricing-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid rgba(0,0,0,0.125);
+        }
+        
+        .price {
+            font-size: 2.5rem;
+            font-weight: 700;
+        }
+        
+        .price-period {
+            font-size: 1rem;
+            opacity: 0.8;
+        }
+        
+        .feature-list {
+            padding: 1.5rem;
+        }
+        
+        .feature-item {
+            padding: 0.5rem 0;
+            display: flex;
+            align-items: center;
+        }
+        
+        .feature-icon {
+            margin-right: 0.75rem;
+        }
+        
+        .pricing-footer {
+            padding: 1.5rem;
+            border-top: 1px solid rgba(0,0,0,0.125);
+        }
+        
+        .popular-badge {
+            position: absolute;
+            top: -15px; /* Adjusted to position the badge higher */
+            right: 1.5rem;
+            padding: 0.5rem 1rem;
+            font-weight: 600;
+            border-radius: 2rem;
+            z-index: 1; /* Added to ensure badge appears on top */
+        }
+
+        
+        .comparison-table th, .comparison-table td {
+            padding: 0.75rem 1rem;
+        }
+        
+        .check-icon {
+            color: #28a745;
+        }
+        
+        .x-icon {
+            color: #dc3545;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand" href="/">Data Science Platform</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/upload">Upload Data</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/eda">EDA</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/visualize">Visualize</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/churn_prediction">Churn Prediction</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/pricing">Pricing</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/demo">Request Demo</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-5">
+        <div class="row text-center mb-5">
+            <div class="col-md-12">
+                <h1>Simple, Transparent Pricing</h1>
+                <p class="lead">Choose the plan that best fits your data science needs</p>
+            </div>
+        </div>
+        
+        <div class="row">
+            <!-- Starter Plan -->
+            <div class="col-md-4 mb-4">
+                <div class="card pricing-card h-100 shadow-sm">
+                    <div class="pricing-header bg-light">
+                        <h3 class="my-0">Starter</h3>
+                        <div class="price mt-3">$29<span class="price-period">/month</span></div>
+                        <p class="text-muted">Perfect for individuals and small teams</p>
+                    </div>
+                    <div class="feature-list">
+                        <div class="feature-item">
+                            <span class="feature-icon"><i class="bi bi-check-circle-fill check-icon"></i></span>
+                            <span>5GB data storage</span>
+                        </div>
+                        <div class="feature-item">
+                            <span class="feature-icon"><i class="bi bi-check-circle-fill check-icon"></i></span>
+                            <span>Exploratory Data Analysis</span>
+                        </div>
+                        <div class="feature-item">
+                            <span class="feature-icon"><i class="bi bi-check-circle-fill check-icon"></i></span>
+                            <span>Basic Data Visualization</span>
+                        </div>
+                        <div class="feature-item">
+                            <span class="feature-icon"><i class="bi bi-check-circle-fill check-icon"></i></span>
+                            <span>Basic Churn Prediction</span>
+                        </div>
+                        <div class="feature-item">
+                            <span class="feature-icon"><i class="bi bi-check-circle-fill check-icon"></i></span>
+                            <span>1 User</span>
+                        </div>
+                        <div class="feature-item">
+                            <span class="feature-icon"><i class="bi bi-check-circle-fill check-icon"></i></span>
+                            <span>Email Support</span>
+                        </div>
+                        <div class="feature-item">
+                            <span class="feature-icon"><i class="bi bi-x-circle-fill x-icon"></i></span>
+                            <span class="text-muted">Advanced ML Models</span>
+                        </div>
+                        <div class="feature-item">
+                            <span class="feature-icon"><i class="bi bi-x-circle-fill x-icon"></i></span>
+                            <span class="text-muted">API Access</span>
+                        </div>
+                        <div class="feature-item">
+                            <span class="feature-icon"><i class="bi bi-x-circle-fill x-icon"></i></span>
+                            <span class="text-muted">Custom Integrations</span>
+                        </div>
+                    </div>
+                    <div class="pricing-footer text-center">
+                        <a href="/demo" class="btn btn-outline-primary btn-lg">Get Started</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pro Plan (Popular) -->
+            <div class="col-md-4 mb-4">
+                <div class="card pricing-card h-100 shadow position-relative">
+                    <div class="badge bg-primary popular-badge">MOST POPULAR</div>
+                    <div class="pricing-header bg-primary text-white">
+                        <h3 class="my-0">Professional</h3>
+                        <div class="price mt-3">$99<span class="price-period">/month</span></div>
+                        <p>Ideal for growing businesses</p>
+                    </div>
+                    <div class="feature-list">
+                        <div class="feature-item">
+                            <span class="feature-icon"><i class="bi bi-check-circle-fill check-icon"></i></span>
+                            <span>25GB data storage</span>
+                        </div>
+                        <div class="feature-item">
+                            <span class="feature-icon"><i class="bi bi-check-circle-fill check-icon"></i></span>
+                            <span>Advanced Data Analysis</span>
+                        </div>
+                        <div class="feature-item">
+                            <span class="feature-icon"><i class="bi bi-check-circle-fill check-icon"></i></span>
+                            <span>Advanced Visualizations</span>
+                        </div>
+                        <div class="feature-item">
+                            <span class="feature-icon"><i class="bi bi-check-circle-fill check-icon"></i></span>
+                            <span>Advanced Churn Prediction</span>
+                        </div>
+                        <div class="feature-item">
+                            <span class="feature-icon"><i class="bi bi-check-circle-fill check-icon"></i></span>
+                            <span>5 Users</span>
+                        </div>
+                        <div class="feature-item">
+                            <span class="feature-icon"><i class="bi bi-check-circle-fill check-icon"></i></span>
+                            <span>Priority Email & Chat Support</span>
+                        </div>
+                        <div class="feature-item">
+                            <span class="feature-icon"><i class="bi bi-check-circle-fill check-icon"></i></span>
+                            <span>Advanced ML Models</span>
+                        </div>
+                        <div class="feature-item">
+                            <span class="feature-icon"><i class="bi bi-check-circle-fill check-icon"></i></span>
+                            <span>API Access</span>
+                        </div>
+                        <div class="feature-item">
+                            <span class="feature-icon"><i class="bi bi-x-circle-fill x-icon"></i></span>
+                            <span class="text-muted">Custom Integrations</span>
+                        </div>
+                    </div>
+                    <div class="pricing-footer text-center">
+                        <a href="/demo" class="btn btn-primary btn-lg">Get Started</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Enterprise Plan -->
+            <div class="col-md-4 mb-4">
+                <div class="card pricing-card h-100 shadow-sm">
+                    <div class="pricing-header bg-light">
+                        <h3 class="my-0">Enterprise</h3>
+                        <div class="price mt-3">$299<span class="price-period">/month</span></div>
+                        <p class="text-muted">For organizations with advanced needs</p>
+                    </div>
+                    <div class="feature-list">
+                        <div class="feature-item">
+                            <span class="feature-icon"><i class="bi bi-check-circle-fill check-icon"></i></span>
+                            <span>Unlimited data storage</span>
+                        </div>
+                        <div class="feature-item">
+                            <span class="feature-icon"><i class="bi bi-check-circle-fill check-icon"></i></span>
+                            <span>Enterprise-grade Data Analysis</span>
+                        </div>
+                        <div class="feature-item">
+                            <span class="feature-icon"><i class="bi bi-check-circle-fill check-icon"></i></span>
+                            <span>Custom Visualizations</span>
+                        </div>
+                        <div class="feature-item">
+                            <span class="feature-icon"><i class="bi bi-check-circle-fill check-icon"></i></span>
+                            <span>Predictive Analytics Suite</span>
+                        </div>
+                        <div class="feature-item">
+                            <span class="feature-icon"><i class="bi bi-check-circle-fill check-icon"></i></span>
+                            <span>Unlimited Users</span>
+                        </div>
+                        <div class="feature-item">
+                            <span class="feature-icon"><i class="bi bi-check-circle-fill check-icon"></i></span>
+                            <span>24/7 Phone, Email & Chat Support</span>
+                        </div>
+                        <div class="feature-item">
+                            <span class="feature-icon"><i class="bi bi-check-circle-fill check-icon"></i></span>
+                            <span>Custom ML Model Development</span>
+                        </div>
+                        <div class="feature-item">
+                            <span class="feature-icon"><i class="bi bi-check-circle-fill check-icon"></i></span>
+                            <span>Advanced API Access</span>
+                        </div>
+                        <div class="feature-item">
+                            <span class="feature-icon"><i class="bi bi-check-circle-fill check-icon"></i></span>
+                            <span>Custom Integrations</span>
+                        </div>
+                    </div>
+                    <div class="pricing-footer text-center">
+                        <a href="/demo" class="btn btn-outline-primary btn-lg">Contact Sales</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="row mt-5">
+            <div class="col-md-12">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-light">
+                        <h3 class="mb-0">Detailed Feature Comparison</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table comparison-table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Feature</th>
+                                        <th class="text-center">Starter</th>
+                                        <th class="text-center">Professional</th>
+                                        <th class="text-center">Enterprise</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>Data Storage</td>
+                                        <td class="text-center">5GB</td>
+                                        <td class="text-center">25GB</td>
+                                        <td class="text-center">Unlimited</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Data Upload Size Limit</td>
+                                        <td class="text-center">100MB</td>
+                                        <td class="text-center">500MB</td>
+                                        <td class="text-center">No Limit</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Exploratory Data Analysis</td>
+                                        <td class="text-center"><i class="bi bi-check-circle-fill check-icon"></i></td>
+                                        <td class="text-center"><i class="bi bi-check-circle-fill check-icon"></i></td>
+                                        <td class="text-center"><i class="bi bi-check-circle-fill check-icon"></i></td>
+                                    </tr>
+                                    <tr>
+                                        <td>Data Visualization</td>
+                                        <td class="text-center">Basic</td>
+                                        <td class="text-center">Advanced</td>
+                                        <td class="text-center">Custom</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Churn Prediction</td>
+                                        <td class="text-center">Basic</td>
+                                        <td class="text-center">Advanced</td>
+                                        <td class="text-center">Enterprise</td>
+                                    </tr>
+                                    <tr>
+                                        <td>ML Models</td>
+                                        <td class="text-center">1 Model</td>
+                                        <td class="text-center">5 Models</td>
+                                        <td class="text-center">Unlimited</td>
+                                    </tr>
+                                    <tr>
+                                        <td>API Access</td>
+                                        <td class="text-center"><i class="bi bi-x-circle-fill x-icon"></i></td>
+                                        <td class="text-center"><i class="bi bi-check-circle-fill check-icon"></i></td>
+                                        <td class="text-center"><i class="bi bi-check-circle-fill check-icon"></i></td>
+                                    </tr>
+                                    <tr>
+                                        <td>Export Capabilities</td>
+                                        <td class="text-center">CSV</td>
+                                        <td class="text-center">CSV, Excel, PDF</td>
+                                        <td class="text-center">All Formats</td>
+                                    </tr>
+                                    <tr>
+                                        <td>User Management</td>
+                                        <td class="text-center">1 User</td>
+                                        <td class="text-center">5 Users</td>
+                                        <td class="text-center">Unlimited</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Team Collaboration</td>
+                                        <td class="text-center"><i class="bi bi-x-circle-fill x-icon"></i></td>
+                                        <td class="text-center"><i class="bi bi-check-circle-fill check-icon"></i></td>
+                                        <td class="text-center"><i class="bi bi-check-circle-fill check-icon"></i></td>
+                                    </tr>
+                                    <tr>
+                                        <td>Role-Based Access Control</td>
+                                        <td class="text-center"><i class="bi bi-x-circle-fill x-icon"></i></td>
+                                        <td class="text-center">Basic</td>
+                                        <td class="text-center">Advanced</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Support</td>
+                                        <td class="text-center">Email</td>
+                                        <td class="text-center">Email & Chat</td>
+                                        <td class="text-center">24/7 Phone, Email & Chat</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Custom Integrations</td>
+                                        <td class="text-center"><i class="bi bi-x-circle-fill x-icon"></i></td>
+                                        <td class="text-center"><i class="bi bi-x-circle-fill x-icon"></i></td>
+                                        <td class="text-center"><i class="bi bi-check-circle-fill check-icon"></i></td>
+                                    </tr>
+                                    <tr>
+                                        <td>Service Level Agreement (SLA)</td>
+                                        <td class="text-center"><i class="bi bi-x-circle-fill x-icon"></i></td>
+                                        <td class="text-center">99.5% uptime</td>
+                                        <td class="text-center">99.9% uptime</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="row mt-5 mb-5">
+            <div class="col-md-8 offset-md-2">
+                <div class="card shadow-sm bg-light">
+                    <div class="card-body text-center p-5">
+                        <h2>Not sure which plan is right for you?</h2>
+                        <p class="lead mb-4">Schedule a demo with our team to discuss your specific needs and get a personalized recommendation.</p>
+                        <a href="/demo" class="btn btn-primary btn-lg">Schedule a Demo</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="row mt-5">
+            <div class="col-md-12">
+                <div class="accordion" id="faqAccordion">
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="faqOne">
+                            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+                                Can I upgrade or downgrade my plan at any time?
+                            </button>
+                        </h2>
+                        <div id="collapseOne" class="accordion-collapse collapse show" aria-labelledby="faqOne" data-bs-parent="#faqAccordion">
+                            <div class="accordion-body">
+                                Yes, you can upgrade or downgrade your plan at any time. When upgrading, the new features will be immediately available, and we'll prorate the difference in price. When downgrading, the change will take effect at the start of your next billing cycle.
+                            </div>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="faqTwo">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+                                Is there a free trial available?
+                            </button>
+                        </h2>
+                        <div id="collapseTwo" class="accordion-collapse collapse" aria-labelledby="faqTwo" data-bs-parent="#faqAccordion">
+                            <div class="accordion-body">
+                                Yes, we offer a 14-day free trial of our Professional plan with no credit card required. This gives you full access to all Professional features to evaluate if our platform meets your needs.
+                            </div>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="faqThree">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
+                                Do you offer discounts for annual subscriptions?
+                            </button>
+                        </h2>
+                        <div id="collapseThree" class="accordion-collapse collapse" aria-labelledby="faqThree" data-bs-parent="#faqAccordion">
+                            <div class="accordion-body">
+                                Yes, we offer a 20% discount on all plans when billed annually. This is a great way to save while ensuring uninterrupted access to our platform.
+                            </div>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="faqFour">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFour" aria-expanded="false" aria-controls="collapseFour">
+                                Can I get a custom plan for my specific needs?
+                            </button>
+                        </h2>
+                        <div id="collapseFour" class="accordion-collapse collapse" aria-labelledby="faqFour" data-bs-parent="#faqAccordion">
+                            <div class="accordion-body">
+                                Absolutely! For organizations with specific requirements, we offer custom plans. Please contact our sales team to discuss your needs, and we'll tailor a solution specifically for you.
+                            </div>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="faqFive">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFive" aria-expanded="false" aria-controls="collapseFive">
+                                What payment methods do you accept?
+                            </button>
+                        </h2>
+                        <div id="collapseFive" class="accordion-collapse collapse" aria-labelledby="faqFive" data-bs-parent="#faqAccordion">
+                            <div class="accordion-body">
+                                We accept all major credit cards including Visa, Mastercard, American Express, and Discover. For Enterprise plans, we also offer invoicing with net-30 payment terms.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="mt-5 py-3 bg-light">
+        <div class="container text-center">
+            <p>Data Science Platform MVP &copy; 2023</p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

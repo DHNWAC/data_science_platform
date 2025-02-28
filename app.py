@@ -207,5 +207,22 @@ def api_load_sample_data():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
+# New routes for demo request and pricing pages
+@app.route('/demo', methods=['GET', 'POST'])
+def demo():
+    if request.method == 'POST':
+        # In a real application, you would process the form submission here
+        # For example, save the demo request to a database and send an email notification
+        
+        # For this MVP, we'll just return the same template 
+        # (the success message is handled client-side with JavaScript)
+        return render_template('demo.html')
+    
+    return render_template('demo.html')
+
+@app.route('/pricing')
+def pricing():
+    return render_template('pricing.html')
+
 if __name__ == '__main__':
     app.run(debug=True)
