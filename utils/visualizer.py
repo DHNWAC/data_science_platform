@@ -38,6 +38,9 @@ class Visualizer:
     
     def create_bar_chart(self, df, x_column, y_column=None, **kwargs):
         """Create a bar chart with improved aesthetics"""
+        # Make sure we're not passing duplicate color parameters
+        user_color = kwargs.pop('color', None)
+        
         if y_column:
             # If both columns are numeric, use averages
             if pd.api.types.is_numeric_dtype(df[x_column]) and pd.api.types.is_numeric_dtype(df[y_column]):
@@ -50,10 +53,11 @@ class Visualizer:
                         grouped, 
                         x='x_binned', 
                         y='mean',
-                        color='count',
-                        color_continuous_scale='Blues',
+                        # Use a more vibrant color scale
+                        color_continuous_scale='Viridis',
                         labels={'mean': f'Average {y_column}', 'x_binned': x_column, 'count': 'Count'},
-                        template="plotly_white"
+                        template="plotly_white",
+                        **kwargs
                     )
                     fig.update_layout(coloraxis_colorbar=dict(title="Count"))
                 else:
@@ -63,12 +67,12 @@ class Visualizer:
                         grouped, 
                         x=x_column, 
                         y='mean',
-                        color='count',
-                        color_continuous_scale='Blues',
+                        # Use a more vibrant color scale
+                        color_discrete_sequence=px.colors.qualitative.Bold,
                         labels={'mean': f'Average {y_column}', 'count': 'Count'},
-                        template="plotly_white"
+                        template="plotly_white",
+                        **kwargs
                     )
-                    fig.update_layout(coloraxis_colorbar=dict(title="Count"))
             # If x is categorical and y is numeric, show means per category
             elif pd.api.types.is_numeric_dtype(df[y_column]):
                 # Group by x_column and calculate statistics of y_column
@@ -77,12 +81,12 @@ class Visualizer:
                     grouped, 
                     x=x_column, 
                     y='mean',
-                    color='count',
-                    color_continuous_scale='Blues',
+                    # Use a more vibrant color scale
+                    color_discrete_sequence=px.colors.qualitative.Bold,
                     labels={'mean': f'Average {y_column}', 'count': 'Count'},
-                    template="plotly_white"
+                    template="plotly_white",
+                    **kwargs
                 )
-                fig.update_layout(coloraxis_colorbar=dict(title="Count"))
             else:
                 # For two categorical variables, create a count-based bar chart
                 counts = df.groupby([x_column, y_column]).size().reset_index(name='count')
@@ -91,8 +95,10 @@ class Visualizer:
                     x=x_column, 
                     y='count',
                     color=y_column,
+                    color_discrete_sequence=px.colors.qualitative.Bold,
                     barmode='group',
-                    template="plotly_white"
+                    template="plotly_white",
+                    **kwargs
                 )
         else:
             # If y_column is not provided, create a count plot
@@ -112,17 +118,15 @@ class Visualizer:
                 else:
                     value_counts = top_n
             
+            # Use a specific color for single-variable bar charts
             fig = px.bar(
                 value_counts, 
                 x='value', 
                 y='count',
-                color='count',
-                color_continuous_scale='Blues',
+                color_discrete_sequence=['#3366CC', '#DC3912', '#FF9900', '#109618', '#990099'],
                 labels={'value': x_column, 'count': 'Count'},
-                template="plotly_white"
-            )
-            fig.update_layout(
-                coloraxis_showscale=False if len(value_counts) < 3 else True
+                template="plotly_white",
+                **kwargs
             )
         
         # Enhance overall appearance
@@ -130,15 +134,22 @@ class Visualizer:
             title=f"{y_column + ' by ' if y_column else 'Distribution of '}{x_column}",
             xaxis_title=x_column,
             yaxis_title=y_column if y_column else 'Count',
-            plot_bgcolor='white',
+            plot_bgcolor='#f8f9fa',
+            paper_bgcolor='white',
             font=dict(size=12),
             margin=dict(l=40, r=40, t=50, b=40),
         )
+        
+        # Make the bars more vibrant
+        fig.update_traces(marker_line_width=1, marker_line_color="#333333", opacity=0.8)
         
         return {'chart': fig.to_json()}
     
     def create_line_chart(self, df, x_column, y_column, **kwargs):
         """Create a line chart with improved aesthetics"""
+        # Make sure we're not passing duplicate color parameters
+        user_color = kwargs.pop('color', None)
+        
         # Check if x_column is datetime
         if pd.api.types.is_datetime64_any_dtype(df[x_column]) or 'date' in x_column.lower() or 'time' in x_column.lower():
             # Try to convert to datetime if it's not already
@@ -163,6 +174,7 @@ class Visualizer:
                     y=y_column,
                     markers=True,
                     line_shape='linear',
+                    color_discrete_sequence=['#2C3E50', '#E74C3C', '#3498DB'],
                     template="plotly_white",
                     **kwargs
                 )
@@ -175,6 +187,7 @@ class Visualizer:
                     y='count',
                     markers=True,
                     line_shape='linear',
+                    color_discrete_sequence=['#2C3E50', '#E74C3C', '#3498DB'],
                     template="plotly_white",
                     **kwargs
                 )
@@ -187,6 +200,7 @@ class Visualizer:
                 y=y_column,
                 markers=True,
                 line_shape='linear',
+                color_discrete_sequence=['#2C3E50', '#E74C3C', '#3498DB'],
                 template="plotly_white",
                 **kwargs
             )
@@ -208,7 +222,8 @@ class Visualizer:
             title=f"{y_column} by {x_column}",
             xaxis_title=x_column,
             yaxis_title=y_column,
-            plot_bgcolor='white',
+            plot_bgcolor='#f8f9fa',
+            paper_bgcolor='white',
             font=dict(size=12),
             margin=dict(l=40, r=40, t=50, b=40),
             legend=dict(
@@ -227,20 +242,23 @@ class Visualizer:
         
         return {'chart': fig.to_json()}
     
-    def create_scatter_plot(self, df, x_column, y_column, color=None, **kwargs):
+    def create_scatter_plot(self, df, x_column, y_column, **kwargs):
         """Create a scatter plot with improved aesthetics"""
+        # Handle color parameter - first check if 'color' is in kwargs
+        color_col = kwargs.pop('color', None)
+        
         if pd.api.types.is_numeric_dtype(df[x_column]) and pd.api.types.is_numeric_dtype(df[y_column]):
             # For numerical x and y
-            if color:
+            if color_col:
                 # If color is categorical
-                if not pd.api.types.is_numeric_dtype(df[color]):
+                if not pd.api.types.is_numeric_dtype(df[color_col]):
                     fig = px.scatter(
                         df, 
                         x=x_column, 
                         y=y_column, 
-                        color=color,
+                        color=color_col,
                         color_discrete_sequence=px.colors.qualitative.Bold,
-                        opacity=0.7,
+                        opacity=0.8,
                         template="plotly_white",
                         **kwargs
                     )
@@ -250,9 +268,9 @@ class Visualizer:
                         df, 
                         x=x_column, 
                         y=y_column, 
-                        color=color,
+                        color=color_col,
                         color_continuous_scale='Viridis',
-                        opacity=0.7,
+                        opacity=0.8,
                         template="plotly_white",
                         **kwargs
                     )
@@ -263,7 +281,7 @@ class Visualizer:
                     x=x_column, 
                     y=y_column,
                     color_discrete_sequence=['#3366CC'],
-                    opacity=0.7,
+                    opacity=0.8,
                     template="plotly_white",
                     **kwargs
                 )
@@ -279,25 +297,28 @@ class Visualizer:
             )
             
             # Add marginal distributions
-            fig = px.scatter(
+            marginal_fig = px.scatter(
                 df, 
                 x=x_column, 
                 y=y_column,
-                color=color,
+                color=color_col if color_col else None,
                 marginal_x="histogram", 
                 marginal_y="histogram",
-                opacity=0.7,
+                opacity=0.8,
                 template="plotly_white",
                 **kwargs
             )
+            
+            # Use the updated figure with marginals
+            fig = marginal_fig
         else:
             # For non-numerical values, create a jittered scatter plot
             fig = px.strip(
                 df, 
                 x=x_column, 
                 y=y_column,
-                color=color,
-                opacity=0.7,
+                color=color_col if color_col else None,
+                opacity=0.8,
                 template="plotly_white",
                 **kwargs
             )
@@ -307,7 +328,8 @@ class Visualizer:
             title=f"Scatter Plot: {y_column} vs {x_column}",
             xaxis_title=x_column,
             yaxis_title=y_column,
-            plot_bgcolor='white',
+            plot_bgcolor='#f8f9fa',
+            paper_bgcolor='white',
             font=dict(size=12),
             margin=dict(l=40, r=40, t=50, b=40),
             legend=dict(
@@ -323,6 +345,9 @@ class Visualizer:
     
     def create_histogram(self, df, x_column, y_column=None, **kwargs):
         """Create a histogram with improved aesthetics"""
+        # Handle color parameter - first check if 'color' is in kwargs
+        color_col = kwargs.pop('color', None)
+        
         # For numerical columns
         if pd.api.types.is_numeric_dtype(df[x_column]):
             if y_column and pd.api.types.is_numeric_dtype(df[y_column]):
@@ -330,10 +355,11 @@ class Visualizer:
                 fig = px.histogram(
                     df, 
                     x=x_column, 
-                    color=y_column,
+                    color=y_column,  # Use y_column for coloring
                     marginal="box",
-                    opacity=0.7,
+                    opacity=0.8,
                     barmode="overlay",
+                    color_discrete_sequence=px.colors.qualitative.Bold,
                     template="plotly_white",
                     **kwargs
                 )
@@ -344,27 +370,32 @@ class Visualizer:
                     x=x_column,
                     histnorm='probability density',
                     marginal="box",
-                    opacity=0.7,
+                    opacity=0.8,
+                    color_discrete_sequence=['#3366CC'],
                     template="plotly_white",
                     **kwargs
                 )
                 
                 # Add KDE curve
-                from scipy.stats import gaussian_kde
-                data = df[x_column].dropna()
-                kde = gaussian_kde(data)
-                x_range = np.linspace(data.min(), data.max(), 1000)
-                y_kde = kde(x_range)
-                
-                fig.add_trace(
-                    go.Scatter(
-                        x=x_range,
-                        y=y_kde,
-                        mode='lines',
-                        name='KDE',
-                        line=dict(color='red', width=2)
+                try:
+                    from scipy.stats import gaussian_kde
+                    data = df[x_column].dropna()
+                    kde = gaussian_kde(data)
+                    x_range = np.linspace(data.min(), data.max(), 1000)
+                    y_kde = kde(x_range)
+                    
+                    fig.add_trace(
+                        go.Scatter(
+                            x=x_range,
+                            y=y_kde,
+                            mode='lines',
+                            name='KDE',
+                            line=dict(color='red', width=2)
+                        )
                     )
-                )
+                except:
+                    # If KDE fails, just show histogram
+                    pass
         else:
             # For categorical data, create a count-based histogram
             value_counts = df[x_column].value_counts().reset_index()
@@ -377,15 +408,14 @@ class Visualizer:
                 value_counts, 
                 x='value', 
                 y='count',
-                color='count',
-                color_continuous_scale='Blues',
+                color_discrete_sequence=['#3366CC', '#DC3912', '#FF9900', '#109618'],
                 template="plotly_white",
+                labels={"value": x_column, "count": "Count"},
                 **kwargs
             )
             fig.update_layout(
                 xaxis_title=x_column,
-                yaxis_title='Count',
-                coloraxis_showscale=False if len(value_counts) < 3 else True
+                yaxis_title='Count'
             )
         
         # Enhance overall appearance
@@ -393,7 +423,8 @@ class Visualizer:
             title=f"Distribution of {x_column}",
             xaxis_title=x_column,
             yaxis_title="Density" if pd.api.types.is_numeric_dtype(df[x_column]) else "Count",
-            plot_bgcolor='white',
+            plot_bgcolor='#f8f9fa',
+            paper_bgcolor='white',
             font=dict(size=12),
             margin=dict(l=40, r=40, t=50, b=40),
             legend=dict(
@@ -405,10 +436,17 @@ class Visualizer:
             )
         )
         
+        # Make the bars more vibrant
+        if pd.api.types.is_numeric_dtype(df[x_column]):
+            fig.update_traces(marker_line_width=1, marker_line_color="#333333", selector=dict(type="histogram"))
+        
         return {'chart': fig.to_json()}
     
     def create_box_plot(self, df, x_column, y_column=None, **kwargs):
         """Create a box plot with improved aesthetics"""
+        # Handle color parameter - first check if 'color' is in kwargs
+        color_col = kwargs.pop('color', None)
+        
         if y_column:
             # Box plot with categories on x-axis
             if pd.api.types.is_numeric_dtype(df[y_column]):
@@ -418,6 +456,7 @@ class Visualizer:
                     y=y_column,
                     notched=True,
                     points="outliers",
+                    color_discrete_sequence=px.colors.qualitative.Bold,
                     template="plotly_white",
                     **kwargs
                 )
@@ -430,6 +469,7 @@ class Visualizer:
                     y='count',
                     color=y_column,
                     notched=True,
+                    color_discrete_sequence=px.colors.qualitative.Bold,
                     template="plotly_white",
                     **kwargs
                 )
@@ -442,6 +482,7 @@ class Visualizer:
                     y=x_column,
                     notched=True,
                     points="outliers",
+                    color_discrete_sequence=['#3366CC'],
                     template="plotly_white",
                     **kwargs
                 )
@@ -459,7 +500,8 @@ class Visualizer:
             title=title,
             xaxis_title=x_column if y_column else "",
             yaxis_title=y_column if y_column else x_column,
-            plot_bgcolor='white',
+            plot_bgcolor='#f8f9fa',
+            paper_bgcolor='white',
             font=dict(size=12),
             margin=dict(l=40, r=40, t=50, b=40)
         )
@@ -468,6 +510,9 @@ class Visualizer:
     
     def create_pie_chart(self, df, x_column, y_column=None, **kwargs):
         """Create a pie chart with improved aesthetics"""
+        # Handle color parameter
+        color_col = kwargs.pop('color', None)
+        
         if y_column:
             # Group by x_column and calculate sum of y_column
             if pd.api.types.is_numeric_dtype(df[y_column]):
@@ -487,7 +532,7 @@ class Visualizer:
                     values=y_column,
                     hole=0.4,
                     template="plotly_white",
-                    color_discrete_sequence=px.colors.qualitative.Set3,
+                    color_discrete_sequence=px.colors.qualitative.Bold,
                     **kwargs
                 )
                 
@@ -509,7 +554,7 @@ class Visualizer:
                     path=[x_column, y_column], 
                     values='count',
                     template="plotly_white",
-                    color_discrete_sequence=px.colors.qualitative.Set3,
+                    color_discrete_sequence=px.colors.qualitative.Bold,
                     **kwargs
                 )
         else:
@@ -530,7 +575,7 @@ class Visualizer:
                 values='count',
                 hole=0.4,
                 template="plotly_white",
-                color_discrete_sequence=px.colors.qualitative.Set3,
+                color_discrete_sequence=px.colors.qualitative.Bold,
                 **kwargs
             )
             
@@ -584,17 +629,28 @@ class Visualizer:
                 **kwargs
             )
             
-            # Improve layout
+            # Improve layout - ensure axis labels are visible
             fig.update_layout(
                 title="Correlation Matrix",
                 width=800,
                 height=700,
                 xaxis=dict(
                     title="",
-                    tickangle=-45
+                    tickangle=-45,
+                    tickfont=dict(size=11),
+                    tickmode='array',
+                    tickvals=list(range(len(corr_matrix.columns))),
+                    ticktext=corr_matrix.columns,
+                    side='bottom',
+                    showgrid=True
                 ),
                 yaxis=dict(
-                    title=""
+                    title="",
+                    tickfont=dict(size=11),
+                    tickmode='array',
+                    tickvals=list(range(len(corr_matrix.index))),
+                    ticktext=corr_matrix.index,
+                    showgrid=True
                 ),
                 coloraxis_colorbar=dict(
                     title="Correlation",
@@ -602,9 +658,10 @@ class Visualizer:
                     lenmode="pixels", len=500,
                     ticks="outside"
                 ),
-                plot_bgcolor='white',
+                plot_bgcolor='#f8f9fa',
+                paper_bgcolor='white',
                 font=dict(size=12),
-                margin=dict(l=40, r=40, t=50, b=40)
+                margin=dict(l=60, r=40, t=50, b=100)
             )
             
             # Improve hover details and text formatting
@@ -620,6 +677,9 @@ class Visualizer:
     
     def create_time_series_plot(self, df, time_column, value_column, **kwargs):
         """Create a time series plot"""
+        # Make sure we're not passing duplicate color parameters
+        user_color = kwargs.pop('color', None)
+        
         # Ensure time_column is in datetime format
         if df[time_column].dtype != 'datetime64[ns]':
             try:
@@ -637,6 +697,7 @@ class Visualizer:
             x=time_column, 
             y=value_column, 
             markers=True,
+            color_discrete_sequence=['#3366CC', '#DC3912', '#FF9900'],
             template="plotly_white",
             **kwargs
         )
@@ -646,36 +707,8 @@ class Visualizer:
             title=f"Time Series: {value_column} over Time",
             xaxis_title=time_column,
             yaxis_title=value_column,
-            plot_bgcolor='white',
-            font=dict(size=12),
-            margin=dict(l=40, r=40, t=50, b=40)
-        )
-        
-        return {'chart': fig.to_json()}
-    
-    def create_pairplot(self, df, columns=None, hue=None, **kwargs):
-        """Create a pair plot with Plotly"""
-        if columns is None:
-            # Get only numerical columns
-            columns = df.select_dtypes(include=['int64', 'float64']).columns.tolist()
-        
-        if len(columns) < 2:
-            return {'error': 'Need at least 2 columns for a pair plot'}
-        
-        # Create a scatter matrix
-        fig = px.scatter_matrix(
-            df, 
-            dimensions=columns, 
-            color=hue,
-            opacity=0.7,
-            template="plotly_white",
-            **kwargs
-        )
-        
-        # Enhance overall appearance
-        fig.update_layout(
-            title="Pair Plot",
-            plot_bgcolor='white',
+            plot_bgcolor='#f8f9fa',
+            paper_bgcolor='white',
             font=dict(size=12),
             margin=dict(l=40, r=40, t=50, b=40)
         )
