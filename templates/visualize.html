@@ -456,6 +456,9 @@
                 // Parse the chart JSON
                 const chartConfig = JSON.parse(chartData.chart);
                 
+                // IMPORTANT: Clear any loading indicators before rendering
+                document.getElementById('chartContainer').innerHTML = '';
+                
                 // If it's a correlation matrix, adjust the container size
                 if (chartType === 'correlation') {
                     document.getElementById('chartContainer').style.height = '650px';

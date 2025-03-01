@@ -341,12 +341,12 @@
             
             function highlight() {
                 dropzone.classList.add('bg-light');
-                dropzone.style.borderColor = var(--primary);
+                dropzone.style.borderColor = "#80be15"; // Your primary color value
             }
             
             function unhighlight() {
                 dropzone.classList.remove('bg-light');
-                dropzone.style.borderColor = '#ddd';
+                dropzone.style.borderColor = "#80be15"; // Your primary color value
             }
             
             dropzone.addEventListener('drop', handleDrop, false);
