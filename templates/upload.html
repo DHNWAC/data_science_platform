@@ -341,7 +341,8 @@
             
             function highlight() {
                 dropzone.classList.add('bg-light');
-                dropzone.style.borderColor = var(--primary);
+                // Use a direct color value instead of CSS variable reference
+                dropzone.style.borderColor = "#80be15"; // Your primary color value
             }
             
             function unhighlight() {
