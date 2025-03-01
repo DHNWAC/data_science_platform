@@ -3,28 +3,86 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pricing - Data Science Platform</title>
+    <title>Pricing | Celstium</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <style>
+        :root {
+            --primary: #80be15;
+            --primary-dark: #5f9207;
+            --primary-light: #eaffc7;
+            --secondary: #d7ff94;
+            --dark: #111111;
+            --black: #111111;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #ffffff;
+            color: var(--dark);
+        }
+        
+        .navbar {
+            background: var(--black) !important;
+        }
+        
+        .btn-primary {
+            background-color: var(--primary);
+            border-color: var(--primary);
+            color: var(--black);
+            font-weight: 600;
+        }
+        
+        .btn-primary:hover {
+            background-color: var(--primary-dark);
+            border-color: var(--primary-dark);
+            color: var(--black);
+        }
+        
+        .btn-outline-primary {
+            border-color: var(--primary);
+            color: var(--dark);
+        }
+        
+        .btn-outline-primary:hover {
+            background-color: var(--primary);
+            color: var(--black);
+        }
+        
+        .logo-container img {
+            height: 40px;
+        }
+        
         .pricing-card {
             transition: transform 0.3s ease, box-shadow 0.3s ease;
-            border-radius: 0.5rem;
-            overflow: visible; /* Changed from 'hidden' to 'visible' */
-            margin-top: 15px; /* Added margin to make space for the badge */
+            border-radius: 16px;
+            overflow: visible;
+            margin-top: 15px;
             position: relative;
+            border: none;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
         }
-
         
         .pricing-card:hover {
             transform: translateY(-10px);
-            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.15);
         }
         
         .pricing-header {
             padding: 1.5rem;
-            border-bottom: 1px solid rgba(0,0,0,0.125);
+            border-bottom: 1px solid rgba(0,0,0,0.1);
+        }
+        
+        .pricing-header.bg-primary {
+            background-color: var(--primary) !important;
+            color: var(--black);
+        }
+        
+        .pricing-header.bg-light {
+            background-color: #f8f9fa;
         }
         
         .price {
@@ -53,37 +111,52 @@
         
         .pricing-footer {
             padding: 1.5rem;
-            border-top: 1px solid rgba(0,0,0,0.125);
+            border-top: 1px solid rgba(0,0,0,0.1);
         }
         
         .popular-badge {
             position: absolute;
-            top: -15px; /* Adjusted to position the badge higher */
+            top: -15px;
             right: 1.5rem;
             padding: 0.5rem 1rem;
             font-weight: 600;
             border-radius: 2rem;
-            z-index: 1; /* Added to ensure badge appears on top */
+            z-index: 1;
+            background-color: var(--primary);
+            color: var(--black);
         }
-
         
         .comparison-table th, .comparison-table td {
             padding: 0.75rem 1rem;
         }
         
         .check-icon {
-            color: #28a745;
+            color: var(--primary-dark);
         }
         
         .x-icon {
-            color: #dc3545;
+            color: #ff6b6b;
+        }
+        
+        .accordion-button:not(.collapsed) {
+            background-color: var(--primary-light);
+            color: var(--black);
+        }
+        
+        .accordion-button:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 0.25rem rgba(196, 255, 97, 0.25);
         }
     </style>
 </head>
 <body>
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+    <nav class="navbar navbar-expand-lg navbar-dark">
         <div class="container">
-            <a class="navbar-brand" href="/">Data Science Platform</a>
+            <a class="navbar-brand d-flex align-items-center" href="/">
+                <div class="logo-container me-2">
+                    <img src="{{ url_for('static', filename='src_images/logo_black.png') }}" alt="Celstium Logo">
+                </div>
+            </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
@@ -118,7 +191,7 @@
     <div class="container mt-5">
         <div class="row text-center mb-5">
             <div class="col-md-12">
-                <h1>Simple, Transparent Pricing</h1>
+                <h1 class="display-4 fw-bold">Simple, Transparent <span style="color: var(--primary-dark);">Pricing</span></h1>
                 <p class="lead">Choose the plan that best fits your data science needs</p>
             </div>
         </div>
@@ -171,7 +244,7 @@
                         </div>
                     </div>
                     <div class="pricing-footer text-center">
-                        <a href="/demo" class="btn btn-outline-primary btn-lg">Get Started</a>
+                        <a href="/demo" class="btn btn-outline-dark btn-lg">Get Started</a>
                     </div>
                 </div>
             </div>
@@ -179,8 +252,8 @@
             <!-- Pro Plan (Popular) -->
             <div class="col-md-4 mb-4">
                 <div class="card pricing-card h-100 shadow position-relative">
-                    <div class="badge bg-primary popular-badge">MOST POPULAR</div>
-                    <div class="pricing-header bg-primary text-white">
+                    <div class="popular-badge">MOST POPULAR</div>
+                    <div class="pricing-header bg-primary">
                         <h3 class="my-0">Professional</h3>
                         <div class="price mt-3">$99<span class="price-period">/month</span></div>
                         <p>Ideal for growing businesses</p>
@@ -276,7 +349,7 @@
                         </div>
                     </div>
                     <div class="pricing-footer text-center">
-                        <a href="/demo" class="btn btn-outline-primary btn-lg">Contact Sales</a>
+                        <a href="/demo" class="btn btn-outline-dark btn-lg">Contact Sales</a>
                     </div>
                 </div>
             </div>
@@ -285,7 +358,7 @@
         <div class="row mt-5">
             <div class="col-md-12">
                 <div class="card shadow-sm">
-                    <div class="card-header bg-light">
+                    <div class="card-header bg-black text-white">
                         <h3 class="mb-0">Detailed Feature Comparison</h3>
                     </div>
                     <div class="card-body">
@@ -394,11 +467,11 @@
         
         <div class="row mt-5 mb-5">
             <div class="col-md-8 offset-md-2">
-                <div class="card shadow-sm bg-light">
+                <div class="card shadow-sm" style="border-radius: 16px; background: linear-gradient(135deg, var(--primary-light), var(--secondary));">
                     <div class="card-body text-center p-5">
                         <h2>Not sure which plan is right for you?</h2>
                         <p class="lead mb-4">Schedule a demo with our team to discuss your specific needs and get a personalized recommendation.</p>
-                        <a href="/demo" class="btn btn-primary btn-lg">Schedule a Demo</a>
+                        <a href="/demo" class="btn btn-dark btn-lg">Schedule a Demo</a>
                     </div>
                 </div>
             </div>
@@ -406,6 +479,7 @@
         
         <div class="row mt-5">
             <div class="col-md-12">
+                <h3 class="mb-4">Frequently Asked Questions</h3>
                 <div class="accordion" id="faqAccordion">
                     <div class="accordion-item">
                         <h2 class="accordion-header" id="faqOne">
@@ -472,9 +546,44 @@
         </div>
     </div>
 
-    <footer class="mt-5 py-3 bg-light">
-        <div class="container text-center">
-            <p>Data Science Platform MVP &copy; 2023</p>
+    <footer class="mt-5 py-4 bg-dark text-white">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="logo-container mb-3">
+                        <img src="{{ url_for('static', filename='src_images/celstium_logo.png') }}" alt="Celstium Logo">
+                    </div>
+                    <p>Making unstructured data into actionable data.</p>
+                </div>
+                <div class="col-md-2">
+                    <h5>Company</h5>
+                    <ul class="list-unstyled">
+                        <li><a href="#" class="text-white">About</a></li>
+                        <li><a href="#" class="text-white">Careers</a></li>
+                        <li><a href="#" class="text-white">Blog</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-2">
+                    <h5>Product</h5>
+                    <ul class="list-unstyled">
+                        <li><a href="/eda" class="text-white">EDA</a></li>
+                        <li><a href="/visualize" class="text-white">Visualize</a></li>
+                        <li><a href="/churn_prediction" class="text-white">Predict</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-4">
+                    <h5>Contact</h5>
+                    <ul class="list-unstyled">
+                        <li><a href="mailto:info@celstium.com" class="text-white">info@celstium.com</a></li>
+                        <li><a href="tel:+1234567890" class="text-white">+1 (234) 567-890</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="row mt-4">
+                <div class="col-md-12 text-center">
+                    <p>Celstium &copy; 2025</p>
+                </div>
+            </div>
         </div>
     </footer>
 

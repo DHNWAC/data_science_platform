@@ -3,16 +3,143 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Churn Prediction - Data Science Platform</title>
+    <title>Churn Prediction | Celstium</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <style>
+        :root {
+            --primary: #80be15;
+            --primary-dark: #5f9207;
+            --primary-light: #eaffc7;
+            --secondary: #d7ff94;
+            --dark: #111111;
+            --black: #111111;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #ffffff;
+            color: var(--dark);
+        }
+        
+        .navbar {
+            background: var(--black) !important;
+        }
+        
+        .btn-primary {
+            background-color: var(--primary);
+            border-color: var(--primary);
+            color: var(--black);
+            font-weight: 600;
+        }
+        
+        .btn-primary:hover {
+            background-color: var(--primary-dark);
+            border-color: var(--primary-dark);
+            color: var(--black);
+        }
+        
+        .btn-outline-primary {
+            border-color: var(--primary);
+            color: var(--dark);
+        }
+        
+        .btn-outline-primary:hover {
+            background-color: var(--primary);
+            color: var(--black);
+        }
+        
+        .logo-container img {
+            height: 40px;
+        }
+        
+        .card {
+            border-radius: 16px;
+            border: none;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+            overflow: hidden;
+        }
+        
+        .card-header {
+            background-color: var(--black);
+            color: white;
+            border-radius: 16px 16px 0 0 !important;
+        }
+        
+        .nav-tabs .nav-link {
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px 8px 0 0;
+            font-weight: 500;
+            color: var(--dark);
+        }
+        
+        .nav-tabs .nav-link.active {
+            background-color: var(--black);
+            color: white;
+            border: none;
+        }
+        
+        .form-control, .form-select {
+            border-radius: 8px;
+            border: 1px solid #e2e2e2;
+            padding: 10px 15px;
+        }
+        
+        .form-control:focus, .form-select:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 0.25rem rgba(196, 255, 97, 0.25);
+        }
+        
+        .form-check-input:checked {
+            background-color: var(--primary);
+            border-color: var(--primary);
+        }
+        
+        .table-primary {
+            background-color: var(--black) !important;
+            color: white;
+        }
+        
+        .bg-success {
+            background-color: var(--primary) !important;
+            color: var(--black) !important;
+        }
+        
+        .bg-danger {
+            background-color: #ff6b6b !important;
+        }
+        
+        .text-success {
+            color: var(--primary-dark) !important;
+        }
+        
+        .text-danger {
+            color: #ff6b6b !important;
+        }
+        
+        .feature-list-container {
+            max-height: 200px;
+            overflow-y: auto;
+            border: 1px solid #e2e2e2;
+            border-radius: 8px;
+            padding: 1rem;
+        }
+    </style>
 </head>
 <body>
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+    <nav class="navbar navbar-expand-lg navbar-dark">
         <div class="container">
-            <a class="navbar-brand" href="/">Data Science Platform</a>
+            <a class="navbar-brand d-flex align-items-center" href="/">
+                <div class="logo-container me-2">
+                    <img src="{{ url_for('static', filename='src_images/logo_black.png') }}" alt="Celstium Logo">
+                </div>
+            </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
@@ -33,6 +160,12 @@
                     <li class="nav-item">
                         <a class="nav-link active" href="/churn_prediction">Churn Prediction</a>
                     </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/pricing">Pricing</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/demo">Request Demo</a>
+                    </li>
                 </ul>
             </div>
         </div>
@@ -42,8 +175,14 @@
         <div class="row">
             <div class="col-md-12">
                 <div class="card shadow-sm mb-4">
-                    <div class="card-header bg-primary text-white">
-                        <h3 class="card-title mb-0">Churn Prediction Model</h3>
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h3 class="card-title mb-0">Customer Churn Prediction</h3>
+                        <div>
+                            <span class="badge bg-light text-dark p-2">
+                                <i class="bi bi-info-circle"></i> 
+                                Predict and <span style="color: var(--primary-dark);">prevent</span> customer churn
+                            </span>
+                        </div>
                     </div>
                     <div class="card-body">
                         <ul class="nav nav-tabs" id="churnTabs" role="tablist">
@@ -58,16 +197,16 @@
                             </li>
                         </ul>
                         
-                        <div class="tab-content mt-3" id="churnTabContent">
+                        <div class="tab-content mt-4" id="churnTabContent">
                             <!-- Train Model Tab -->
                             <div class="tab-pane fade show active" id="train" role="tabpanel">
                                 <div class="row">
                                     <div class="col-md-4">
                                         <div class="card bg-light">
                                             <div class="card-body">
-                                                <h5 class="card-title">Model Configuration</h5>
+                                                <h5 class="card-title mb-4">Model Configuration</h5>
                                                 <form id="trainModelForm">
-                                                    <div class="mb-3">
+                                                    <div class="mb-4">
                                                         <label for="targetColumn" class="form-label">Target Column</label>
                                                         <select class="form-select" id="targetColumn" required>
                                                             <option value="" selected disabled>Select target column</option>
@@ -78,15 +217,15 @@
                                                         <div class="form-text">Select the column you want to predict (usually 'Churn')</div>
                                                     </div>
                                                     
-                                                    <div class="mb-3">
+                                                    <div class="mb-4">
                                                         <label class="form-label">Feature Columns</label>
                                                         <div class="mb-2">
                                                             <button type="button" id="selectAllFeatures" class="btn btn-sm btn-outline-primary me-2">Select All</button>
                                                             <button type="button" id="deselectAllFeatures" class="btn btn-sm btn-outline-secondary">Deselect All</button>
                                                         </div>
-                                                        <div style="max-height: 200px; overflow-y: auto; border: 1px solid #dee2e6; border-radius: 0.25rem; padding: 0.5rem;">
+                                                        <div class="feature-list-container">
                                                             {% for column in columns %}
-                                                            <div class="form-check">
+                                                            <div class="form-check mb-2">
                                                                 <input class="form-check-input feature-column" type="checkbox" value="{{ column }}" id="feature-{{ column }}">
                                                                 <label class="form-check-label" for="feature-{{ column }}">
                                                                     {{ column }}
@@ -98,7 +237,9 @@
                                                     </div>
                                                     
                                                     <div class="d-grid gap-2">
-                                                        <button type="submit" class="btn btn-primary">Train Model</button>
+                                                        <button type="submit" class="btn btn-primary py-2">
+                                                            <i class="bi bi-lightning-charge"></i> Train Model
+                                                        </button>
                                                     </div>
                                                 </form>
                                             </div>
@@ -107,17 +248,21 @@
                                     
                                     <div class="col-md-8">
                                         <div class="card shadow-sm" id="trainingResultCard" style="display: none;">
+                                            <div class="card-header">
+                                                <h5 class="card-title mb-0">Training Results</h5>
+                                            </div>
                                             <div class="card-body">
-                                                <h5 class="card-title">Training Results</h5>
                                                 <div id="trainingResult">
                                                     <!-- Training results will be displayed here -->
                                                 </div>
                                             </div>
                                         </div>
                                         
-                                        <div class="card shadow-sm" id="featureImportanceCard" style="display: none; margin-top: 1rem;">
+                                        <div class="card shadow-sm" id="featureImportanceCard" style="display: none; margin-top: 1.5rem;">
+                                            <div class="card-header">
+                                                <h5 class="card-title mb-0">Feature Importance</h5>
+                                            </div>
                                             <div class="card-body">
-                                                <h5 class="card-title">Feature Importance</h5>
                                                 <div id="featureImportanceChart" style="height: 400px;">
                                                     <!-- Feature importance chart will be displayed here -->
                                                 </div>
@@ -130,10 +275,12 @@
                             <!-- Make Predictions Tab -->
                             <div class="tab-pane fade" id="predict" role="tabpanel">
                                 <div class="row">
-                                    <div class="col-md-6">
+                                    <div class="col-md-5">
                                         <div class="card bg-light">
+                                            <div class="card-header">
+                                                <h5 class="card-title mb-0">Prediction Input</h5>
+                                            </div>
                                             <div class="card-body">
-                                                <h5 class="card-title">Prediction Input</h5>
                                                 <div id="predictionInputForm">
                                                     <div class="alert alert-info">
                                                         Please train a model first on the Train Model tab.
@@ -143,10 +290,12 @@
                                         </div>
                                     </div>
                                     
-                                    <div class="col-md-6">
+                                    <div class="col-md-7">
                                         <div class="card shadow-sm">
+                                            <div class="card-header">
+                                                <h5 class="card-title mb-0">Prediction Results</h5>
+                                            </div>
                                             <div class="card-body">
-                                                <h5 class="card-title">Prediction Results</h5>
                                                 <div id="predictionResult">
                                                     <div class="text-center py-5">
                                                         <p class="text-muted">Train a model and submit prediction inputs to see results</p>
@@ -163,8 +312,10 @@
                                 <div class="row">
                                     <div class="col-md-12">
                                         <div class="card shadow-sm">
+                                            <div class="card-header">
+                                                <h5 class="card-title mb-0">Model Performance Metrics</h5>
+                                            </div>
                                             <div class="card-body">
-                                                <h5 class="card-title">Model Performance Metrics</h5>
                                                 <div id="modelEvaluation">
                                                     <div class="alert alert-info">
                                                         Please train a model first on the Train Model tab.
@@ -182,9 +333,44 @@
         </div>
     </div>
 
-    <footer class="mt-5 py-3 bg-light">
-        <div class="container text-center">
-            <p>Data Science Platform MVP &copy; 2023</p>
+    <footer class="mt-5 py-4 bg-dark text-white">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="logo-container mb-3">
+                        <img src="{{ url_for('static', filename='src_images/celstium_logo.png') }}" alt="Celstium Logo">
+                    </div>
+                    <p>Making unstructured data into actionable data.</p>
+                </div>
+                <div class="col-md-2">
+                    <h5>Company</h5>
+                    <ul class="list-unstyled">
+                        <li><a href="#" class="text-white">About</a></li>
+                        <li><a href="#" class="text-white">Careers</a></li>
+                        <li><a href="#" class="text-white">Blog</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-2">
+                    <h5>Product</h5>
+                    <ul class="list-unstyled">
+                        <li><a href="/eda" class="text-white">EDA</a></li>
+                        <li><a href="/visualize" class="text-white">Visualize</a></li>
+                        <li><a href="/churn_prediction" class="text-white">Predict</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-4">
+                    <h5>Contact</h5>
+                    <ul class="list-unstyled">
+                        <li><a href="mailto:info@celstium.com" class="text-white">info@celstium.com</a></li>
+                        <li><a href="tel:+1234567890" class="text-white">+1 (234) 567-890</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="row mt-4">
+                <div class="col-md-12 text-center">
+                    <p>Celstium &copy; 2025</p>
+                </div>
+            </div>
         </div>
     </footer>
 
@@ -338,10 +524,15 @@
                                     </table>
                                 </div>
                                 <div class="col-md-6">
-                                    <p><strong>Model Type:</strong> XGBoost</p>
-                                    <p><strong>Target Column:</strong> ${targetColumn}</p>
-                                    <p><strong>Features Used:</strong> ${featureColumns.length}</p>
-                                    <p><strong>Classification Type:</strong> ${data.metrics.num_classes > 2 ? 'Multi-class' : 'Binary'}</p>
+                                    <div class="card bg-light">
+                                        <div class="card-body">
+                                            <h6 class="card-title">Model Details</h6>
+                                            <p><strong>Model Type:</strong> XGBoost</p>
+                                            <p><strong>Target Column:</strong> ${targetColumn}</p>
+                                            <p><strong>Features Used:</strong> ${featureColumns.length}</p>
+                                            <p><strong>Classification Type:</strong> ${data.metrics.num_classes > 2 ? 'Multi-class' : 'Binary'}</p>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         `;
@@ -363,9 +554,9 @@
                                 y: features,
                                 orientation: 'h',
                                 marker: {
-                                    color: 'rgba(55, 128, 191, 0.7)',
+                                    color: '#c4ff61',
                                     line: {
-                                        color: 'rgba(55, 128, 191, 1.0)',
+                                        color: '#b1ff2e',
                                         width: 1
                                     }
                                 }
@@ -385,6 +576,7 @@
                                     l: 150
                                 },
                                 plot_bgcolor: 'white',
+                                paper_bgcolor: 'white',
                                 font: {
                                     size: 12
                                 }
@@ -414,7 +606,9 @@
                 let formHTML = `
                     <form id="makePredictionForm">
                         <div class="mb-3">
-                            <p class="text-success"><i class="bi bi-check-circle-fill"></i> Model is trained and ready for predictions</p>
+                            <div class="alert alert-success">
+                                <i class="bi bi-check-circle-fill"></i> Model is trained and ready for predictions
+                            </div>
                         </div>
                 `;
                 
@@ -430,7 +624,9 @@
                 
                 formHTML += `
                         <div class="d-grid gap-2">
-                            <button type="submit" class="btn btn-primary">Make Prediction</button>
+                            <button type="submit" class="btn btn-primary py-2">
+                                <i class="bi bi-lightning-charge"></i> Make Prediction
+                            </button>
                         </div>
                     </form>
                 `;
@@ -491,15 +687,15 @@
                                         title: { text: "Churn Probability", font: { size: 16 } },
                                         gauge: {
                                             axis: { range: [null, 100] },
-                                            bar: { color: "darkblue" },
+                                            bar: { color: "#111111" },
                                             bgcolor: "white",
                                             borderwidth: 2,
                                             bordercolor: "gray",
                                             steps: [
-                                                { range: [0, 25], color: "green" },
-                                                { range: [25, 50], color: "yellow" },
-                                                { range: [50, 75], color: "orange" },
-                                                { range: [75, 100], color: "red" }
+                                                { range: [0, 25], color: "#c4ff61" },
+                                                { range: [25, 50], color: "#d7ff94" },
+                                                { range: [50, 75], color: "#ffd166" },
+                                                { range: [75, 100], color: "#ff6b6b" }
                                             ],
                                             threshold: {
                                                 line: { color: "red", width: 4 },
@@ -601,22 +797,28 @@
                         prediction == 'true' || prediction == 'True') {
                         // Will churn - red card
                         churnCard = `
-                            <div class="card bg-danger text-white mb-3">
-                                <div class="card-body text-center">
+                            <div class="card bg-danger text-white mb-4">
+                                <div class="card-body text-center p-4">
                                     <h5 class="card-title">Churn Risk</h5>
-                                    <p class="display-4"><i class="bi bi-exclamation-triangle-fill"></i></p>
-                                    <p class="card-text">This customer is likely to churn</p>
+                                    <p class="display-4 my-3"><i class="bi bi-exclamation-triangle-fill"></i></p>
+                                    <p class="card-text fs-5">This customer is likely to churn</p>
+                                    <div class="mt-3">
+                                        <button class="btn btn-light">Send Retention Offer</button>
+                                    </div>
                                 </div>
                             </div>
                         `;
                     } else {
                         // Will not churn - green card
                         churnCard = `
-                            <div class="card bg-success text-white mb-3">
-                                <div class="card-body text-center">
+                            <div class="card bg-success mb-4">
+                                <div class="card-body text-center p-4">
                                     <h5 class="card-title">Retention</h5>
-                                    <p class="display-4"><i class="bi bi-check-circle-fill"></i></p>
-                                    <p class="card-text">This customer is likely to stay</p>
+                                    <p class="display-4 my-3"><i class="bi bi-check-circle-fill"></i></p>
+                                    <p class="card-text fs-5">This customer is likely to stay</p>
+                                    <div class="mt-3">
+                                        <button class="btn btn-dark">Send Upsell Offer</button>
+                                    </div>
                                 </div>
                             </div>
                         `;
@@ -659,7 +861,7 @@
                 let evaluationHTML = `
                     <div class="row">
                         <div class="col-md-6">
-                            <h5>Performance Metrics</h5>
+                            <h5 class="mb-3">Performance Metrics</h5>
                             <table class="table table-bordered">
                                 <thead class="table-primary">
                                     <tr>
@@ -700,36 +902,40 @@
                             </table>
                         </div>
                         <div class="col-md-6">
-                            <h5>What These Metrics Mean for Churn Prediction</h5>
-                            <ul class="list-group">
-                                <li class="list-group-item">
-                                    <strong>Accuracy:</strong> Overall correctness of predictions (${(metrics.accuracy * 100).toFixed(2)}% of predictions are correct)
-                                </li>
-                                <li class="list-group-item">
-                                    <strong>Precision:</strong> When the model predicts a customer will churn, it's right ${(metrics.precision * 100).toFixed(2)}% of the time
-                                </li>
-                                <li class="list-group-item">
-                                    <strong>Recall:</strong> The model correctly identifies ${(metrics.recall * 100).toFixed(2)}% of all customers who actually churn
-                                </li>
-                                <li class="list-group-item">
-                                    <strong>F1 Score:</strong> Balance between precision and recall (${(metrics.f1 * 100).toFixed(2)}%)
-                                </li>
-                                ${metrics.roc_auc ? `
-                                <li class="list-group-item">
-                                    <strong>ROC AUC:</strong> Model's ability to distinguish between customers who will churn and those who won't (${(metrics.roc_auc * 100).toFixed(2)}%)
-                                </li>
-                                ` : ''}
-                            </ul>
+                            <h5 class="mb-3">What These Metrics Mean for Churn Prediction</h5>
+                            <div class="card bg-light">
+                                <div class="card-body">
+                                    <ul class="list-group list-group-flush">
+                                        <li class="list-group-item bg-transparent border-0 ps-0">
+                                            <strong>Accuracy:</strong> Overall correctness of predictions (${(metrics.accuracy * 100).toFixed(2)}% of predictions are correct)
+                                        </li>
+                                        <li class="list-group-item bg-transparent border-0 ps-0">
+                                            <strong>Precision:</strong> When the model predicts a customer will churn, it's right ${(metrics.precision * 100).toFixed(2)}% of the time
+                                        </li>
+                                        <li class="list-group-item bg-transparent border-0 ps-0">
+                                            <strong>Recall:</strong> The model correctly identifies ${(metrics.recall * 100).toFixed(2)}% of all customers who actually churn
+                                        </li>
+                                        <li class="list-group-item bg-transparent border-0 ps-0">
+                                            <strong>F1 Score:</strong> Balance between precision and recall (${(metrics.f1 * 100).toFixed(2)}%)
+                                        </li>
+                                        ${metrics.roc_auc ? `
+                                        <li class="list-group-item bg-transparent border-0 ps-0">
+                                            <strong>ROC AUC:</strong> Model's ability to distinguish between customers who will churn and those who won't (${(metrics.roc_auc * 100).toFixed(2)}%)
+                                        </li>
+                                        ` : ''}
+                                    </ul>
+                                </div>
+                            </div>
                         </div>
                     </div>
                     
                     <div class="mt-4">
-                        <h5>Model Interpretation for Churn Prediction</h5>
+                        <h5 class="mb-3">Model Interpretation for Churn Prediction</h5>
                         <div class="card">
                             <div class="card-body">
                                 <p>Based on the metrics above, this model ${metrics.accuracy > 0.8 ? 'performs well' : 'may need improvement'} for predicting customer churn.</p>
                                 
-                                <h6>Business Insights:</h6>
+                                <h6 class="mt-4">Business Insights:</h6>
                                 <ul>
                                     <li><strong>Accuracy ${(metrics.accuracy * 100).toFixed(2)}%:</strong> ${
                                         metrics.accuracy > 0.9 ? 'Excellent overall performance' : 
@@ -748,7 +954,7 @@
                                     }</li>
                                 </ul>
                                 
-                                <h6>Recommendations:</h6>
+                                <h6 class="mt-4">Recommendations:</h6>
                                 <ul>
                                     <li>Focus retention efforts on customers the model predicts will churn</li>
                                     <li>Review the Feature Importance chart to understand key churn drivers</li>
