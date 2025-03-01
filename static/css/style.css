@@ -330,3 +330,10 @@ footer {
 .x-icon {
     color: #ff6b6b;
 }
+
+
+
+.badge.bg-primary {
+    background-color: var(--primary) !important;
+    color: var(--black) !important;
+}
