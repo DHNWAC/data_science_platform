@@ -12,8 +12,8 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <style>
         :root {
-            --primary: #c4ff61;
-            --primary-dark: #b1ff2e;
+            --primary: #80be15;
+            --primary-dark: #5f9207;
             --primary-light: #eaffc7;
             --secondary: #d7ff94;
             --dark: #111111;
@@ -98,6 +98,14 @@
             height: 200px;
             margin-bottom: 0px;
         }
+
+        .bi-circle-fill, 
+        .circle-icon, 
+        svg circle {
+            color: var(--primary-dark) !important;
+            fill: var(--primary-dark) !important;
+        }
+
         
     </style>
 </head>
