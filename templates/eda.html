@@ -18,7 +18,7 @@
             --primary-light: #eaffc7;
             --secondary: #d7ff94;
             --dark: #111111;
-            --black: #000000;
+            --black: #111111;
         }
         
         body {
@@ -28,37 +28,37 @@
         }
         
         .navbar {
-            background: var(--black) !important;
+            background: var(--dark) !important;
         }
         
         .btn-primary {
             background-color: var(--primary);
             border-color: var(--primary);
-            color: var(--black);
+            color: var(--dark);
             font-weight: 600;
         }
         
         .btn-primary:hover {
             background-color: var(--primary-dark);
             border-color: var(--primary-dark);
-            color: var(--black);
+            color: var(--dark);
         }
         
         .btn-success {
             background-color: var(--primary);
             border-color: var(--primary-dark);
-            color: var(--black);
+            color: var(--dark);
         }
         
         .btn-success:hover {
             background-color: var(--primary-dark);
             border-color: var(--primary-dark);
-            color: var(--black);
+            color: var(--dark);
         }
         
         .btn-info {
-            background-color: var(--black);
-            border-color: var(--black);
+            background-color: var(--dark);
+            border-color: var(--dark);
             color: white;
         }
         
@@ -80,7 +80,7 @@
         }
         
         .card-header {
-            background-color: var(--black);
+            background-color: var(--dark);
             color: white;
             border-radius: 16px 16px 0 0 !important;
         }
@@ -94,13 +94,13 @@
         }
         
         .nav-tabs .nav-link.active {
-            background-color: var(--black);
+            background-color: var(--dark);
             color: white;
             border: none;
         }
         
         .table-primary {
-            background-color: var(--black) !important;
+            background-color: var(--dark) !important;
             color: white;
             font-weight: 500;
         }
@@ -120,7 +120,7 @@
         
         .badge.bg-success {
             background-color: var(--primary) !important;
-            color: var(--black);
+            color: var(--dark);
         }
     </style>
 </head>
@@ -129,7 +129,7 @@
         <div class="container">
             <a class="navbar-brand d-flex align-items-center" href="/">
                 <div class="logo-container me-2">
-                    <img src="{{ url_for('static', filename='src_images/celstium_logo.png') }}" alt="Celstium Logo">
+                    <img src="{{ url_for('static', filename='src_images/logo_black.png') }}" alt="Celstium Logo">
                 </div>
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
@@ -527,7 +527,7 @@
                                                         y: i,
                                                         text: val.toFixed(2),
                                                         font: {
-                                                            color: Math.abs(val) > 0.5 ? 'white' : 'black'
+                                                            color: Math.abs(val) > 0.5 ? 'white' : 'dark'
                                                         },
                                                         showarrow: false
                                                     }))

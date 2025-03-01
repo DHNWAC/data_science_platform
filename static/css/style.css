@@ -5,7 +5,7 @@
     --primary-light: #eaffc7; /* Light lime green */
     --secondary: #d7ff94;     /* Light green */
     --dark: #111111;          /* Almost black */
-    --black: #000000;         /* Black */
+    --black: #111111;         /* Black */
 }
 
 body {
