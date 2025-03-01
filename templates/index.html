@@ -16,7 +16,7 @@
             --primary-dark: #b1ff2e;
             --primary-light: #eaffc7;
             --secondary: #d7ff94;
-            --dark: #1a1a1a;
+            --dark: #111111;
             --black: #000000;
         }
         
@@ -27,7 +27,7 @@
         }
         
         .navbar {
-            background: var(--black) !important;
+            background: var(--dark) !important;
         }
         
         .btn-primary {
@@ -93,8 +93,8 @@
         }
         
         .logo-container-large img {
-            height: 60px;
-            margin-bottom: 20px;
+            height: 200px;
+            margin-bottom: 0px;
         }
     </style>
 </head>
@@ -103,7 +103,7 @@
         <div class="container">
             <a class="navbar-brand d-flex align-items-center" href="/">
                 <div class="logo-container me-2">
-                    <img src="{{ url_for('static', filename='src_images/celstium_logo.png') }}" alt="Celstium Logo">
+                    <img src="{{ url_for('static', filename='src_images/logo_black.png') }}" alt="Celstium Logo">
                 </div>
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
@@ -142,7 +142,7 @@
             <div class="row align-items-center">
                 <div class="col-md-7">
                     <div class="logo-container-large mb-4">
-                        <img src="{{ url_for('static', filename='src_images/celstium_logo.png') }}" alt="Celstium Logo">
+                        <img src="{{ url_for('static', filename='src_images/logo_transparent.png') }}" alt="Celstium Logo">
                     </div>
                     <h1 class="display-4 fw-bold mb-4">Making <span style="color: var(--black);">Unstructured Data</span> into <span style="color: var(--black);">Actionable Data</span></h1>
                     <p class="lead mb-5">An all-in-one solution for data exploration, visualization, and predictive analytics.</p>
