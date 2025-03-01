@@ -15,7 +15,7 @@
             --primary: #80be15;
             --primary-dark: #5f9207;
             --primary-light: #eaffc7;
-            --secondary: #d7ff94;
+            --secondary: #c0e087;
             --dark: #111111;
             --black: #111111;
         }
@@ -102,8 +102,8 @@
         .bi-circle-fill, 
         .circle-icon, 
         svg circle {
-            color: var(--primary) !important;
-            fill: var(--primary) !important;
+            color: var(--primary-dark) !important;
+            fill: var(--primary-dark) !important;
         }
 
         
@@ -163,7 +163,7 @@
                     </div>
                 </div>
                 <div class="col-md-5">
-                    <img src="/src_images/data-illustration.svg" alt="Data Illustration" class="img-fluid">
+                    <img src="{{ url_for('static', filename='src_images/green-theme.svg') }}" alt="Data Illustration" class="img-fluid hero-illustration">
                 </div>
             </div>
         </div>

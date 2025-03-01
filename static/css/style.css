@@ -337,3 +337,18 @@ footer {
     background-color: var(--primary) !important;
     color: var(--black) !important;
 }
+
+.badge.bg-primary.rounded-circle {
+    width: 40px;  /* Adjust the width */
+    height: 40px; /* Make width and height the same for a perfect circle */
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+}
+
+.hero-illustration {
+    width: 1000px;
+    max-width: 150%;
+    height: auto;
+}

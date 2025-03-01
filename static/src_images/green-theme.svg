@@ -1,0 +1,73 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 350" style="background-color: transparent;">
+  <!-- Define Color Palette -->
+  <style>
+    .primary-dark { fill: #5f9207; }
+    .primary-light { fill: #c4ff61; }
+    .primary-medium { fill: #80be15; }
+    .dark { fill: #111111; }
+  </style>
+  
+  <!-- Gradient Definitions -->
+  <defs>
+    <linearGradient id="dataGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#c4ff61;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#80be15;stop-opacity:1" />
+    </linearGradient>
+    
+    <filter id="shadowEffect">
+      <feDropShadow dx="3" dy="3" stdDeviation="3" flood-color="#111111" flood-opacity="0.2"/>
+    </filter>
+  </defs>
+  
+  <!-- Advanced Data Visualization Elements -->
+  <!-- 3D-like Data Bars with Depth -->
+  <g transform="translate(100, 100)">
+    <rect x="0" y="100" width="50" height="150" fill="url(#dataGradient)" rx="5" filter="url(#shadowEffect)">
+      <animate attributeName="height" from="0" to="150" dur="1.2s" fill="freeze"/>
+      <animate attributeName="y" from="250" to="100" dur="1.2s" fill="freeze"/>
+    </rect>
+    
+    <rect x="80" y="50" width="50" height="200" class="primary-dark" rx="5" filter="url(#shadowEffect)">
+      <animate attributeName="height" from="0" to="200" dur="1.4s" fill="freeze"/>
+      <animate attributeName="y" from="250" to="50" dur="1.4s" fill="freeze"/>
+    </rect>
+    
+    <rect x="160" y="150" width="50" height="100" class="primary-light" rx="5" filter="url(#shadowEffect)">
+      <animate attributeName="height" from="0" to="100" dur="1s" fill="freeze"/>
+      <animate attributeName="y" from="250" to="150" dur="1s" fill="freeze"/>
+    </rect>
+  </g>
+  
+  <!-- Dynamic Connection Lines -->
+  <path d="M150 180 Q250 120 350 220" 
+        fill="none" 
+        stroke="#5f9207" 
+        stroke-width="3" 
+        stroke-dasharray="10,5" 
+        opacity="0.7">
+    <animate attributeName="stroke-dashoffset" from="30" to="0" dur="2s" repeatCount="indefinite"/>
+  </path>
+  
+  <!-- Data Nodes with Pulsing Effect -->
+  <g>
+    <circle cx="150" cy="180" r="15" class="dark" opacity="0.6">
+      <animate attributeName="r" from="10" to="15" dur="1.5s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="250" cy="120" r="20" class="primary-medium" opacity="0.8">
+      <animate attributeName="r" from="15" to="20" dur="1.8s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="350" cy="220" r="15" class="primary-dark" opacity="0.7">
+      <animate attributeName="r" from="10" to="15" dur="2s" repeatCount="indefinite"/>
+    </circle>
+  </g>
+  
+  <!-- Abstract Network Connections -->
+  <path d="M30 300 L100 230 L180 260 L260 200 L340 240 L420 180" 
+        fill="none" 
+        stroke="#111111" 
+        stroke-width="2" 
+        stroke-dasharray="5,5" 
+        opacity="0.2">
+    <animate attributeName="stroke-dashoffset" from="50" to="0" dur="3s" repeatCount="indefinite"/>
+  </path>
+</svg>
