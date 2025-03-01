@@ -3,15 +3,119 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Request Demo - Data Science Platform</title>
+    <title>Request Demo | Celstium</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        :root {
+            --primary: #c4ff61;
+            --primary-dark: #b1ff2e;
+            --primary-light: #eaffc7;
+            --secondary: #d7ff94;
+            --dark: #1a1a1a;
+            --black: #000000;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #ffffff;
+            color: var(--dark);
+        }
+        
+        .navbar {
+            background: var(--black) !important;
+        }
+        
+        .btn-primary {
+            background-color: var(--primary);
+            border-color: var(--primary);
+            color: var(--black);
+            font-weight: 600;
+        }
+        
+        .btn-primary:hover {
+            background-color: var(--primary-dark);
+            border-color: var(--primary-dark);
+            color: var(--black);
+        }
+        
+        .logo-container img {
+            height: 40px;
+        }
+        
+        .card {
+            border-radius: 16px;
+            border: none;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .card-header {
+            background-color: var(--black);
+            color: white;
+            border-radius: 16px 16px 0 0 !important;
+        }
+        
+        .form-control, .form-select {
+            border-radius: 8px;
+            padding: 12px 15px;
+            border: 1px solid #e0e0e0;
+        }
+        
+        .form-control:focus, .form-select:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 0.25rem rgba(196, 255, 97, 0.25);
+        }
+        
+        .form-check-input:checked {
+            background-color: var(--primary);
+            border-color: var(--primary);
+        }
+        
+        .form-label {
+            font-weight: 500;
+        }
+        
+        .feature-icon {
+            background-color: var(--primary-light);
+            width: 64px;
+            height: 64px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.75rem;
+            color: var(--black);
+            margin-bottom: 1rem;
+        }
+        
+        .demo-process-card {
+            border-radius: 12px;
+            padding: 2rem;
+            height: 100%;
+            text-align: center;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            background-color: #f8f9fa;
+        }
+        
+        .demo-process-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+    </style>
 </head>
 <body>
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+    <nav class="navbar navbar-expand-lg navbar-dark">
         <div class="container">
-            <a class="navbar-brand" href="/">Data Science Platform</a>
+            <a class="navbar-brand d-flex align-items-center" href="/">
+                <div class="logo-container me-2">
+                    <img src="{{ url_for('static', filename='src_images/celstium_logo.png') }}" alt="Celstium Logo">
+                </div>
+            </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
@@ -47,7 +151,7 @@
         <div class="row">
             <div class="col-md-8 offset-md-2">
                 <div class="card shadow">
-                    <div class="card-header bg-primary text-white">
+                    <div class="card-header">
                         <h3 class="card-title mb-0">Request a Personalized Demo</h3>
                     </div>
                     <div class="card-body">
@@ -136,46 +240,58 @@
                                 </div>
                             </div>
                             
-                            <div class="mb-3">
-                                <label for="interests" class="form-label">What features are you most interested in?</label>
-                                <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" value="Data Exploration" id="interestEDA" name="interests">
-                                    <label class="form-check-label" for="interestEDA">
-                                        Data Exploration & Analysis
-                                    </label>
-                                </div>
-                                <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" value="Data Visualization" id="interestViz" name="interests">
-                                    <label class="form-check-label" for="interestViz">
-                                        Data Visualization
-                                    </label>
-                                </div>
-                                <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" value="Churn Prediction" id="interestChurn" name="interests">
-                                    <label class="form-check-label" for="interestChurn">
-                                        Customer Churn Prediction
-                                    </label>
-                                </div>
-                                <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" value="Automated ML" id="interestAutoML" name="interests">
-                                    <label class="form-check-label" for="interestAutoML">
-                                        Automated Machine Learning
-                                    </label>
-                                </div>
-                                <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" value="Enterprise Integration" id="interestIntegration" name="interests">
-                                    <label class="form-check-label" for="interestIntegration">
-                                        Enterprise Integration
-                                    </label>
+                            <div class="mb-4">
+                                <label class="form-label">What features are you most interested in?</label>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-check mb-2">
+                                            <input class="form-check-input" type="checkbox" value="Data Exploration" id="interestEDA" name="interests">
+                                            <label class="form-check-label" for="interestEDA">
+                                                Data Exploration & Analysis
+                                            </label>
+                                        </div>
+                                        <div class="form-check mb-2">
+                                            <input class="form-check-input" type="checkbox" value="Data Visualization" id="interestViz" name="interests">
+                                            <label class="form-check-label" for="interestViz">
+                                                Data Visualization
+                                            </label>
+                                        </div>
+                                        <div class="form-check mb-2">
+                                            <input class="form-check-input" type="checkbox" value="Churn Prediction" id="interestChurn" name="interests">
+                                            <label class="form-check-label" for="interestChurn">
+                                                Customer Churn Prediction
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-check mb-2">
+                                            <input class="form-check-input" type="checkbox" value="Automated ML" id="interestAutoML" name="interests">
+                                            <label class="form-check-label" for="interestAutoML">
+                                                Automated Machine Learning
+                                            </label>
+                                        </div>
+                                        <div class="form-check mb-2">
+                                            <input class="form-check-input" type="checkbox" value="Enterprise Integration" id="interestIntegration" name="interests">
+                                            <label class="form-check-label" for="interestIntegration">
+                                                Enterprise Integration
+                                            </label>
+                                        </div>
+                                        <div class="form-check mb-2">
+                                            <input class="form-check-input" type="checkbox" value="Other" id="interestOther" name="interests">
+                                            <label class="form-check-label" for="interestOther">
+                                                Other
+                                            </label>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                             
-                            <div class="mb-3">
+                            <div class="mb-4">
                                 <label for="additionalInfo" class="form-label">Any specific questions or requirements?</label>
-                                <textarea class="form-control" id="additionalInfo" name="additionalInfo" rows="3"></textarea>
+                                <textarea class="form-control" id="additionalInfo" name="additionalInfo" rows="3" placeholder="Tell us about your data science needs"></textarea>
                             </div>
                             
-                            <div class="mb-3 form-check">
+                            <div class="mb-4 form-check">
                                 <input type="checkbox" class="form-check-input" id="agreeTerms" name="agreeTerms" required>
                                 <label class="form-check-label" for="agreeTerms">I agree to the <a href="#">privacy policy</a> and <a href="#">terms of service</a>.</label>
                             </div>
@@ -193,20 +309,32 @@
                     </div>
                     <div class="card-body">
                         <div class="row">
-                            <div class="col-md-4 text-center mb-3">
-                                <i class="bi bi-calendar-check text-primary" style="font-size: 2rem;"></i>
-                                <h5 class="mt-2">Quick Response</h5>
-                                <p>We'll contact you within 24 hours to schedule your demo.</p>
+                            <div class="col-md-4 mb-4">
+                                <div class="demo-process-card">
+                                    <div class="feature-icon mx-auto">
+                                        <i class="bi bi-calendar-check"></i>
+                                    </div>
+                                    <h5 class="mt-2">Quick Response</h5>
+                                    <p>We'll contact you within 24 hours to schedule your demo.</p>
+                                </div>
                             </div>
-                            <div class="col-md-4 text-center mb-3">
-                                <i class="bi bi-person-video3 text-primary" style="font-size: 2rem;"></i>
-                                <h5 class="mt-2">Personalized Demo</h5>
-                                <p>Get a customized tour of our platform for your specific needs.</p>
+                            <div class="col-md-4 mb-4">
+                                <div class="demo-process-card">
+                                    <div class="feature-icon mx-auto">
+                                        <i class="bi bi-person-video3"></i>
+                                    </div>
+                                    <h5 class="mt-2">Personalized Demo</h5>
+                                    <p>Get a customized tour of our platform for your specific needs.</p>
+                                </div>
                             </div>
-                            <div class="col-md-4 text-center mb-3">
-                                <i class="bi bi-graph-up-arrow text-primary" style="font-size: 2rem;"></i>
-                                <h5 class="mt-2">ROI Assessment</h5>
-                                <p>Learn how our platform can improve your data science workflows.</p>
+                            <div class="col-md-4 mb-4">
+                                <div class="demo-process-card">
+                                    <div class="feature-icon mx-auto">
+                                        <i class="bi bi-graph-up-arrow"></i>
+                                    </div>
+                                    <h5 class="mt-2">ROI Assessment</h5>
+                                    <p>Learn how Celstium can improve your data science workflows.</p>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -215,9 +343,44 @@
         </div>
     </div>
 
-    <footer class="mt-5 py-3 bg-light">
-        <div class="container text-center">
-            <p>Data Science Platform MVP &copy; 2023</p>
+    <footer class="mt-5 py-4 bg-dark text-white">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="logo-container mb-3">
+                        <img src="{{ url_for('static', filename='src_images/celstium_logo.png') }}" alt="Celstium Logo">
+                    </div>
+                    <p>Making unstructured data into actionable data.</p>
+                </div>
+                <div class="col-md-2">
+                    <h5>Company</h5>
+                    <ul class="list-unstyled">
+                        <li><a href="#" class="text-white">About</a></li>
+                        <li><a href="#" class="text-white">Careers</a></li>
+                        <li><a href="#" class="text-white">Blog</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-2">
+                    <h5>Product</h5>
+                    <ul class="list-unstyled">
+                        <li><a href="/eda" class="text-white">EDA</a></li>
+                        <li><a href="/visualize" class="text-white">Visualize</a></li>
+                        <li><a href="/churn_prediction" class="text-white">Predict</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-4">
+                    <h5>Contact</h5>
+                    <ul class="list-unstyled">
+                        <li><a href="mailto:info@celstium.com" class="text-white">info@celstium.com</a></li>
+                        <li><a href="tel:+1234567890" class="text-white">+1 (234) 567-890</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="row mt-4">
+                <div class="col-md-12 text-center">
+                    <p>Celstium &copy; 2025</p>
+                </div>
+            </div>
         </div>
     </footer>
 
@@ -239,12 +402,15 @@
                     
                     // Insert success message
                     const successMessage = document.createElement('div');
-                    successMessage.className = 'alert alert-success';
+                    successMessage.className = 'alert alert-success p-4';
                     successMessage.innerHTML = `
                         <h4 class="alert-heading">Thank you for your interest!</h4>
                         <p>Your demo request has been received. One of our data science experts will contact you shortly at the email address you provided.</p>
                         <hr>
                         <p class="mb-0">In the meantime, feel free to explore our <a href="/pricing">pricing plans</a> or try our <a href="/">platform's features</a>.</p>
+                        <div class="mt-4 text-center">
+                            <a href="/" class="btn btn-primary">Back to Home</a>
+                        </div>
                     `;
                     
                     demoForm.parentNode.insertBefore(successMessage, demoForm);
