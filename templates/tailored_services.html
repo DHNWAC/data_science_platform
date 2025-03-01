@@ -1,0 +1,1131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tailored Services | Celstium</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        :root {
+            --primary: #80be15;
+            --primary-dark: #5f9207;
+            --primary-light: #eaffc7;
+            --secondary: #d7ff94;
+            --dark: #111111;
+            --black: #111111;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #ffffff;
+            color: var(--dark);
+        }
+        
+        .navbar {
+            background: var(--black) !important;
+        }
+        
+        .btn-primary {
+            background-color: var(--primary);
+            border-color: var(--primary);
+            color: var(--black);
+            font-weight: 600;
+        }
+        
+        .btn-primary:hover {
+            background-color: var(--primary-dark);
+            border-color: var(--primary-dark);
+            color: var(--black);
+        }
+        
+        .btn-outline-primary {
+            border-color: var(--primary);
+            color: var(--dark);
+        }
+        
+        .btn-outline-primary:hover {
+            background-color: var(--primary);
+            color: var(--black);
+        }
+        
+        .logo-container img {
+            height: 40px;
+        }
+        
+        .service-card {
+            border-radius: 16px;
+            overflow: hidden;
+            border: none;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            height: 100%;
+        }
+        
+        .service-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.1);
+        }
+        
+        .service-icon {
+            background-color: var(--primary-light);
+            width: 80px;
+            height: 80px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            color: var(--black);
+            margin-bottom: 1.5rem;
+        }
+        
+        .hero-section {
+            background: linear-gradient(135deg, var(--primary-light), var(--secondary));
+            padding: 100px 0;
+            border-radius: 0 0 20px 20px;
+        }
+        
+        .case-study-card {
+            border-radius: 16px;
+            overflow: hidden;
+            border: none;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            margin-bottom: 2rem;
+        }
+        
+        .case-study-header {
+            background-color: var(--black);
+            color: white;
+            padding: 1.5rem;
+            border-radius: 16px 16px 0 0;
+        }
+        
+        .testimonial-card {
+            background-color: #f8f9fa;
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            position: relative;
+        }
+        
+        .testimonial-card::before {
+            content: "\201C"; /* Unicode for opening double quote */
+            font-size: 5rem;
+            position: absolute;
+            top: -20px;
+            left: 20px;
+            color: var(--primary);
+            opacity: 0.3;
+            font-family: Georgia, serif;
+        }
+        
+        .quote-attribution {
+            text-align: right;
+            font-weight: 600;
+            margin-top: 1rem;
+        }
+        
+        .service-package-card {
+            border-radius: 16px;
+            overflow: hidden;
+            border: none;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            height: 100%;
+        }
+        
+        .service-package-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.1);
+        }
+        
+        .service-package-header {
+            background-color: var(--black);
+            color: white;
+            padding: 1.5rem;
+            text-align: center;
+            border-radius: 16px 16px 0 0;
+        }
+        
+        .service-package-price {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary-dark);
+            margin: 1rem 0;
+        }
+        
+        .service-price-period {
+            font-size: 0.9rem;
+            color: #6c757d;
+        }
+        
+        .service-process-step {
+            display: flex;
+            margin-bottom: 2rem;
+        }
+        
+        .service-process-number {
+            background-color: var(--primary);
+            color: var(--black);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            margin-right: 1rem;
+            flex-shrink: 0;
+        }
+        
+        .service-process-content h5 {
+            margin-bottom: 0.5rem;
+        }
+        
+        .tech-stack-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+        
+        .tech-icon {
+            width: 40px;
+            height: 40px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 1rem;
+            color: var(--black);
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container">
+            <a class="navbar-brand d-flex align-items-center" href="/">
+                <div class="logo-container me-2">
+                    <img src="{{ url_for('static', filename='src_images/logo_black.png') }}" alt="Celstium Logo">
+                </div>
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/upload">Upload Data</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/eda">EDA</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/visualize">Visualize</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/churn_prediction">Churn Prediction</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/pricing">Pricing</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/tailored_services">Tailored Services</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/demo">Request Demo</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero-section">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-lg-7">
+                    <h1 class="display-4 fw-bold mb-4">Tailored Data Science <span style="color: var(--black);">Consulting Services</span></h1>
+                    <p class="lead mb-5">Partner with our expert team to transform your data into actionable insights and predictive models that drive business growth.</p>
+                    <div class="d-flex gap-3">
+                        <a href="#packages" class="btn btn-primary btn-lg px-4 py-3">View Service Packages</a>
+                        <a href="#contact" class="btn btn-outline-dark btn-lg px-4 py-3">Schedule a Consultation</a>
+                    </div>
+                </div>
+                <div class="col-lg-5">
+                    <img src="{{ url_for('static', filename='src_images/green-theme.svg') }}" alt="Data Science Consulting" class="img-fluid">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Services Overview -->
+    <section class="py-5 mt-5">
+        <div class="container">
+            <div class="row text-center mb-5">
+                <div class="col-md-12">
+                    <h2 class="section-title">How We Can <span style="color: var(--primary-dark);">Help</span></h2>
+                    <p class="lead">Our data science consulting services deliver custom solutions tailored to your business needs</p>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-4 mb-4">
+                    <div class="service-card h-100 p-4">
+                        <div class="service-icon mx-auto">
+                            <i class="bi bi-graph-up"></i>
+                        </div>
+                        <h3 class="text-center mb-3">Customer Churn Analysis</h3>
+                        <p>Identify at-risk customers before they leave with our advanced predictive models. We'll help you understand why customers churn and create targeted retention strategies.</p>
+                        <ul>
+                            <li>Identify churn indicators unique to your business</li>
+                            <li>Develop custom predictive models</li>
+                            <li>Create actionable retention strategies</li>
+                            <li>Implement automated early warning systems</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="col-md-4 mb-4">
+                    <div class="service-card h-100 p-4">
+                        <div class="service-icon mx-auto">
+                            <i class="bi bi-people"></i>
+                        </div>
+                        <h3 class="text-center mb-3">Customer Segmentation</h3>
+                        <p>Understand your customers at a deeper level through advanced clustering and segmentation. Tailor your marketing, product offerings, and customer service to each segment.</p>
+                        <ul>
+                            <li>Identify natural customer groupings</li>
+                            <li>Create behavioral and value-based segments</li>
+                            <li>Develop segment-specific strategies</li>
+                            <li>Implement personalization frameworks</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="col-md-4 mb-4">
+                    <div class="service-card h-100 p-4">
+                        <div class="service-icon mx-auto">
+                            <i class="bi bi-cash-coin"></i>
+                        </div>
+                        <h3 class="text-center mb-3">Revenue Optimization</h3>
+                        <p>Maximize your business potential through predictive modeling for pricing, cross-selling, upselling, and lifetime value optimization.</p>
+                        <ul>
+                            <li>Develop dynamic pricing models</li>
+                            <li>Create next-best-offer systems</li>
+                            <li>Build lifetime value prediction</li>
+                            <li>Implement revenue forecasting</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row mt-4">
+                <div class="col-md-4 mb-4">
+                    <div class="service-card h-100 p-4">
+                        <div class="service-icon mx-auto">
+                            <i class="bi bi-clipboard-data"></i>
+                        </div>
+                        <h3 class="text-center mb-3">Data Strategy Consulting</h3>
+                        <p>Develop a comprehensive data strategy to ensure your organization collects, manages, and leverages data effectively to drive business value.</p>
+                        <ul>
+                            <li>Data maturity assessment</li>
+                            <li>Data governance frameworks</li>
+                            <li>Data collection strategy</li>
+                            <li>Analytics roadmap development</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="col-md-4 mb-4">
+                    <div class="service-card h-100 p-4">
+                        <div class="service-icon mx-auto">
+                            <i class="bi bi-code-square"></i>
+                        </div>
+                        <h3 class="text-center mb-3">Custom Model Development</h3>
+                        <p>Get bespoke machine learning and AI models built specifically for your unique business challenges and integrated into your workflows.</p>
+                        <ul>
+                            <li>Custom algorithm development</li>
+                            <li>Model training and validation</li>
+                            <li>System integration</li>
+                            <li>Ongoing model maintenance</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="col-md-4 mb-4">
+                    <div class="service-card h-100 p-4">
+                        <div class="service-icon mx-auto">
+                            <i class="bi bi-mortarboard"></i>
+                        </div>
+                        <h3 class="text-center mb-3">Training & Enablement</h3>
+                        <p>Empower your team with the knowledge and skills they need to leverage data science in their daily work through customized training programs.</p>
+                        <ul>
+                            <li>Data literacy workshops</li>
+                            <li>Custom Python/R training</li>
+                            <li>Model interpretation training</li>
+                            <li>Executive data science literacy</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Our Process -->
+    <section class="py-5 bg-light">
+        <div class="container">
+            <div class="row text-center mb-5">
+                <div class="col-md-12">
+                    <h2 class="section-title">Our Proven <span style="color: var(--primary-dark);">Process</span></h2>
+                    <p class="lead">A systematic approach to solving your data challenges</p>
+                </div>
+            </div>
+
+            <div class="row justify-content-center">
+                <div class="col-lg-8">
+                    <div class="service-process-step">
+                        <div class="service-process-number">1</div>
+                        <div class="service-process-content">
+                            <h5>Discovery & Assessment</h5>
+                            <p>We begin by understanding your business goals, current data landscape, and specific challenges. Our team conducts a thorough assessment of your data maturity and identifies key opportunities for impact.</p>
+                        </div>
+                    </div>
+
+                    <div class="service-process-step">
+                        <div class="service-process-number">2</div>
+                        <div class="service-process-content">
+                            <h5>Data Preparation & Strategy</h5>
+                            <p>Our data scientists work with your team to collect, clean, and prepare the necessary data. We develop a detailed project plan with clear milestones, deliverables, and success metrics.</p>
+                        </div>
+                    </div>
+
+                    <div class="service-process-step">
+                        <div class="service-process-number">3</div>
+                        <div class="service-process-content">
+                            <h5>Model Development & Validation</h5>
+                            <p>We build custom models using advanced machine learning techniques tailored to your specific needs. Each model undergoes rigorous testing and validation to ensure accuracy and reliability.</p>
+                        </div>
+                    </div>
+
+                    <div class="service-process-step">
+                        <div class="service-process-number">4</div>
+                        <div class="service-process-content">
+                            <h5>Implementation & Integration</h5>
+                            <p>We integrate the models into your existing systems and workflows, ensuring seamless operation. Our team provides comprehensive documentation and training for your staff.</p>
+                        </div>
+                    </div>
+
+                    <div class="service-process-step">
+                        <div class="service-process-number">5</div>
+                        <div class="service-process-content">
+                            <h5>Monitoring & Optimization</h5>
+                            <p>After implementation, we continue to monitor model performance and make necessary adjustments. We provide ongoing support to ensure long-term success and help you adapt to changing business conditions.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Service Packages -->
+    <section id="packages" class="py-5 mt-3">
+        <div class="container">
+            <div class="row text-center mb-5">
+                <div class="col-md-12">
+                    <h2 class="section-title">Service <span style="color: var(--primary-dark);">Packages</span></h2>
+                    <p class="lead">Flexible options to suit your business needs and budget</p>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-4 mb-4">
+                    <div class="service-package-card h-100">
+                        <div class="service-package-header">
+                            <h3>Data Analysis Sprint</h3>
+                        </div>
+                        <div class="card-body d-flex flex-column">
+                            <div class="service-package-price text-center">
+                                $5,000<span class="service-price-period">one-time</span>
+                            </div>
+                            <p class="text-center mb-4">Perfect for businesses looking to explore the value of their data with a focused analysis project.</p>
+                            
+                            <ul class="mb-4">
+                                <li>2-week focused analysis</li>
+                                <li>Data assessment & cleanup</li>
+                                <li>Exploratory data analysis</li>
+                                <li>Basic predictive modeling</li>
+                                <li>Strategic recommendations report</li>
+                                <li>1 follow-up consultation</li>
+                            </ul>
+
+                            <p class="text-muted mt-auto"><strong>Timeframe:</strong> 2-3 weeks</p>
+                            <div class="mt-4 text-center">
+                                <a href="#contact" class="btn btn-primary">Get Started</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-4 mb-4">
+                    <div class="service-package-card h-100" style="transform: scale(1.05);">
+                        <div class="service-package-header" style="background-color: var(--primary-dark);">
+                            <h3>Custom Model Development</h3>
+                            <span class="badge bg-warning text-dark">Most Popular</span>
+                        </div>
+                        <div class="card-body d-flex flex-column">
+                            <div class="service-package-price text-center">
+                                $15,000<span class="service-price-period">one-time</span>
+                            </div>
+                            <p class="text-center mb-4">Comprehensive solution with a fully customized predictive model built for your specific business needs.</p>
+                            
+                            <ul class="mb-4">
+                                <li>Thorough data assessment</li>
+                                <li>Advanced data preparation</li>
+                                <li>Custom model development</li>
+                                <li>Integration with your systems</li>
+                                <li>Training for your team</li>
+                                <li>Model documentation</li>
+                                <li>30-day support post-implementation</li>
+                                <li>Performance monitoring dashboard</li>
+                            </ul>
+
+                            <p class="text-muted mt-auto"><strong>Timeframe:</strong> 6-8 weeks</p>
+                            <div class="mt-4 text-center">
+                                <a href="#contact" class="btn btn-primary">Get Started</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-4 mb-4">
+                    <div class="service-package-card h-100">
+                        <div class="service-package-header">
+                            <h3>Ongoing Data Partnership</h3>
+                        </div>
+                        <div class="card-body d-flex flex-column">
+                            <div class="service-package-price text-center">
+                                $5,000<span class="service-price-period">/month</span>
+                            </div>
+                            <p class="text-center mb-4">Long-term partnership with ongoing support, model updates, and continuous optimization.</p>
+                            
+                            <ul class="mb-4">
+                                <li>Dedicated data scientist (20 hrs/week)</li>
+                                <li>Monthly strategy sessions</li>
+                                <li>Continuous model improvement</li>
+                                <li>Regular reporting and insights</li>
+                                <li>New model development as needed</li>
+                                <li>Priority support</li>
+                                <li>Free access to Celstium platform</li>
+                                <li>Quarterly business impact review</li>
+                            </ul>
+
+                            <p class="text-muted mt-auto"><strong>Minimum term:</strong> 3 months</p>
+                            <div class="mt-4 text-center">
+                                <a href="#contact" class="btn btn-primary">Get Started</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row mt-5">
+                <div class="col-lg-8 offset-lg-2">
+                    <div class="card bg-light p-4 text-center">
+                        <h4>Need a custom solution?</h4>
+                        <p class="mb-3">We offer fully customized services tailored to your specific business challenges.</p>
+                        <a href="#contact" class="btn btn-primary mx-auto" style="max-width: 200px;">Contact Us</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Case Studies -->
+    <section class="py-5 bg-light mt-3">
+        <div class="container">
+            <div class="row text-center mb-5">
+                <div class="col-md-12">
+                    <h2 class="section-title">Client <span style="color: var(--primary-dark);">Success Stories</span></h2>
+                    <p class="lead">Real results for businesses like yours</p>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-lg-6 mb-4">
+                    <div class="case-study-card">
+                        <div class="case-study-header">
+                            <h4>SaaS Churn Reduction</h4>
+                            <span class="badge bg-primary">Software Industry</span>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-4 mb-3 mb-md-0">
+                                    <div class="text-center">
+                                        <h3 class="display-4 text-primary">42%</h3>
+                                        <p>Churn Reduction</p>
+                                    </div>
+                                </div>
+                                <div class="col-md-8">
+                                    <h5>The Challenge</h5>
+                                    <p>CloudTech, a growing SaaS company, was experiencing a monthly churn rate of 8%, significantly impacting revenue growth.</p>
+                                    
+                                    <h5>Our Solution</h5>
+                                    <p>We developed a custom churn prediction model that identified at-risk customers two months before they were likely to cancel. We then created an automated early warning system and personalized retention playbooks.</p>
+                                    
+                                    <h5>The Results</h5>
+                                    <ul>
+                                        <li>Reduced monthly churn from 8% to 4.6%</li>
+                                        <li>Increased average customer lifetime by 74%</li>
+                                        <li>Added $1.2M in annual recurring revenue</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-6 mb-4">
+                    <div class="case-study-card">
+                        <div class="case-study-header">
+                            <h4>E-commerce Personalization</h4>
+                            <span class="badge bg-primary">Retail Industry</span>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-4 mb-3 mb-md-0">
+                                    <div class="text-center">
+                                        <h3 class="display-4 text-primary">27%</h3>
+                                        <p>Revenue Increase</p>
+                                    </div>
+                                </div>
+                                <div class="col-md-8">
+                                    <h5>The Challenge</h5>
+                                    <p>StyleCo, an online fashion retailer, struggled with low conversion rates and average order values despite high website traffic.</p>
+                                    
+                                    <h5>Our Solution</h5>
+                                    <p>We developed a customer segmentation model and personalized recommendation engine based on purchase history, browsing behavior, and demographic data.</p>
+                                    
+                                    <h5>The Results</h5>
+                                    <ul>
+                                        <li>Increased conversion rate by 34%</li>
+                                        <li>Grew average order value by 22%</li>
+                                        <li>Improved email marketing ROI by 47%</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-6 mb-4">
+                    <div class="case-study-card">
+                        <div class="case-study-header">
+                            <h4>Predictive Maintenance</h4>
+                            <span class="badge bg-primary">Manufacturing Industry</span>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-4 mb-3 mb-md-0">
+                                    <div class="text-center">
+                                        <h3 class="display-4 text-primary">62%</h3>
+                                        <p>Downtime Reduction</p>
+                                    </div>
+                                </div>
+                                <div class="col-md-8">
+                                    <h5>The Challenge</h5>
+                                    <p>IndustrialTech, a manufacturing company, faced frequent unexpected equipment failures leading to costly production downtime.</p>
+                                    
+                                    <h5>Our Solution</h5>
+                                    <p>We implemented IoT sensors and developed a machine learning model to predict equipment failures before they occurred, enabling proactive maintenance.</p>
+                                    
+                                    <h5>The Results</h5>
+                                    <ul>
+                                        <li>Reduced unplanned downtime by 62%</li>
+                                        <li>Decreased maintenance costs by 35%</li>
+                                        <li>Extended equipment lifespan by 28%</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-6 mb-4">
+                    <div class="case-study-card">
+                        <div class="case-study-header">
+                            <h4>Customer Lifetime Value Optimization</h4>
+                            <span class="badge bg-primary">Financial Services</span>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-4 mb-3 mb-md-0">
+                                    <div class="text-center">
+                                        <h3 class="display-4 text-primary">3.2x</h3>
+                                        <p>Marketing ROI</p>
+                                    </div>
+                                </div>
+                                <div class="col-md-8">
+                                    <h5>The Challenge</h5>
+                                    <p>FinServe, a financial services provider, was spending their marketing budget inefficiently without clear targeting or prioritization.</p>
+                                    
+                                    <h5>Our Solution</h5>
+                                    <p>We developed a predictive CLV model that identified high-potential customers and created a dynamic budget allocation system based on expected customer value.</p>
+                                    
+                                    <h5>The Results</h5>
+                                    <ul>
+                                        <li>Increased marketing ROI by 220%</li>
+                                        <li>Grew high-value customer acquisition by 58%</li>
+                                        <li>Reduced customer acquisition cost by 31%</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonials -->
+    <section class="py-5 mt-3">
+        <div class="container">
+            <div class="row text-center mb-5">
+                <div class="col-md-12">
+                    <h2 class="section-title">What Our <span style="color: var(--primary-dark);">Clients Say</span></h2>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-lg-4 mb-4">
+                    <div class="testimonial-card h-100">
+                        <p class="mb-3">The team at Celstium transformed our approach to customer retention. Their churn prediction model helped us identify at-risk customers we wouldn't have caught otherwise, and their retention strategies have been game-changing for our business.</p>
+                        <div class="quote-attribution">
+                            <p>Sarah Johnson<br>
+                            <small>CMO, CloudTech Solutions</small></p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-4 mb-4">
+                    <div class="testimonial-card h-100">
+                        <p class="mb-3">Working with Celstium was eye-opening. Their customer segmentation analysis revealed patterns we couldn't see ourselves. The insights have transformed our marketing strategy and dramatically improved our conversion rates.</p>
+                        <div class="quote-attribution">
+                            <p>Michael Chen<br>
+                            <small>Head of E-commerce, StyleCo</small></p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-4 mb-4">
+                    <div class="testimonial-card h-100">
+                        <p class="mb-3">The predictive maintenance model Celstium built for us has paid for itself many times over. We've nearly eliminated unexpected downtime and optimized our maintenance schedule, resulting in significant cost savings.</p>
+                        <div class="quote-attribution">
+                            <p>Robert Garcia<br>
+                            <small>Operations Director, IndustrialTech</small></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Our Technology Stack -->
+    <section class="py-5 bg-light mt-3">
+        <div class="container">
+            <div class="row text-center mb-5">
+                <div class="col-md-12">
+                    <h2 class="section-title">Our <span style="color: var(--primary-dark);">Technology Stack</span></h2>
+                    <p class="lead">Cutting-edge tools and technologies we leverage for your success</p>
+                </div>
+            </div>
+
+            <div class="row justify-content-center">
+                <div class="col-lg-8">
+                    <div class="row">
+                        <div class="col-md-6 mb-4">
+                            <div class="tech-stack-item">
+                                <div class="tech-icon">
+                                    <i class="bi bi-filetype-py"></i>
+                                </div>
+                                <div>
+                                    <h5 class="mb-1">Python Ecosystem</h5>
+                                    <p class="mb-0">Advanced analytics with pandas, scikit-learn, TensorFlow, and PyTorch</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6 mb-4">
+                            <div class="tech-stack-item">
+                                <div class="tech-icon">
+                                    <i class="bi bi-cloud"></i>
+                                </div>
+                                <div>
+                                    <h5 class="mb-1">Cloud Platforms</h5>
+                                    <p class="mb-0">AWS, Azure, and Google Cloud for scalable processing and deployment</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6 mb-4">
+                            <div class="tech-stack-item">
+                                <div class="tech-icon">
+                                    <i class="bi bi-database"></i>
+                                </div>
+                                <div>
+                                    <h5 class="mb-1">Big Data Technologies</h5>
+                                    <p class="mb-0">Spark, Hadoop, and distributed computing for large-scale processing</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6 mb-4">
+                            <div class="tech-stack-item">
+                                <div class="tech-icon">
+                                    <i class="bi bi-graph-up-arrow"></i>
+                                </div>
+                                <div>
+                                    <h5 class="mb-1">ML Frameworks</h5>
+                                    <p class="mb-0">Custom modeling with XGBoost, Random Forest, Neural Networks, and more</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6 mb-4">
+                            <div class="tech-stack-item">
+                                <div class="tech-icon">
+                                    <i class="bi bi-bar-chart-line"></i>
+                                </div>
+                                <div>
+                                    <h5 class="mb-1">Visualization Tools</h5>
+                                    <p class="mb-0">Tableau, Power BI, and custom dashboards for actionable insights</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6 mb-4">
+                            <div class="tech-stack-item">
+                                <div class="tech-icon">
+                                    <i class="bi bi-cpu"></i>
+                                </div>
+                                <div>
+                                    <h5 class="mb-1">MLOps</h5>
+                                    <p class="mb-0">Automated pipelines, monitoring, and CI/CD for model deployment</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ Section -->
+    <section class="py-5 mt-3">
+        <div class="container">
+            <div class="row text-center mb-5">
+                <div class="col-md-12">
+                    <h2 class="section-title">Frequently Asked <span style="color: var(--primary-dark);">Questions</span></h2>
+                </div>
+            </div>
+
+            <div class="row justify-content-center">
+                <div class="col-lg-8">
+                    <div class="accordion" id="servicesAccordion">
+                        <div class="accordion-item">
+                            <h2 class="accordion-header" id="headingOne">
+                                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+                                    What kind of data do I need to get started?
+                                </button>
+                            </h2>
+                            <div id="collapseOne" class="accordion-collapse collapse show" aria-labelledby="headingOne" data-bs-parent="#servicesAccordion">
+                                <div class="accordion-body">
+                                    <p>We can work with a variety of data sources and formats. For effective predictive modeling, you'll typically need historical data that captures customer behaviors, interactions, and outcomes. This might include:</p>
+                                    <ul>
+                                        <li>Customer demographics and account information</li>
+                                        <li>Transaction or purchase history</li>
+                                        <li>Product usage or engagement metrics</li>
+                                        <li>Customer service interactions</li>
+                                        <li>Previous churn or conversion events</li>
+                                    </ul>
+                                    <p>Don't worry if your data isn't perfectly organized—part of our service includes data assessment and preparation. We'll help you identify which data points are most valuable and how to collect additional data if needed.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="accordion-item">
+                            <h2 class="accordion-header" id="headingTwo">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+                                    How long does it take to develop a custom model?
+                                </button>
+                            </h2>
+                            <div id="collapseTwo" class="accordion-collapse collapse" aria-labelledby="headingTwo" data-bs-parent="#servicesAccordion">
+                                <div class="accordion-body">
+                                    <p>The timeline for custom model development varies based on the complexity of your business challenge, data readiness, and specific requirements. Typically, our process follows these timeframes:</p>
+                                    <ul>
+                                        <li><strong>Data Analysis Sprint:</strong> 2-3 weeks</li>
+                                        <li><strong>Custom Model Development:</strong> 6-8 weeks</li>
+                                        <li><strong>Enterprise-scale Implementation:</strong> 10-12 weeks</li>
+                                    </ul>
+                                    <p>We always start with a detailed discovery phase to provide you with a more accurate timeline based on your specific situation. For urgent needs, we can sometimes accelerate certain phases of the project.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="accordion-item">
+                            <h2 class="accordion-header" id="headingThree">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
+                                    How do we measure the ROI of your services?
+                                </button>
+                            </h2>
+                            <div id="collapseThree" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#servicesAccordion">
+                                <div class="accordion-body">
+                                    <p>We believe in measurable results and establish clear success metrics at the beginning of every engagement. Depending on your project, ROI measurements might include:</p>
+                                    <ul>
+                                        <li>Reduction in churn rate percentage</li>
+                                        <li>Increase in customer lifetime value</li>
+                                        <li>Growth in conversion rates or average order value</li>
+                                        <li>Cost savings from operational efficiencies</li>
+                                        <li>Revenue gains from improved targeting or pricing</li>
+                                    </ul>
+                                    <p>We provide regular reporting dashboards and conduct quarterly business impact reviews to ensure our work is delivering tangible value to your organization.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="accordion-item">
+                            <h2 class="accordion-header" id="headingFour">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFour" aria-expanded="false" aria-controls="collapseFour">
+                                    Do you offer services for small businesses or startups?
+                                </button>
+                            </h2>
+                            <div id="collapseFour" class="accordion-collapse collapse" aria-labelledby="headingFour" data-bs-parent="#servicesAccordion">
+                                <div class="accordion-body">
+                                    <p>Yes! We work with businesses of all sizes, from startups to enterprise organizations. For smaller businesses or those with budget constraints, we offer several options:</p>
+                                    <ul>
+                                        <li>Focused Data Analysis Sprints with clear scope</li>
+                                        <li>SaaS platform access with limited consulting hours</li>
+                                        <li>Data strategy workshops to guide your internal team</li>
+                                        <li>Phased implementation approaches that spread costs over time</li>
+                                    </ul>
+                                    <p>We're happy to discuss your specific needs and develop a solution that fits your budget while delivering meaningful business impact.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="accordion-item">
+                            <h2 class="accordion-header" id="headingFive">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFive" aria-expanded="false" aria-controls="collapseFive">
+                                    How do you handle data security and privacy?
+                                </button>
+                            </h2>
+                            <div id="collapseFive" class="accordion-collapse collapse" aria-labelledby="headingFive" data-bs-parent="#servicesAccordion">
+                                <div class="accordion-body">
+                                    <p>We take data security and privacy extremely seriously. Our security measures include:</p>
+                                    <ul>
+                                        <li>Signed confidentiality and data protection agreements</li>
+                                        <li>Secure data transfer protocols and encryption</li>
+                                        <li>Compliance with relevant regulations (GDPR, CCPA, etc.)</li>
+                                        <li>Option to work within your existing security infrastructure</li>
+                                        <li>Data anonymization and minimization practices</li>
+                                        <li>Regular security audits and best practices</li>
+                                    </ul>
+                                    <p>We're happy to discuss specific security requirements or compliance needs for your organization.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="accordion-item">
+                            <h2 class="accordion-header" id="headingSix">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSix" aria-expanded="false" aria-controls="collapseSix">
+                                    What makes Celstium different from other data science consulting firms?
+                                </button>
+                            </h2>
+                            <div id="collapseSix" class="accordion-collapse collapse" aria-labelledby="headingSix" data-bs-parent="#servicesAccordion">
+                                <div class="accordion-body">
+                                    <p>Celstium stands out in several key ways:</p>
+                                    <ul>
+                                        <li><strong>Business-First Approach:</strong> We focus on business outcomes, not just technical sophistication</li>
+                                        <li><strong>Hybrid Model:</strong> We combine consulting expertise with our proprietary SaaS platform</li>
+                                        <li><strong>Domain Expertise:</strong> Deep specialization in customer behavior modeling and retention</li>
+                                        <li><strong>Implementation Focus:</strong> We don't just deliver models; we ensure they drive real business impact</li>
+                                        <li><strong>Transparent Metrics:</strong> Clear measurement of business value and ROI</li>
+                                        <li><strong>Knowledge Transfer:</strong> We empower your team throughout the process</li>
+                                    </ul>
+                                    <p>Our clients appreciate our pragmatic approach that balances technical excellence with practical business application.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section id="contact" class="py-5 bg-light mt-3">
+        <div class="container">
+            <div class="row text-center mb-5">
+                <div class="col-md-12">
+                    <h2 class="section-title">Ready to <span style="color: var(--primary-dark);">Get Started?</span></h2>
+                    <p class="lead">Schedule a free consultation to discuss your business challenges</p>
+                </div>
+            </div>
+
+            <div class="row justify-content-center">
+                <div class="col-lg-8">
+                    <div class="card shadow-sm">
+                        <div class="card-body p-4">
+                            <form id="consultationForm">
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="fullName" class="form-label">Full Name*</label>
+                                        <input type="text" class="form-control" id="fullName" required>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="companyName" class="form-label">Company Name*</label>
+                                        <input type="text" class="form-control" id="companyName" required>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="email" class="form-label">Email Address*</label>
+                                        <input type="email" class="form-control" id="email" required>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="phone" class="form-label">Phone Number</label>
+                                        <input type="tel" class="form-control" id="phone">
+                                    </div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="serviceInterest" class="form-label">What services are you interested in?*</label>
+                                    <select class="form-select" id="serviceInterest" required>
+                                        <option value="" selected disabled>Select a service</option>
+                                        <option value="Churn Analysis">Customer Churn Analysis</option>
+                                        <option value="Customer Segmentation">Customer Segmentation</option>
+                                        <option value="Revenue Optimization">Revenue Optimization</option>
+                                        <option value="Data Strategy">Data Strategy Consulting</option>
+                                        <option value="Custom Model">Custom Model Development</option>
+                                        <option value="Training">Training & Enablement</option>
+                                        <option value="Other">Other (please specify)</option>
+                                    </select>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="businessChallenge" class="form-label">Briefly describe your business challenge*</label>
+                                    <textarea class="form-control" id="businessChallenge" rows="4" required></textarea>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="budget" class="form-label">Approximate budget range</label>
+                                    <select class="form-select" id="budget">
+                                        <option value="" selected disabled>Select a range</option>
+                                        <option value="Under $5,000">Under $5,000</option>
+                                        <option value="$5,000 - $15,000">$5,000 - $15,000</option>
+                                        <option value="$15,000 - $30,000">$15,000 - $30,000</option>
+                                        <option value="$30,000 - $50,000">$30,000 - $50,000</option>
+                                        <option value="$50,000+">$50,000+</option>
+                                    </select>
+                                </div>
+
+                                <div class="mb-3 form-check">
+                                    <input type="checkbox" class="form-check-input" id="consentCheck" required>
+                                    <label class="form-check-label" for="consentCheck">I consent to being contacted about Celstium's services</label>
+                                </div>
+
+                                <div class="text-center mt-4">
+                                    <button type="submit" class="btn btn-primary btn-lg px-5">Schedule Consultation</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="mt-5 py-4 bg-dark text-white">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="logo-container mb-3">
+                        <img src="{{ url_for('static', filename='src_images/celstium_logo.png') }}" alt="Celstium Logo">
+                    </div>
+                    <p>Making unstructured data into actionable data.</p>
+                </div>
+                <div class="col-md-2">
+                    <h5>Company</h5>
+                    <ul class="list-unstyled">
+                        <li><a href="#" class="text-white">About</a></li>
+                        <li><a href="#" class="text-white">Careers</a></li>
+                        <li><a href="#" class="text-white">Blog</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-2">
+                    <h5>Product</h5>
+                    <ul class="list-unstyled">
+                        <li><a href="/eda" class="text-white">EDA</a></li>
+                        <li><a href="/visualize" class="text-white">Visualize</a></li>
+                        <li><a href="/churn_prediction" class="text-white">Predict</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-4">
+                    <h5>Contact</h5>
+                    <ul class="list-unstyled">
+                        <li><a href="mailto:info@celstium.com" class="text-white">info@celstium.com</a></li>
+                        <li><a href="tel:+1234567890" class="text-white">+1 (234) 567-890</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="row mt-4">
+                <div class="col-md-12 text-center">
+                    <p>Celstium &copy; 2025</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Form submission handling
+            const consultationForm = document.getElementById('consultationForm');
+            
+            if (consultationForm) {
+                consultationForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    
+                    // In a real implementation, you would send this data to your server
+                    // For now, we'll just show a success message
+                    
+                    // Hide the form
+                    consultationForm.style.display = 'none';
+                    
+                    // Create success message
+                    const successMessage = document.createElement('div');
+                    successMessage.className = 'alert alert-success p-4 text-center';
+                    successMessage.innerHTML = `
+                        <h4 class="alert-heading">Thank you for your interest!</h4>
+                        <p>We've received your consultation request and a member of our team will contact you within 24 hours to schedule a call.</p>
+                        <hr>
+                        <p class="mb-0">In the meantime, feel free to explore our <a href="/pricing" class="alert-link">platform pricing</a> or learn more about our <a href="#" class="alert-link">methodology</a>.</p>
+                    `;
+                    
+                    // Add success message before the form
+                    consultationForm.parentNode.insertBefore(successMessage, consultationForm);
+                });
+            }
+        });
+    </script>
+</body>
+</html>

@@ -150,6 +150,8 @@ def api_train_churn_model():
     
     return jsonify({'metrics': metrics})
 
+
+
 @app.route('/api/predict_churn', methods=['POST'])
 def api_predict_churn():
     try:
@@ -224,5 +226,13 @@ def demo():
 def pricing():
     return render_template('pricing.html')
 
+
+@app.route('/tailored_services')
+def tailored_services():
+    return render_template('tailored_services.html')
+
+
+
 if __name__ == '__main__':
     app.run(debug=True)
+
