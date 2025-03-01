@@ -55,7 +55,7 @@
         
         .hero-section {
             background: linear-gradient(135deg, var(--primary-light), var(--secondary));
-            padding: 100px 0;
+            padding: 0px 0 70px 0;  /* Top, right, bottom, left - more padding at bottom */
             border-radius: 0 0 20px 20px;
         }
         
@@ -95,9 +95,10 @@
         }
         
         .logo-container-large img {
-            height: 40px;
+            height: 200px;
             margin-bottom: 0px;
         }
+        
     </style>
 </head>
 <body>
@@ -143,7 +144,7 @@
         <div class="container">
             <div class="row align-items-center">
                 <div class="col-md-7">
-                    <div class="logo-container-large mb-4">
+                    <div class="logo-container-large" style="margin-left: -30px;">
                         <img src="{{ url_for('static', filename='src_images/logo_transparent.png') }}" alt="Celstium Logo">
                     </div>
                     <h1 class="display-4 fw-bold mb-4">Making <span style="color: var(--black);">Unstructured Data</span> into <span style="color: var(--black);">Actionable Data</span></h1>
