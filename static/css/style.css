@@ -352,3 +352,48 @@ footer {
     max-width: 150%;
     height: auto;
 }
+
+/* Navbar Dropdown Styling */
+.dropdown-menu {
+    background-color: #222222;
+    border: none;
+    border-radius: 8px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+    padding: 0.5rem 0;
+    margin-top: 0.5rem;
+}
+
+.dropdown-item {
+    color: #ffffff;
+    padding: 0.75rem 1.5rem;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.dropdown-item:hover, .dropdown-item:focus {
+    background-color: #333333;
+    color: var(--primary);
+}
+
+/* Active state for dropdown items */
+.dropdown-item.active, .dropdown-item:active {
+    background-color: var(--primary);
+    color: var(--black);
+}
+
+/* Dropdown toggle arrow */
+.dropdown-toggle::after {
+    display: inline-block;
+    margin-left: 0.5em;
+    vertical-align: 0.15em;
+    content: "";
+    border-top: 0.3em solid;
+    border-right: 0.3em solid transparent;
+    border-bottom: 0;
+    border-left: 0.3em solid transparent;
+}
+
+/* Highlight the active section in dropdown */
+.nav-item.dropdown.active .nav-link.dropdown-toggle {
+    color: var(--primary);
+}
