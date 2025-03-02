@@ -157,3 +157,37 @@ document.addEventListener('DOMContentLoaded', function() {
         document.body.removeChild(a);
     };
 });
+
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Get current page path
+    const currentPath = window.location.pathname;
+    
+    // Remove active class from all nav items
+    document.querySelectorAll('.nav-link').forEach(link => {
+        link.classList.remove('active');
+    });
+    
+    // Check if current path matches any of the Auto ML pages
+    const autoMlPages = ['/upload', '/eda', '/visualize', '/churn_prediction'];
+    const isAutoMlPage = autoMlPages.some(page => currentPath === page);
+    
+    if (isAutoMlPage) {
+        // Highlight Auto ML dropdown
+        document.getElementById('automlDropdown').classList.add('active');
+        
+        // Also highlight the specific page in the dropdown
+        document.querySelectorAll('.dropdown-item').forEach(item => {
+            if (item.getAttribute('href') === currentPath) {
+                item.classList.add('active');
+            }
+        });
+    } else {
+        // For non-Auto ML pages, highlight the direct nav item
+        document.querySelectorAll('.nav-link').forEach(link => {
+            if (link.getAttribute('href') === currentPath) {
+                link.classList.add('active');
+            }
+        });
+    }
+});
